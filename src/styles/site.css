@@ -234,8 +234,8 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   flex-wrap: wrap;
 }
 
@@ -247,9 +247,17 @@
   color: var(--text);
 }
 
+.brand-logo {
+  display: block;
+  width: 128px;
+  height: 128px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 .brand-name {
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -265,7 +273,7 @@
 
 .site-nav a {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.04em;
   text-decoration: none;
   color: var(--muted);
@@ -408,6 +416,30 @@
 @media (max-width: 640px) {
   .wrap {
     padding: 0 18px;
+  }
+
+  /* The logo is 128px and cannot shrink (whole-number scaling), so on a phone
+     the menu sits beside it instead of under it, and the written name steps
+     aside: the link still announces the site name, and the page says it in
+     its first line. */
+  .site-head-inner {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-name {
+    display: none;
+  }
+
+  .site-nav {
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  .site-nav a {
+    font-size: 13px;
+    padding: 5px 7px;
   }
 
   .section {

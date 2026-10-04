@@ -1,19 +1,79 @@
 /* Homepage: the forest, the writing box, and the bunny beside it. */
 
-/* ------------------------------------------------------------- the forest */
+/* ------------------------------------------------- the palette on the forest */
 
-/* The shell goes transparent so the fixed scene shows through everything.
-   It also becomes the stacking context the scene sits at the bottom of. */
+/* Farida's five colours, and nothing white (2026-10-04). Wine and dark green
+   are both readable on both light surfaces (6.9:1 and 5.7:1 against pale pink
+   and light green), so headings are wine and secondary text dark green
+   wherever they sit. Pink never carries text: it is 3.3:1 at best, and only
+   against wine. It is used for fills, shadows and glows. */
 .shell-forest {
+  --bg: #cfdd9d;
+  --surface: #f8cae4;
+  --surface-alt: #cfdd9d;
+  --text: #752445;
+  --muted: #2f582c;
+  --faint: #2f582c;
+  --border: #752445;
+  --border-strong: #752445;
+  --shadow: rgba(117, 36, 69, 0.35);
+  --accent: #ea6993;
+  --accent-strong: #752445;
+  --accent-text: #752445;
+  --accent-cool: #2f582c;
+  --highlight: #cfdd9d;
+  --on-accent: #f8cae4;
+  --focus-ring: #752445;
+
+  /* Transparent, so the fixed scene shows through everything, and the
+     stacking context the scene sits at the bottom of. */
   background: transparent;
   position: relative;
   z-index: 0;
 }
 
-.shell-forest .site-head,
-.shell-forest .site-foot {
-  background: rgba(251, 250, 241, 0.92);
+.shell-forest .site-head {
+  background: #f8cae4;
 }
+
+.shell-forest .site-foot {
+  background: #cfdd9d;
+  border-color: #2f582c;
+}
+
+.shell-forest .site-nav a {
+  color: #2f582c;
+}
+
+.shell-forest .site-nav a:hover,
+.shell-forest .site-nav a[aria-current='page'] {
+  color: #752445;
+  border-color: #752445;
+}
+
+/* Pink on wine is only 3.3:1, so the button is wine with pale-pink text
+   (6.9:1) and pink lives in its shadow. */
+.shell-forest .btn-primary {
+  background: #752445;
+  color: #f8cae4;
+  border-color: #752445;
+  box-shadow: 4px 4px 0 #ea6993;
+}
+
+.shell-forest .btn-primary:hover {
+  box-shadow: 5px 5px 0 #ea6993;
+}
+
+.shell-forest .btn-primary:active {
+  box-shadow: 1px 1px 0 #ea6993;
+}
+
+.shell-forest .textarea::placeholder {
+  color: #2f582c;
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------- the forest */
 
 .forest {
   position: fixed;
@@ -30,12 +90,18 @@
   image-rendering: crisp-edges;
 }
 
+@media (min-width: 1160px) {
+  .forest {
+    background-position: 0% 100%;
+  }
+}
+
 /* A slow patch of sunlight wandering across the meadow. */
 .forest::after {
   content: '';
   position: absolute;
   inset: -20%;
-  background: radial-gradient(ellipse at 30% 25%, rgba(255, 246, 200, 0.2), transparent 55%);
+  background: radial-gradient(ellipse at 30% 25%, rgba(248, 202, 228, 0.22), transparent 55%);
   pointer-events: none;
 }
 
@@ -43,18 +109,12 @@
   position: absolute;
   width: 4px;
   height: 4px;
-  background: #fff6b3;
-  box-shadow: 0 0 6px 2px rgba(255, 236, 150, 0.6);
+  background: #f8cae4;
+  box-shadow: 0 0 6px 2px rgba(234, 105, 147, 0.6);
   opacity: 0;
   animation-name: drift;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
-}
-
-@media (min-width: 1100px) {
-  .forest {
-    background-position: 0% 100%;
-  }
 }
 
 /* -------------------------------------------------------------- the hero */
@@ -62,7 +122,7 @@
 .hero {
   position: relative;
   padding: 44px 0 56px;
-  min-height: calc(100vh - 150px);
+  min-height: calc(100vh - 190px);
   display: flex;
   align-items: center;
   /* The bunny stands past the card's right edge on wide screens. Clip
@@ -77,44 +137,49 @@
   gap: 22px;
 }
 
-/* The card and the bunny share a stage, so the bunny can be placed against
-   the card rather than against the page. */
+/* The card and the cast share a stage, so the bunny can be placed against the
+   card rather than against the page. On narrow screens the stage is a column:
+   bunny, card, portrait. */
 .hero-stage {
   position: relative;
   width: min(100%, 640px);
+  display: flex;
+  flex-direction: column;
 }
 
 .hero-card {
+  order: 1;
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 28px 30px 24px;
-  background: rgba(251, 250, 241, 0.95);
-  border: var(--border-width) solid var(--border-strong);
-  box-shadow: 6px 6px 0 rgba(30, 44, 27, 0.4);
+  background: #f8cae4;
+  border: var(--border-width) solid #752445;
+  box-shadow: 6px 6px 0 rgba(117, 36, 69, 0.45);
   transition:
     transform 240ms ease,
-    box-shadow 240ms ease,
-    background-color 240ms ease;
+    box-shadow 240ms ease;
 }
 
 .hero-card:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 8px 8px 0 rgba(30, 44, 27, 0.4);
+  box-shadow: 8px 8px 0 rgba(117, 36, 69, 0.45);
 }
 
-/* While someone is writing, the card lifts and the whole thing warms up. */
+/* While someone is writing, the card lifts and the pink comes forward. */
 .hero-card:focus-within {
   transform: translate(-2px, -2px);
-  background: rgba(253, 252, 245, 0.98);
   box-shadow:
-    9px 9px 0 var(--accent-strong),
-    0 0 0 5px rgba(234, 105, 147, 0.22);
+    9px 9px 0 #752445,
+    0 0 0 5px rgba(234, 105, 147, 0.45);
 }
 
 .hero-card .pad-textarea {
+  background: #cfdd9d;
+  color: #752445;
+  border-color: #752445;
   transition:
     border-color 200ms ease,
     box-shadow 200ms ease;
@@ -122,8 +187,9 @@
 
 .hero-card .pad-textarea:focus {
   outline: none;
-  border-color: var(--accent-strong);
-  box-shadow: inset 0 0 0 1px var(--accent-strong);
+  box-shadow:
+    inset 0 0 0 1px #752445,
+    0 0 0 4px rgba(234, 105, 147, 0.4);
 }
 
 .hero-words {
@@ -135,11 +201,11 @@
 }
 
 .hero-words .h1 {
-  font-size: clamp(2rem, 4.6vw, 2.8rem);
+  font-size: clamp(1.8rem, 4.2vw, 2.6rem);
 }
 
 .hero-words .lede {
-  max-width: 44ch;
+  max-width: 46ch;
 }
 
 .hero-actions {
@@ -148,16 +214,16 @@
 
 .hero-price {
   font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 14px;
+  color: #752445;
   letter-spacing: 0.02em;
 }
 
 .hero-assurance {
   margin: 0;
-  font-size: 14px;
-  color: var(--muted);
-  border-top: 1px solid var(--border);
+  font-size: 15px;
+  color: #2f582c;
+  border-top: 1px solid #752445;
   padding-top: 14px;
 }
 
@@ -165,45 +231,72 @@
   margin: 0;
   font-size: 15px;
   padding: 8px 14px;
-  background: rgba(251, 250, 241, 0.9);
-  border: 1px solid var(--border);
+  background: #cfdd9d;
+  color: #2f582c;
+  border: var(--border-width) solid #2f582c;
 }
 
 .hero-alt-muted {
-  color: var(--faint);
   font-style: italic;
 }
 
-/* The bunny stands at the card's bottom-right corner, leaning in. On a wide
-   screen she overlaps the corner from outside; below 1100px she steps under
-   the card, still touching it, so nothing hangs off the edge of a tablet. */
-.hero-bunny {
-  position: absolute;
+/* ---------------------------------------------------------------- the cast */
+
+/* `--cast` is the standing bunny's scale in CSS pixels per art pixel. It must
+   match the breakpoint in Bunny.tsx (3x from 1400px, 2x below). */
+.hero-cast {
+  --cast: 2px;
+  display: contents;
+}
+
+/* Narrow: the bunny stands on the card's top edge, right-aligned, feet on the
+   border; the portrait follows the card, right-aligned under her column. */
+.hero-cast .bunny-standing {
+  order: 0;
+  align-self: flex-end;
+  position: relative;
   z-index: 2;
-  bottom: calc(var(--px, 3px) * -5);
-  right: calc(var(--px, 3px) * -78);
-  pointer-events: none;
+  margin-bottom: calc(var(--cast) * -10);
 }
 
-.hero-bunny .bunny {
-  --px: 3px;
+.hero-cast .bunny-portrait {
+  order: 2;
+  align-self: flex-end;
+  position: relative;
+  z-index: 2;
+  margin-top: calc(var(--px) * -4);
 }
 
-@media (max-width: 1099px) {
-  .hero-stage {
+/* Wide: the cast is a column pinned to the card's top-right corner. The bunny
+   overlaps the card by ten art pixels (her cloak tip, inside the padding, so
+   she never covers text); the portrait is centred under the staff, which is
+   at art pixel 96 of her 128. */
+@media (min-width: 1160px) {
+  .hero-cast {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-start;
+    position: absolute;
+    top: calc(var(--cast) * -8);
+    right: calc(var(--cast) * -91);
+    z-index: 2;
+    pointer-events: none;
   }
 
-  .hero-bunny {
-    position: static;
-    margin-top: calc(var(--px, 2px) * -14);
-    margin-right: calc(var(--px, 2px) * -4);
+  .hero-cast .bunny-standing {
+    margin: 0;
+    align-self: auto;
   }
 
-  .hero-bunny .bunny {
-    --px: 2px;
+  .hero-cast .bunny-portrait {
+    align-self: auto;
+    margin: calc(var(--cast) * 2) 0 0 calc(var(--cast) * 96 - 128px);
+  }
+}
+
+@media (min-width: 1400px) {
+  .hero-cast {
+    --cast: 3px;
   }
 }
 
@@ -240,8 +333,8 @@
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(255, 232, 150, 0.65) 0%,
-    rgba(255, 232, 150, 0.2) 45%,
+    rgba(248, 202, 228, 0.75) 0%,
+    rgba(234, 105, 147, 0.25) 45%,
     transparent 70%
   );
   filter: blur(calc(var(--px) * 1.2));
@@ -253,16 +346,29 @@
   position: absolute;
   width: var(--px);
   height: var(--px);
-  background: #fff7c2;
-  box-shadow: 0 0 calc(var(--px) * 1.5) rgba(255, 226, 120, 0.9);
+  background: #f8cae4;
+  box-shadow: 0 0 calc(var(--px) * 1.5) rgba(234, 105, 147, 0.9);
   opacity: 0;
 }
 
-/* --------------------------------------------- who is writing back (meet) */
+/* ------------------------------------------------- sections on the forest */
 
-.meet {
-  padding-top: 0;
+.on-forest {
+  background: #f8cae4;
+  border-top: var(--border-width) solid #752445;
 }
+
+.on-forest-alt {
+  background: #cfdd9d;
+  border-top-color: #2f582c;
+}
+
+.on-forest .prose,
+.on-forest .lede {
+  color: #2f582c;
+}
+
+/* --------------------------------------------- who is writing back (meet) */
 
 .meet-inner {
   display: flex;
@@ -270,11 +376,6 @@
   align-items: center;
   text-align: center;
   gap: 18px;
-}
-
-/* The portrait rises out of the section so she sits right under the hero. */
-.meet .bunny-portrait {
-  margin-top: calc(var(--px) * -34);
 }
 
 .meet-words {
@@ -292,25 +393,18 @@
   margin-top: 8px;
 }
 
-/* ------------------------------------------------- sections on the forest */
-
-.on-forest {
-  background: rgba(251, 250, 241, 0.9);
-  border-top: var(--border-width) solid var(--border-strong);
-}
-
-.on-forest + .on-forest {
-  border-top-width: 1px;
-  border-top-color: var(--border);
+.meet .trust-card {
+  background: #cfdd9d;
+  border-color: #2f582c;
 }
 
 .not-therapy {
   margin: 8px 0 0;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
-  color: var(--muted);
-  border-left: 4px solid var(--accent-strong);
+  color: #752445;
+  border-left: 4px solid #752445;
   padding-left: 14px;
   max-width: 58ch;
 }
@@ -325,39 +419,40 @@
 
 .example-category {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent-text);
+  color: #752445;
   font-weight: 700;
 }
 
 .example-rule {
   border: 0;
-  border-top: 2px solid var(--border);
+  border-top: 2px solid #752445;
   width: 100%;
   margin: 6px 0;
 }
 
 .example-from {
   font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 14px;
+  color: #2f582c;
   margin: 4px 0 0;
 }
 
 .example-awaiting {
   border-style: dashed;
+  border-color: #2f582c;
   box-shadow: none;
-  background: var(--surface-alt);
+  background: #cfdd9d;
 }
 
 .example-awaiting-title {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   margin: 0;
-  color: var(--accent-text);
+  color: #752445;
 }
 
 /* ---------------------------------------------------------------- trust */
@@ -368,7 +463,7 @@
   line-height: 1.45;
   margin: 0;
   max-width: 34ch;
-  color: var(--accent-text);
+  color: #752445;
   font-weight: 700;
 }
 
@@ -382,12 +477,10 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--surface);
 }
 
 .trust-card .prose {
   font-size: 15px;
-  color: var(--muted);
 }
 
 /* ----------------------------------------------------------- final call */
@@ -556,20 +649,11 @@
 
 @media (max-width: 640px) {
   .hero {
-    padding: 22px 0 40px;
+    padding: 16px 0 40px;
     min-height: 0;
   }
 
   .hero-card {
     padding: 22px 18px 20px;
-  }
-
-  .hero-bunny {
-    margin-top: calc(var(--px, 2px) * -10);
-    margin-right: calc(var(--px, 2px) * -2);
-  }
-
-  .meet .bunny-portrait {
-    margin-top: calc(var(--px) * -28);
   }
 }

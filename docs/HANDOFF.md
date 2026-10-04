@@ -133,7 +133,9 @@ two factors verify (secret word + date window, or secret word + email).
 | Language | **English only** for now. No i18n scaffolding. |
 | Characters | **Two** — frog (the one writing) and bunny (the one writing back). **There is no owl**, despite `PROMPT.md` §10. |
 | Night mode | **Off for launch.** Disabled behind `FEATURES.nightMode`, not deleted. Comes back after launch. |
-| Palette | Five brand colours **plus Cream `#F2E6C9`**. A wood/brown neutral was proposed and **rejected**. |
+| Palette | Five brand colours. On the **home page, only those five and nothing white** (Farida, 2026-10-04): pale pink card, light green writing box, wine and dark green text (6.9:1 and 5.7:1 on both). Cream `#F2E6C9` stays on the inner pages. A wood/brown neutral was proposed and **rejected**. |
+| Font | **VCR OSD Mono** everywhere except the safety screen and the dashboard, which keep system fonts on purpose. It lacks the em dash, en dash, middle dot and manat sign; those fall back to Courier New. The copy is never rewritten to avoid them. |
+| Logo | The bunny's **portrait**, at its native 128px, in the header of every page and as the favicon. It is also the Instagram picture. |
 | Archive at launch | On, but shows an empty state until something is approved. |
 | Deletion | Destroys body, answer and email; keeps a payment tombstone for refunds. |
 | Artwork licensing | Settled — Farida's artist has given full permission. |
@@ -194,6 +196,10 @@ the smallest whole-number scale that covers the viewport. The animations are
 CSS keyframes stepped with `steps(1)`, so a sprite never lands between pixels;
 they all stop under `prefers-reduced-motion`. Everything else on the site
 still goes through `SpriteCanvas` and the shared loop.
+
+**The header logo is 128px because nothing smaller is allowed.** Whole-number
+scaling means the portrait cannot shrink to 64px without the artist exporting
+one. On phones the written site name steps aside so the menu fits beside it.
 
 **Sprites and pixel art.** Art is scaled by **whole numbers only**, never 1.5.
 `SpriteCanvas` draws with `imageSmoothingEnabled = false` at integer scale.

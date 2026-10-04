@@ -26,17 +26,19 @@ It is at the bottom of this page.
     <td width="34%"><img src="docs/screenshots/home-mobile.png" alt="The home page on a phone"></td>
   </tr>
   <tr>
-    <td>The home page. The writing box sits in the forest, and the bunny who writes back stands at its corner, listening. She breathes and blinks, her lantern sparkles, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
+    <td>The home page, in Farida's five colours and her pixel font. The writing box sits in the forest; the bunny who writes back stands at its top-right corner, listening, with her portrait beneath her staff. She breathes and blinks, her lantern sparkles, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
     <td>The same page on a phone: the box first, the bunny beside it.</td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/home-meet.png" alt="Under the writing box: a close-up of the bunny, centred, above the line that all advice is written by one real human"></td>
+    <td width="50%"><img src="docs/screenshots/home-writing.png" alt="While someone writes, the box lifts and the pink comes forward"></td>
+    <td width="50%"><img src="docs/screenshots/home-tablet.png" alt="On a tablet the bunny stands on the top edge of the box instead of beside it"></td>
   </tr>
   <tr>
-    <td>Just under the box, a close-up introduces who is actually reading.</td>
+    <td>While someone writes, the box lifts and the pink comes forward.</td>
+    <td>On a tablet or phone the bunny steps onto the top edge of the box instead of standing beside it.</td>
   </tr>
 </table>
 

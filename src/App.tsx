@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
 import { Admin } from './pages/Admin';
 import { Answer } from './pages/Answer';
 import { Archive } from './pages/Archive';
@@ -30,9 +30,17 @@ const DevSprites: ComponentType | null = import.meta.env.DEV
     })
   : null;
 
+/**
+ * The real site uses path routes (/ask, /a/:token). A design preview hosted
+ * on a static page with no server behind it cannot serve those paths, so a
+ * build made with VITE_PREVIEW_ROUTER=hash uses #/ask style routes instead.
+ * Nothing else changes, and the flag is never set for a real build.
+ */
+const Router = import.meta.env.VITE_PREVIEW_ROUTER === 'hash' ? HashRouter : BrowserRouter;
+
 export function App() {
   return (
-    <BrowserRouter
+    <Router
       // Opt in to React Router v7 behaviour now: state updates wrapped in
       // startTransition, and relative paths inside splat routes resolved the
       // v7 way. Silences the upgrade warnings and avoids a surprise later.
@@ -86,6 +94,6 @@ export function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }

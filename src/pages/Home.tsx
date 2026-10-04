@@ -14,11 +14,10 @@ import './Home.css';
 /**
  * The homepage.
  *
- * The forest fills the whole page. In the middle of it sits the writing box,
- * and the bunny stands at its bottom-right corner, close enough to be
- * listening. Under the hero, the close-up of the bunny introduces the one who
- * writes back. Then: why it costs what it costs, a real example, and a final
- * invitation.
+ * The forest fills the whole page. In the middle of it sits the writing box;
+ * the bunny stands at its top-right corner, close enough to be listening, and
+ * her portrait sits centred beneath the staff she holds. Then: who is writing
+ * back, why it costs what it costs, a real example, and a final invitation.
  *
  * The writing box is the hero rather than a thing below it. Someone arriving
  * mid-crisis should not have to read a landing page before they find out
@@ -80,8 +79,12 @@ export function Home() {
               </p>
             </div>
 
-            <div className="hero-bunny">
+            {/* The cast stands beside the card on a wide screen (top-right,
+                portrait under the staff) and steps above and below it on
+                narrower ones. Order and placement live in Home.css. */}
+            <div className="hero-cast">
               <StandingBunny />
+              <PortraitBunny />
             </div>
           </div>
 
@@ -100,7 +103,6 @@ export function Home() {
       {/* -------------------------------------------- who is writing back */}
       <section className="section on-forest meet">
         <div className="wrap meet-inner">
-          <PortraitBunny />
           <div className="stack meet-words">
             <h2 className="h2">{copy.trust.heading}</h2>
             {/* Specified verbatim in the brief. */}
@@ -119,7 +121,7 @@ export function Home() {
       </section>
 
       {/* -------------------------------------------------------- why 1 AZN */}
-      <section className="section on-forest">
+      <section className="section on-forest on-forest-alt">
         <div className="wrap wrap-narrow stack" style={{ gap: '16px' }}>
           <h2 className="h2">{copy.whyADollar.heading}</h2>
           {copy.whyADollar.body.map((paragraph) => (
@@ -161,7 +163,7 @@ export function Home() {
       </section>
 
       {/* -------------------------------------------------------- final cta */}
-      <section className="section on-forest final">
+      <section className="section on-forest on-forest-alt final">
         <div className="wrap wrap-narrow stack" style={{ gap: '16px', alignItems: 'flex-start' }}>
           <h2 className="h2">{copy.finalCta.heading}</h2>
           <p className="lede">{copy.finalCta.body}</p>

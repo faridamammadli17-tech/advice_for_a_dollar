@@ -30,4 +30,9 @@ export default defineConfig({
       },
     },
   },
+  // `vite preview` serves the production bundle the same way, so a shared
+  // preview through a tunnel shows the real thing rather than the dev build.
+  preview: {
+    allowedHosts: ['.trycloudflare.com', 'localhost'],
+  },
 });

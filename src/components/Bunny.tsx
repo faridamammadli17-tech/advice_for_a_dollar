@@ -72,9 +72,12 @@ function Figure({ open, blink, sparkles, glow, scale, className, label }: Figure
   );
 }
 
-/** Standing beside the writing box. 3x on a wide screen, 2x below that. */
+/**
+ * Standing at the writing box's top-right corner. 3x on a wide screen, 2x
+ * below that; Home.css positions her with the same breakpoint (--cast).
+ */
 export function StandingBunny() {
-  const wide = useMediaQuery('(min-width: 1100px)');
+  const wide = useMediaQuery('(min-width: 1400px)');
   return (
     <Figure
       open={standingOpen}

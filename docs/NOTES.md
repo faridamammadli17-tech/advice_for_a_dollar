@@ -1640,3 +1640,51 @@ to pay, and wire the refund path (`markRefunded` has no caller). The archive
 shows its first hundred entries with no paging. At the proxy, exclude `/a/`
 and `/api/a/` from access logs, and repeat the API's security headers on
 whatever serves the HTML.
+
+---
+
+## Her colours, her font, and the bunny at the top right (2026-10-04, evening)
+
+Farida's second brief corrected the first: the bunny belongs at the top right
+of the writing box, the close-up portrait goes centred beneath the staff she
+holds and, smaller, into the header as the logo (it is the Instagram picture
+too), the page uses her five colours with nothing white, and everything is set
+in VCR OSD Mono. The copy stays exactly as written.
+
+**Contrast, measured.** Wine on pale pink 6.95:1, wine on light green 6.91:1,
+dark green on pale pink 5.70:1, dark green on light green 5.67:1, pale pink
+on wine 6.95:1. So wine and dark green are the only text colours and both
+work on both light surfaces. Pink is 3.31:1 at best (on wine) and 2.1:1 on the
+light surfaces, so it never carries text: it is the button's shadow, the glow,
+the fireflies. The button is wine with pale-pink text rather than pink, for
+that reason. Cream, approved in September for the paper surfaces, stays on the
+inner pages; the home page is the five colours only.
+
+**The font.** Loaded with `@font-face` from the project's own files, so every
+visitor gets it. Used for headings and body text. It lacks four characters:
+the em dash (which the copy uses throughout), the en dash, the middle dot (in
+"1 AZN minimum · pay what you want") and the manat sign. The stack falls back
+to Courier New for those glyphs. Looked at closely, the fallback dash and dot
+are thinner than the pixel strokes around them; at reading size they pass
+without drawing the eye. The honest options are to live with it, or to draw
+those four glyphs as a tiny companion font in the same pixel style; Farida
+decides. Not in the font either: ə, ş, ğ, ı and İ, which would matter the day
+there is Azerbaijani copy. The safety screen and the dashboard keep the plain
+system fonts, deliberately.
+
+**Composition.** From 1160px up, the bunny overlaps the card's top-right
+corner by ten art pixels (inside its padding, never over text) and the
+portrait sits centred under the staff, at art pixel 96 of her 128, measured
+to the pixel in the browser. Below that she stands on the card's top edge,
+right-aligned, and the portrait follows the card on the right; there the
+portrait sits 64px left of the staff line, because centring it under the
+staff would push it off a phone's edge. The logo is the portrait at its native
+128px, since whole-number scaling allows nothing smaller; on phones the menu
+sits beside it and the written name steps aside.
+
+**A link to open.** This environment's network policy refuses the tunnel
+services (api.trycloudflare.com, localtunnel.me), so no tunnel could be
+opened from here. Instead a static preview build (`VITE_PREVIEW_ROUTER=hash`,
+relative paths) is published as a private page: the whole front end, no server
+behind it, so the writing flow stops politely at its first step. A real shared
+preview needs either that policy widened or the server hosted somewhere.
