@@ -1,0 +1,33 @@
+.static {
+  padding: 48px 0 96px;
+}
+
+.static-list {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 62ch;
+  line-height: 1.65;
+}
+
+.static-list li::marker {
+  color: var(--accent);
+}
+
+.awaiting {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--accent-strong);
+  border: 2px dashed var(--accent-strong);
+  padding: 12px 14px;
+  max-width: 58ch;
+}
+
+.static-foot {
+  border-top: 2px solid var(--border);
+  padding-top: 26px;
+}

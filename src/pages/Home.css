@@ -1,0 +1,768 @@
+/* Homepage: the forest, the writing box, the bunny beside it, the frog at its foot. */
+
+/* ------------------------------------------------- the palette on the forest */
+
+/* Farida's five colours, and nothing neutral (2026-10-04). The rule is
+   background first, then whichever text colour reads best on it: wine on the
+   light greens and pinks (6.9:1), dark green as the quieter second colour on
+   them (5.7:1), and pale pink or white on the dark-green bands (5.4:1 and
+   8.3:1). Pink never carries text: it is 3.3:1 at best. It is used for
+   fills, shadows and glows. */
+.shell-forest {
+  --bg: #cfdd9d;
+  --surface: #f8cae4;
+  --surface-alt: #cfdd9d;
+  --text: #752445;
+  --muted: #2f582c;
+  --faint: #2f582c;
+  --border: #752445;
+  --border-strong: #752445;
+  --shadow: rgba(117, 36, 69, 0.35);
+  --accent: #ea6993;
+  --accent-strong: #752445;
+  --accent-text: #752445;
+  --accent-cool: #2f582c;
+  --highlight: #cfdd9d;
+  --on-accent: #f8cae4;
+  --focus-ring: #752445;
+
+  /* Transparent, so the fixed scene shows through everything, and the
+     stacking context the scene sits at the bottom of. */
+  background: transparent;
+  position: relative;
+  z-index: 0;
+}
+
+/* The band across the top is dark green; on it, the name and the menu are
+   pale pink, and the page you are on is white. */
+.shell-forest .site-head {
+  background: #2f582c;
+  border-color: #cfdd9d;
+}
+
+.shell-forest .brand {
+  color: #f8cae4;
+}
+
+.shell-forest .site-nav a {
+  color: #f8cae4;
+}
+
+.shell-forest .site-nav a:hover,
+.shell-forest .site-nav a[aria-current='page'] {
+  color: #ffffff;
+  border-color: #cfdd9d;
+}
+
+.shell-forest .site-nav a:focus-visible {
+  outline-color: #ffffff;
+}
+
+/* The footer is the same dark green band. */
+.shell-forest .site-foot {
+  background: #2f582c;
+  border-color: #cfdd9d;
+  color: #f8cae4;
+}
+
+.shell-forest .foot-title {
+  color: #cfdd9d;
+}
+
+.shell-forest .foot-col a,
+.shell-forest .foot-note,
+.shell-forest .foot-bottom {
+  color: #f8cae4;
+}
+
+.shell-forest .foot-col a:hover {
+  color: #ffffff;
+}
+
+.shell-forest .foot-bottom {
+  border-color: rgba(207, 221, 157, 0.5);
+}
+
+/* Pink on wine is only 3.3:1, so the button is wine with pale-pink text
+   (6.9:1) and pink lives in its shadow. */
+.shell-forest .btn-primary {
+  background: #752445;
+  color: #f8cae4;
+  border-color: #752445;
+  box-shadow: 4px 4px 0 #ea6993;
+}
+
+.shell-forest .btn-primary:hover {
+  box-shadow: 5px 5px 0 #ea6993;
+}
+
+.shell-forest .btn-primary:active {
+  box-shadow: 1px 1px 0 #ea6993;
+}
+
+.shell-forest .textarea::placeholder {
+  color: #2f582c;
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------- the forest */
+
+/* The fixed layer behind the page. The scene itself is `.forest-stage`,
+   sized and placed by ForestScene.tsx at a whole-number scale, anchored to
+   the ground (and to the left edge on wide screens, so the painted bunny
+   and frog on their mushroom stay in view). Nothing dims it: no overlay, no
+   filter, no blend, full colour. */
+.forest {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background-color: #7dc26a;
+}
+
+.forest-stage {
+  position: absolute;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* The little black creatures, each at the exact spot it was painted. */
+.critter {
+  position: absolute;
+  display: block;
+}
+
+.critter-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.critter-blink {
+  opacity: 0;
+}
+
+.firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #f8cae4;
+  box-shadow: 0 0 7px 3px rgba(234, 105, 147, 0.65);
+  opacity: 0;
+  animation-name: drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* -------------------------------------------------------------- the hero */
+
+.hero {
+  position: relative;
+  padding: 44px 0 56px;
+  min-height: calc(100vh - 190px);
+  display: flex;
+  align-items: center;
+  /* The bunny stands past the card's right edge on wide screens. Clip
+     sideways only, so nothing can add a horizontal scrollbar. */
+  overflow-x: clip;
+}
+
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+/* The card and the cast share a stage, so the bunny and the frog can be
+   placed against the card rather than against the page. The stage is a
+   column: bunny (on narrow screens), card, frog. */
+.hero-stage {
+  position: relative;
+  width: min(100%, 640px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* The box is pale green; the writing area inside it is pale pink. */
+.hero-card {
+  order: 1;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 30px 24px;
+  background: #cfdd9d;
+  border: var(--border-width) solid #752445;
+  box-shadow: 6px 6px 0 rgba(117, 36, 69, 0.45);
+  transition:
+    transform 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.hero-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 8px 8px 0 rgba(117, 36, 69, 0.45);
+}
+
+/* While someone is writing, the card lifts and the pink comes forward. */
+.hero-card:focus-within {
+  transform: translate(-2px, -2px);
+  box-shadow:
+    9px 9px 0 #752445,
+    0 0 0 5px rgba(234, 105, 147, 0.45);
+}
+
+.hero-card .pad-textarea {
+  background: #f8cae4;
+  color: #752445;
+  border-color: #752445;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.hero-card .pad-textarea:focus {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px #752445,
+    0 0 0 4px rgba(234, 105, 147, 0.4);
+}
+
+.hero-words {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.hero-words .h1 {
+  font-size: clamp(1.8rem, 4.2vw, 2.6rem);
+}
+
+.hero-words .lede {
+  max-width: 46ch;
+}
+
+.hero-actions {
+  justify-content: flex-start;
+}
+
+.hero-price {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: #752445;
+  letter-spacing: 0.02em;
+}
+
+.hero-assurance {
+  margin: 0;
+  font-size: 15px;
+  color: #2f582c;
+  border-top: 1px solid #752445;
+  padding-top: 14px;
+}
+
+.hero-alt {
+  margin: 0;
+  font-size: 15px;
+  padding: 8px 14px;
+  background: #cfdd9d;
+  color: #2f582c;
+  border: var(--border-width) solid #2f582c;
+}
+
+.hero-alt-muted {
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------- the cast */
+
+/* `--cast` is the standing bunny's scale in CSS pixels per art pixel. It must
+   match the breakpoint in Bunny.tsx (3x from 1400px, 2x below). */
+.hero-cast {
+  --cast: 2px;
+  display: contents;
+}
+
+/* Narrow: the bunny stands on the card's top edge, right-aligned, feet on the
+   border. */
+.hero-cast .bunny-standing {
+  order: 0;
+  align-self: flex-end;
+  position: relative;
+  z-index: 2;
+  margin-bottom: calc(var(--cast) * -10);
+}
+
+/* Wide: the bunny is pinned to the card's top-right corner, overlapping it by
+   ten art pixels (her cloak tip, inside the padding, so she never covers
+   text). */
+@media (min-width: 1160px) {
+  .hero-cast {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    top: calc(var(--cast) * -8);
+    right: calc(var(--cast) * -91);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .hero-cast .bunny-standing {
+    margin: 0;
+    align-self: auto;
+  }
+}
+
+@media (min-width: 1400px) {
+  .hero-cast {
+    --cast: 3px;
+  }
+}
+
+/* ------------------------------------------------------------- the frog */
+
+/* The frog at his computer sits at the foot of the card, in the flow after
+   it, with the top of his monitor tucked seven art pixels into the card's
+   bottom padding, under the last line of text. `--fx` is his scale (3x everywhere; TypingFrog.tsx).
+
+   He starts at the card's left edge, except where that would put him on top
+   of the scene's own frog and bunny on their mushroom. Those sit in the
+   leftmost 148 scene pixels, drawn at the scene's scale (`--scene`, kept in
+   step with ForestScene.tsx below) and anchored left from 1160px or centred
+   under that. Where the card's left edge is inside that strip, he slides
+   right along the card's bottom edge until he clears it by twelve pixels. */
+.hero-frog {
+  --fx: 3px;
+  --scene: 1;
+  --painted-right: calc(148px * var(--scene) + (100vw - 480px * var(--scene)) / 2);
+  --card-left: calc((100vw - 640px) / 2);
+  order: 2;
+  align-self: flex-start;
+  position: relative;
+  z-index: 2;
+  margin-top: calc(var(--fx) * -7);
+  margin-left: max(
+    calc(var(--fx) * -4),
+    calc(var(--painted-right) + 12px - var(--card-left) - var(--fx) * 4)
+  );
+  pointer-events: none;
+}
+
+@media (min-width: 481px), (min-height: 280px) {
+  .hero-frog {
+    --scene: 2;
+  }
+}
+
+@media (min-width: 961px), (min-height: 559px) {
+  .hero-frog {
+    --scene: 3;
+  }
+}
+
+@media (min-width: 1441px), (min-height: 838px) {
+  .hero-frog {
+    --scene: 4;
+  }
+}
+
+@media (min-width: 1921px), (min-height: 1117px) {
+  .hero-frog {
+    --scene: 5;
+  }
+}
+
+@media (min-width: 1160px) {
+  .hero-frog {
+    --painted-right: calc(148px * var(--scene));
+  }
+}
+
+/* ------------------------------------------------------------- the bunny */
+
+.bunny {
+  position: relative;
+  display: block;
+  flex: none;
+  user-select: none;
+}
+
+.bunny-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.bunny-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* The closed-eye frame sits on top and is shown only for the blink. */
+.bunny-blink {
+  opacity: 0;
+}
+
+.bunny-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(248, 202, 228, 0.75) 0%,
+    rgba(234, 105, 147, 0.25) 45%,
+    transparent 70%
+  );
+  filter: blur(calc(var(--px) * 1.2));
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.sparkle {
+  position: absolute;
+  width: var(--px);
+  height: var(--px);
+  background: #f8cae4;
+  box-shadow: 0 0 calc(var(--px) * 1.5) rgba(234, 105, 147, 0.9);
+  opacity: 0;
+}
+
+/* ------------------------------------------------- sections on the forest */
+
+.on-forest {
+  background: #f8cae4;
+  border-top: var(--border-width) solid #752445;
+}
+
+.on-forest-alt {
+  background: #cfdd9d;
+  border-top-color: #2f582c;
+}
+
+.on-forest .prose,
+.on-forest .lede {
+  color: #2f582c;
+}
+
+/* --------------------------------------------- who is writing back (meet) */
+
+.meet-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.meet-words {
+  gap: 10px;
+  align-items: center;
+}
+
+.meet .one-human {
+  max-width: 40ch;
+}
+
+.meet .trust-grid {
+  width: 100%;
+  text-align: left;
+  margin-top: 8px;
+}
+
+.meet .trust-card {
+  background: #cfdd9d;
+  border-color: #2f582c;
+}
+
+.not-therapy {
+  margin: 8px 0 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #752445;
+  border-left: 4px solid #752445;
+  padding-left: 14px;
+  max-width: 58ch;
+}
+
+/* -------------------------------------------------------------- example */
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.example-category {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #752445;
+  font-weight: 700;
+}
+
+.example-rule {
+  border: 0;
+  border-top: 2px solid #752445;
+  width: 100%;
+  margin: 6px 0;
+}
+
+.example-from {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: #2f582c;
+  margin: 4px 0 0;
+}
+
+.example-awaiting {
+  border-style: dashed;
+  border-color: #2f582c;
+  box-shadow: none;
+  background: #cfdd9d;
+}
+
+.example-awaiting-title {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: #752445;
+}
+
+/* ---------------------------------------------------------------- trust */
+
+.one-human {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  line-height: 1.45;
+  margin: 0;
+  max-width: 34ch;
+  color: #752445;
+  font-weight: 700;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.trust-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trust-card .prose {
+  font-size: 15px;
+}
+
+/* ----------------------------------------------------------- final call */
+
+.final {
+  padding-bottom: 88px;
+}
+
+/* ------------------------------------------------------- the writing pad */
+
+.pad {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pad-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  /* Pulls the frog down so he sits on the top edge of the textarea. */
+  margin-bottom: -4px;
+}
+
+.pad-head .field-label {
+  padding-bottom: 6px;
+}
+
+.pad-textarea {
+  background: var(--bg);
+}
+
+/* --------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: no-preference) {
+  .bunny-standing .bunny-body {
+    animation: bob 2.4s steps(1, end) infinite;
+  }
+
+  .bunny-blink {
+    animation: blink 4.8s steps(1, end) infinite;
+  }
+
+  .sparkle {
+    animation: twinkle 2.7s steps(1, end) infinite;
+  }
+
+  .bunny-glow {
+    animation: glow 3.6s ease-in-out infinite;
+  }
+
+  /* Each creature has its own duration and delay (ForestScene.tsx). */
+  .critter {
+    animation-name: fidget;
+    animation-timing-function: steps(1, end);
+    animation-iteration-count: infinite;
+  }
+
+  .critter-blink {
+    animation-name: blink;
+    animation-timing-function: steps(1, end);
+    animation-iteration-count: infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .firefly {
+    display: none;
+  }
+
+  .hero-card,
+  .hero-card:hover,
+  .hero-card:focus-within {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* One art pixel up and back, held rather than eased, so the sprite never
+   lands between pixels. */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--px) * -1));
+  }
+}
+
+@keyframes blink {
+  0%,
+  92% {
+    opacity: 0;
+  }
+  93%,
+  96% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  55% {
+    opacity: 0;
+  }
+  60%,
+  80% {
+    opacity: 1;
+  }
+  85%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(18px, -26px);
+    opacity: 0.35;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-10px, -54px);
+    opacity: 0;
+  }
+}
+
+/* A creature's fidget: mostly still, a bob up, a shuffle to one side and
+   back, by one art pixel each, held rather than eased. */
+@keyframes fidget {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  22% {
+    transform: translateY(calc(var(--px) * -1));
+  }
+  30% {
+    transform: translate(0, 0);
+  }
+  58% {
+    transform: translateX(calc(var(--px) * -1));
+  }
+  66% {
+    transform: translate(0, 0);
+  }
+  70% {
+    transform: translateY(calc(var(--px) * -1));
+  }
+  76% {
+    transform: translate(0, 0);
+  }
+}
+
+/* --------------------------------------------------------------- mobile */
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 16px 0 40px;
+    min-height: 0;
+  }
+
+  .hero-card {
+    padding: 22px 18px 20px;
+  }
+
+  /* The card's bottom padding is shallower here, so the monitor tucks in
+     by six pixels instead of seven. */
+  .hero-frog {
+    margin-top: calc(var(--fx) * -6);
+  }
+}

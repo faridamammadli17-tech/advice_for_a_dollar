@@ -1,0 +1,332 @@
+/* ===========================================================================
+   The owner's dashboard.
+
+   Plain on purpose. This is a workbench, not part of the visitor experience:
+   no pixel shadows, no mascots, no ceremony. Dense, legible, quick to scan.
+   =========================================================================== */
+
+.admin-shell {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  padding: 32px 24px 96px;
+  max-width: 940px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: var(--font-system);
+}
+
+.admin-centre {
+  justify-content: center;
+  align-items: center;
+  max-width: none;
+}
+
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 2px solid var(--border-strong);
+  padding-bottom: 16px;
+}
+
+.admin-h1 {
+  font-family: var(--font-system-mono);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.admin-quiet {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-label {
+  font-family: var(--font-system-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 700;
+}
+
+.admin-error {
+  color: var(--accent-strong);
+  font-size: 14px;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ login */
+
+.admin-login {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 22rem;
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  padding: 28px;
+}
+
+.admin-input,
+.admin-textarea,
+.admin-select {
+  font-family: var(--font-system);
+  font-size: 15px;
+  padding: 10px 12px;
+  border: 2px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  width: 100%;
+}
+
+.admin-textarea {
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.admin-select {
+  width: auto;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.admin-btn {
+  font-family: var(--font-system-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 9px 14px;
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.admin-btn:hover:not(:disabled) {
+  background: var(--surface-alt);
+}
+
+.admin-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.admin-btn-danger {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------ alarm */
+
+.admin-alarm {
+  border: 3px solid var(--accent-strong);
+  background: var(--accent-strong);
+  color: #ffffff;
+  padding: 14px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------ stats */
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0;
+  border: 2px solid var(--border-strong);
+}
+
+.admin-stat {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-stat:last-child {
+  border-right: 0;
+}
+
+.admin-stat-on {
+  background: var(--surface-alt);
+}
+
+.admin-stat-value {
+  font-family: var(--font-system-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.admin-stat-on .admin-stat-value {
+  color: var(--accent-strong);
+}
+
+.admin-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- filters */
+
+.admin-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-chip {
+  font-family: var(--font-system-mono);
+  font-size: 12px;
+  padding: 8px 13px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-chip[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent-strong);
+}
+
+/* ------------------------------------------------------------------- list */
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-row {
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-row-flagged {
+  border-color: var(--accent-strong);
+  border-width: 3px;
+}
+
+.admin-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.admin-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-badge {
+  font-family: var(--font-system-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.admin-badge-danger {
+  background: var(--accent-strong);
+  color: #ffffff;
+  border-color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.admin-badge-note {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.admin-badge-ok {
+  border-color: var(--accent-cool);
+  color: var(--accent-cool);
+}
+
+.admin-meta {
+  font-family: var(--font-system-mono);
+  font-size: 11px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  max-width: 68ch;
+}
+
+.admin-answered {
+  border-left: 3px solid var(--border);
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-foot {
+  border-top: 2px solid var(--border);
+  padding-top: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* A failed action, shown rather than swallowed. Softer than the safety alarm,
+   because this is "that did not save", not "somebody may be in danger". */
+.admin-alarm-soft {
+  background: var(--surface-alt);
+  color: var(--accent-strong);
+  border-color: var(--accent-strong);
+  border-width: 2px;
+  font-weight: 600;
+}

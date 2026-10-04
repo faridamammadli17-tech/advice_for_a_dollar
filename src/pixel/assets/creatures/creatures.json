@@ -1,0 +1,78 @@
+{
+  "scene": {
+    "width": 480,
+    "height": 279
+  },
+  "creatures": [
+    {
+      "id": 1,
+      "x": 437,
+      "y": 32,
+      "width": 15,
+      "height": 13,
+      "eyes": 20,
+      "fur": 107,
+      "touchesEdge": false
+    },
+    {
+      "id": 2,
+      "x": 427,
+      "y": 46,
+      "width": 14,
+      "height": 13,
+      "eyes": 14,
+      "fur": 108,
+      "touchesEdge": false
+    },
+    {
+      "id": 3,
+      "x": 26,
+      "y": 60,
+      "width": 14,
+      "height": 13,
+      "eyes": 14,
+      "fur": 117,
+      "touchesEdge": false
+    },
+    {
+      "id": 4,
+      "x": 435,
+      "y": 132,
+      "width": 14,
+      "height": 15,
+      "eyes": 19,
+      "fur": 148,
+      "touchesEdge": false
+    },
+    {
+      "id": 5,
+      "x": 449,
+      "y": 146,
+      "width": 7,
+      "height": 8,
+      "eyes": 2,
+      "fur": 41,
+      "touchesEdge": false
+    },
+    {
+      "id": 6,
+      "x": 414,
+      "y": 179,
+      "width": 22,
+      "height": 16,
+      "eyes": 18,
+      "fur": 237,
+      "touchesEdge": false
+    },
+    {
+      "id": 7,
+      "x": 52,
+      "y": 258,
+      "width": 32,
+      "height": 21,
+      "eyes": 44,
+      "fur": 483,
+      "touchesEdge": true
+    }
+  ]
+}

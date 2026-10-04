@@ -1,0 +1,54 @@
+{
+  "name": "advice-for-a-dollar",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A one-person advice service: write a problem anonymously, pay one manat, and a real person writes back.",
+  "engines": {
+    "node": ">=22.16"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsx scripts/preflight.ts && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "server": "tsx server/index.ts",
+    "server:dev": "tsx watch server/index.ts",
+    "admin:hash": "tsx server/bin/hash-password.ts",
+    "backup": "tsx scripts/backup.ts",
+    "preflight": "tsx scripts/preflight.ts",
+    "art:check": "tsx scripts/check-art.ts",
+    "art:recover": "python3 scripts/downscale-art.py",
+    "art:recover-jpeg": "python3 scripts/recover-from-jpeg.py",
+    "art:blink": "python3 scripts/make-blink-frames.py",
+    "art:typist": "python3 scripts/make-typist-layers.py",
+    "art:creatures": "python3 scripts/cut-scene-creatures.py"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "fastify": "^5.12.5",
+    "nodemailer": "^10.0.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/node": "^26.6.2",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.2",
+    "eslint": "^9.12.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "globals": "^15.11.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.8.1",
+    "vite": "^5.4.9",
+    "vitest": "^2.1.3"
+  }
+}

@@ -1,0 +1,26 @@
+# Runs on every pull request and on main: the same checks a developer runs
+# locally. A green tick on GitHub means the tests, types and lint all passed.
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Tests, types, lint, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run lint
+      # A test bundle only. The real build stays blocked until the crisis
+      # numbers and the remaining copy are filled in (see scripts/preflight.ts).
+      - run: ALLOW_PLACEHOLDER_CONTENT=1 npm run build

@@ -1,0 +1,275 @@
+/* The frog at his computer: layered art, moved by whole pixels. */
+
+.typist {
+  position: relative;
+  display: block;
+  flex: none;
+  user-select: none;
+}
+
+.typist-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+}
+
+.typist-torso,
+.typist-head {
+  position: absolute;
+  inset: 0;
+}
+
+.typist-blink {
+  opacity: 0;
+}
+
+/* Each line of text on the screen is the whole text layer clipped to its own
+   row. `--line-*` are art-pixel numbers set per line by TypingFrog.tsx. At
+   rest (and under reduced motion) every line shows in full. */
+.typist-line {
+  --line-hidden-path: inset(
+    calc(var(--line-top) * var(--px)) calc(var(--line-hidden) * var(--px))
+      calc(var(--line-bottom) * var(--px)) calc(var(--line-left) * var(--px))
+  );
+  --line-shown-path: inset(
+    calc(var(--line-top) * var(--px)) calc(var(--line-shown) * var(--px))
+      calc(var(--line-bottom) * var(--px)) calc(var(--line-left) * var(--px))
+  );
+  clip-path: var(--line-shown-path);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .typist-torso {
+    animation: typist-breathe 3.4s steps(1, end) infinite;
+  }
+
+  .typist-head {
+    animation: typist-glance 7.2s steps(1, end) infinite;
+  }
+
+  .typist-blink {
+    animation: typist-blink 5.1s steps(1, end) infinite;
+    animation-delay: 1.3s;
+  }
+
+  .typist-arm {
+    animation: typist-type 0.56s steps(1, end) infinite;
+  }
+
+  /* One fourteen-second page: seven lines typed one after another, a pause
+     to read it back, then a clear screen and a fresh start. Each line's
+     typing segment runs in as many steps as it has pixels, so the text
+     advances one pixel at a time. */
+  .typist-line {
+    animation: 14s steps(1, end) infinite;
+  }
+
+  .typist-line-1 {
+    animation-name: typist-line-1;
+  }
+
+  .typist-line-2 {
+    animation-name: typist-line-2;
+  }
+
+  .typist-line-3 {
+    animation-name: typist-line-3;
+  }
+
+  .typist-line-4 {
+    animation-name: typist-line-4;
+  }
+
+  .typist-line-5 {
+    animation-name: typist-line-5;
+  }
+
+  .typist-line-6 {
+    animation-name: typist-line-6;
+  }
+
+  .typist-line-7 {
+    animation-name: typist-line-7;
+  }
+}
+
+/* The chest rises one pixel for half of each breath. */
+@keyframes typist-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--px) * -1));
+  }
+}
+
+/* Screen, then down to the keys for a while, then back to the screen. The
+   head only ever drops from its drawn position (its cut is at the chin). */
+@keyframes typist-glance {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  42% {
+    transform: translateY(var(--px));
+  }
+  47% {
+    transform: translateY(calc(var(--px) * 2));
+  }
+  80% {
+    transform: translateY(var(--px));
+  }
+  85% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes typist-blink {
+  0%,
+  92% {
+    opacity: 0;
+  }
+  93%,
+  96% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Tap, rest, tap-and-reach, rest: about seven taps a second. */
+@keyframes typist-type {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(0, calc(var(--px) * -1));
+  }
+  50% {
+    transform: translate(0, 0);
+  }
+  75% {
+    transform: translate(calc(var(--px) * -1), calc(var(--px) * -1));
+  }
+}
+
+@keyframes typist-line-1 {
+  0%,
+  2.857% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(11, end);
+  }
+  10.714% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}
+
+@keyframes typist-line-2 {
+  0%,
+  12.143% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(14, end);
+  }
+  20% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}
+
+@keyframes typist-line-3 {
+  0%,
+  21.429% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(8, end);
+  }
+  29.286% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}
+
+@keyframes typist-line-4 {
+  0%,
+  30.714% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(14, end);
+  }
+  38.571% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}
+
+@keyframes typist-line-5 {
+  0%,
+  40% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(11, end);
+  }
+  47.857% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}
+
+@keyframes typist-line-6 {
+  0%,
+  49.286% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(14, end);
+  }
+  57.143% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}
+
+@keyframes typist-line-7 {
+  0%,
+  58.571% {
+    clip-path: var(--line-hidden-path);
+    animation-timing-function: steps(6, end);
+  }
+  66.429% {
+    clip-path: var(--line-shown-path);
+    animation-timing-function: steps(1, end);
+  }
+  88%,
+  100% {
+    clip-path: var(--line-hidden-path);
+  }
+}

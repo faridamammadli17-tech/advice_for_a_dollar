@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop &amp; timing check</title>
+
+<!--
+  VERIFICATION HARNESS — not part of the app, not shipped.
+
+  Covers the two things renderer-check.html cannot: the shared animation loop
+  (src/pixel/useSpriteLoop.ts) and frame timing (src/pixel/timing.ts).
+
+  Ports of the real logic, type annotations stripped. The acceptance criterion
+  "one shared animation loop is used" is checked here by counting actual
+  requestAnimationFrame calls while many subscribers are attached.
+-->
+
+<link rel="stylesheet" href="../src/styles/theme.css">
+<style>
+  * { box-sizing: border-box; border-radius: 0; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); padding: 28px 22px 80px; }
+  .wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+  h1 { font-family: var(--font-mono); font-size: 1.5rem; text-transform: uppercase; margin: 0; }
+  h2 { font-family: var(--font-mono); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 12px; color: var(--accent-cool); }
+  .lede { margin: 0; color: var(--muted); max-width: 70ch; font-size: 14.5px; }
+  .panel { border: var(--border-width) solid var(--border-strong); background: var(--surface); box-shadow: 5px 5px 0 var(--shadow); padding: 18px 20px; }
+  .results { list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
+  .results li { display: flex; gap: 10px; align-items: baseline; }
+  .tag { font-weight: 700; flex: none; width: 5ch; }
+  .pass .tag { color: var(--accent-cool); }
+  .fail .tag { color: var(--accent-strong); }
+  #status { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>Loop &amp; timing check</h1>
+    <p class="lede">Ports of <code>useSpriteLoop.ts</code> and <code>timing.ts</code>. The loop tests run in real time against real animation frames, so they take a couple of seconds.</p>
+  </div>
+  <div class="panel">
+    <h2>Checks</h2>
+    <p id="status">running…</p>
+    <ul class="results" id="results"></ul>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   Port of src/pixel/timing.ts
+   ========================================================================= */
+
+function advanceFrame(current, elapsedMs, deltaMs, fps, frameCount, loops) {
+  if (frameCount <= 1 || !(fps > 0)) return { frame: 0, elapsedMs: 0 };
+
+  var frameDurationMs = 1000 / fps;
+  var accumulated = elapsedMs + deltaMs;
+
+  if (accumulated < frameDurationMs) return { frame: current, elapsedMs: accumulated };
+
+  var steps = Math.floor(accumulated / frameDurationMs);
+  var remainder = accumulated - steps * frameDurationMs;
+  var next = current + steps;
+
+  return {
+    frame: loops ? next % frameCount : Math.min(next, frameCount - 1),
+    elapsedMs: remainder
+  };
+}
+
+/* =========================================================================
+   Port of src/pixel/useSpriteLoop.ts (module internals)
+   ========================================================================= */
+
+var MAX_DELTA_MS = 100;
+
+function clampDelta(previousTimestamp, timestamp) {
+  if (previousTimestamp === null) return 0;
+  var delta = timestamp - previousTimestamp;
+  if (!(delta > 0)) return 0;
+  return Math.min(delta, MAX_DELTA_MS);
+}
+
+var subscribers = new Set();
+var frameHandle = null;
+var lastTimestamp = null;
+
+// Instrumentation: count how many rAF calls the loop makes.
+var rafCalls = 0;
+function countedRaf(fn) { rafCalls++; return window.requestAnimationFrame(fn); }
+
+function tick(timestamp) {
+  frameHandle = countedRaf(tick);
+  var delta = clampDelta(lastTimestamp, timestamp);
+  lastTimestamp = timestamp;
+  var snapshot = [];
+  subscribers.forEach(function (s) { snapshot.push(s); });
+  for (var i = 0; i < snapshot.length; i++) snapshot[i](delta, timestamp);
+}
+
+function start() {
+  if (frameHandle !== null) return;
+  lastTimestamp = null;
+  frameHandle = countedRaf(tick);
+}
+
+function stop() {
+  if (frameHandle === null) return;
+  window.cancelAnimationFrame(frameHandle);
+  frameHandle = null;
+  lastTimestamp = null;
+}
+
+function subscribe(sub) {
+  subscribers.add(sub);
+  if (!document.hidden) start();
+  return function () {
+    subscribers.delete(sub);
+    if (subscribers.size === 0) stop();
+  };
+}
+
+function isRunning() { return frameHandle !== null; }
+
+/* =========================================================================
+   Harness
+   ========================================================================= */
+
+var results = [];
+function check(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail || '' }); }
+function about(actual, expected, tol) { return Math.abs(actual - expected) <= tol; }
+function waitFrames(n) {
+  return new Promise(function (resolve) {
+    var left = n;
+    (function step() {
+      if (left-- <= 0) return resolve();
+      window.requestAnimationFrame(step);
+    })();
+  });
+}
+
+/* ---- timing: pure, synchronous ---- */
+
+var r;
+
+r = advanceFrame(0, 0, 100, 6, 3, true);
+check('Below one frame duration, the frame holds',
+  r.frame === 0 && about(r.elapsedMs, 100, 0.001),
+  '6fps, 100ms < 166.67ms → frame ' + r.frame + ', carried ' + r.elapsedMs.toFixed(2) + 'ms');
+
+r = advanceFrame(0, 100, 100, 6, 3, true);
+check('Crossing a frame boundary advances once and carries the remainder',
+  r.frame === 1 && about(r.elapsedMs, 200 - 1000 / 6, 0.001),
+  '200ms → frame ' + r.frame + ', carried ' + r.elapsedMs.toFixed(2) + 'ms');
+
+// Drift: 60 ticks of a 60fps frame over exactly one second at 6fps = 6 frames.
+var frame = 0, carried = 0, advances = 0;
+for (var t = 0; t < 60; t++) {
+  var before = frame;
+  var step = advanceFrame(frame, carried, 1000 / 60, 6, 1000, true);
+  frame = step.frame; carried = step.elapsedMs;
+  if (frame !== before) advances++;
+}
+check('No drift over one simulated second', frame === 6,
+  '6fps for 1s of 60fps ticks → landed on frame ' + frame + ' after ' + advances + ' advances (expected 6)');
+
+r = advanceFrame(0, 0, 100000, 12, 26, false);
+check('A non-looping animation holds on its last frame',
+  r.frame === 25, 'envelope, 100s elapsed → frame ' + r.frame + ' of 0..25');
+
+r = advanceFrame(2, 0, 1000, 6, 3, true);
+check('A looping animation wraps', r.frame === (2 + 6) % 3,
+  '3 frames, 6 steps from frame 2 → frame ' + r.frame);
+
+r = advanceFrame(0, 0, 5000, 6, 1, true);
+check('A single-frame animation never moves', r.frame === 0 && r.elapsedMs === 0,
+  'frame ' + r.frame);
+
+r = advanceFrame(0, 0, 5000, 0, 4, true);
+check('An fps of 0 is survived, not divided by', r.frame === 0 && r.elapsedMs === 0,
+  'frame ' + r.frame + ' (no Infinity, no NaN)');
+
+check('Delta is clamped so a hidden tab cannot fast-forward',
+  clampDelta(0, 600000) === MAX_DELTA_MS && clampDelta(null, 5) === 0 && clampDelta(100, 50) === 0,
+  '10 minutes → ' + clampDelta(0, 600000) + 'ms; first tick → 0; backwards → 0');
+
+/* ---- loop: real animation frames ---- */
+
+(async function run() {
+  // One subscriber.
+  rafCalls = 0;
+  var ticksA = 0;
+  var offA = subscribe(function () { ticksA++; });
+  await waitFrames(12);
+  var callsOne = rafCalls;
+  offA();
+
+  check('Unsubscribing the last subscriber stops the loop', !isRunning(),
+    'subscribers=' + subscribers.size + ', running=' + isRunning());
+
+  // Five subscribers: the rAF count must not multiply.
+  rafCalls = 0;
+  var counts = [0, 0, 0, 0, 0];
+  var offs = counts.map(function (_, i) {
+    return subscribe(function () { counts[i]++; });
+  });
+  await waitFrames(12);
+  var callsFive = rafCalls;
+  var allSame = counts.every(function (c) { return c === counts[0]; });
+  offs.forEach(function (off) { off(); });
+
+  check('Five subscribers still drive exactly one loop',
+    callsFive <= callsOne + 2,
+    '1 subscriber → ' + callsOne + ' rAF calls; 5 subscribers → ' + callsFive +
+    ' (five separate loops would be ~' + (callsOne * 5) + ')');
+
+  check('Every subscriber is ticked the same number of times', allSame,
+    'counts: ' + counts.join(', '));
+
+  check('All five unsubscribed cleanly', !isRunning() && subscribers.size === 0,
+    'subscribers=' + subscribers.size);
+
+  // Unsubscribing from inside a callback must not disturb the iteration.
+  var survivorTicks = 0, threw = null;
+  var offSelf = null;
+  var offSurvivor = subscribe(function () { survivorTicks++; });
+  try {
+    offSelf = subscribe(function () { if (offSelf) offSelf(); });
+    await waitFrames(6);
+  } catch (e) {
+    threw = String(e);
+  }
+  var survivorAfter = survivorTicks;
+  offSurvivor();
+
+  check('A subscriber may remove itself mid-tick', threw === null && survivorAfter >= 3,
+    threw ? threw : 'survivor kept ticking (' + survivorAfter + ' ticks), no error');
+
+  check('Loop is idle once everything has unsubscribed',
+    !isRunning() && subscribers.size === 0, 'running=' + isRunning());
+
+  /* ---- render ---- */
+  var list = document.getElementById('results');
+  results.forEach(function (res) {
+    var li = document.createElement('li');
+    li.className = res.ok ? 'pass' : 'fail';
+    var tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = res.ok ? 'PASS' : 'FAIL';
+    var txt = document.createElement('span');
+    txt.textContent = res.name + (res.detail ? '  — ' + res.detail : '');
+    li.appendChild(tag); li.appendChild(txt);
+    list.appendChild(li);
+  });
+
+  var failed = results.filter(function (res) { return !res.ok; }).length;
+  document.getElementById('status').textContent =
+    failed === 0 ? 'All ' + results.length + ' checks pass.' : failed + ' of ' + results.length + ' FAILING.';
+  document.title = failed === 0
+    ? 'Loop check — all ' + results.length + ' pass'
+    : 'Loop check — ' + failed + ' FAILING';
+})();
+</script>
+</body>
+</html>

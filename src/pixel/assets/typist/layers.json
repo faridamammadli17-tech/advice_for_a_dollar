@@ -1,0 +1,50 @@
+{
+  "canvas": {
+    "width": 96,
+    "height": 68
+  },
+  "source": {
+    "file": "typist_idle_01.png",
+    "cropX": 17,
+    "cropY": 38
+  },
+  "lines": [
+    {
+      "y": 16,
+      "x": 25,
+      "width": 11
+    },
+    {
+      "y": 18,
+      "x": 25,
+      "width": 14
+    },
+    {
+      "y": 20,
+      "x": 25,
+      "width": 8
+    },
+    {
+      "y": 22,
+      "x": 25,
+      "width": 14
+    },
+    {
+      "y": 26,
+      "x": 25,
+      "width": 11
+    },
+    {
+      "y": 28,
+      "x": 25,
+      "width": 14
+    },
+    {
+      "y": 30,
+      "x": 25,
+      "width": 6
+    }
+  ],
+  "eyeCount": 7,
+  "filledBehindArm": 151
+}
