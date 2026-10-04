@@ -28,7 +28,7 @@ like a SaaS product, or like AI.
 
 ## State: working end to end
 
-All five planned phases are built. **133 tests pass**; typecheck, lint and
+All five planned phases are built. **160 tests pass**; typecheck, lint and
 build are clean.
 
 | | |
@@ -36,7 +36,7 @@ build are clean.
 | Front end | React + TypeScript + Vite |
 | Server | Fastify |
 | Database | SQLite via Node's built-in `node:sqlite` |
-| Tests | 133 across 4 files, including 31 full-stack HTTP tests |
+| Tests | 160 across 4 files, including 50 full-stack HTTP tests |
 
 A visitor can: write, be safety-screened, choose a secret word, choose private
 or public, pay (mock provider), watch the envelope ceremony, get a magic link,
@@ -75,12 +75,15 @@ her voice.
 
 ### 2. Safety screening runs server-side, before payment
 
-`src/lib/safety/` — 42 rules, 16 masks, 55 tests. A flagged submission stops
+`src/lib/safety/` — 43 rules, 16 masks, 61 tests. A flagged submission stops
 the flow, is never charged, and can never be published.
 
 The check runs in `POST /api/submissions` regardless of what the client did.
 The UI screens too, for a fast interstitial, but the client's verdict is never
-trusted.
+trusted. Flagged rows exist only when Farida flags one by hand (text the
+screener flags is never stored at all); they can still be answered through
+the dashboard, because the rule is about payment and publication, not about
+replying.
 
 The interstitial (`SafetyInterstitial.tsx`) deliberately breaks every other
 style rule: no characters, no sprites, no animation, no playfulness. Plain type
@@ -96,7 +99,7 @@ Farida approved it **and** it is not flagged **and** it has an answer.
 
 **Never query on `visibility` alone.** The rule is hard-coded in a SQL view
 (`public_submissions` in `server/db.ts`), so a careless query in TypeScript
-cannot leak a row. An exhaustive test walks all 48 state combinations and
+cannot leak a row. An exhaustive test walks all 192 state combinations (including whether an answer exists) and
 asserts exactly one publishes.
 
 ### 4. Farida never edits submissions
@@ -113,7 +116,7 @@ global uniqueness (a salted hash cannot be looked up).
 ### 6. Recovery never confirms a submission exists
 
 `/recover` answers identically for a wrong word, an empty word, and a
-rate-limited request — same body, same 700ms floor. It returns a link only when
+rate-limited request — same body, same 1.2 s floor. The search is capped at 48 candidates inside a window of at most three months, all checked in parallel, so the time taken cannot say how many submissions a window holds. It returns a link only when
 two factors verify (secret word + date window, or secret word + email).
 
 ---
@@ -150,6 +153,18 @@ two factors verify (secret word + date window, or secret word + email).
 reads `.env` at start with Node's built-in `process.loadEnvFile`, before anything
 looks at `process.env`. Until 2026-10-04 nothing loaded it, so the README's
 admin-password instructions could not work. Do not remove that line.
+
+**Behind a proxy or tunnel, set `TRUST_PROXY=loopback`.** The login and
+recovery limits key on the visitor's address. Behind nginx, Caddy or a
+Cloudflare tunnel every connection arrives from the proxy, so without this
+every visitor shares one limit and eight wrong guesses by anyone lock the owner
+out. Never set it to `true`: that trusts a header anyone can forge.
+
+**Backups are `npm run backup`, not a file copy.** The database runs in
+write-ahead-log mode, so while the server runs the newest submissions live in
+`advice.db-wal`; copying `advice.db` alone produced an empty file. The command
+takes a consistent snapshot through SQLite's own backup API, and a clean stop
+(Ctrl-C) now folds the log back into the file.
 
 **`node:sqlite` and Vite.** Vite's resolver strips the `node:` prefix and then
 fails looking for a package called "sqlite". `server/db.ts` loads it through

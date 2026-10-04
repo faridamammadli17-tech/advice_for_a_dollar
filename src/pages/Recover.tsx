@@ -26,7 +26,9 @@ export function Recover() {
   const [secretWord, setSecretWord] = useState('');
   const [month, setMonth] = useState('');
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ searched: true; link: string | null } | null>(null);
+  const [result, setResult] = useState<
+    { searched: true; link: string | null; unreachable?: boolean } | null
+  >(null);
 
   const search = async () => {
     setBusy(true);
@@ -48,15 +50,25 @@ export function Recover() {
       }
     }
 
-    const response = await fetch('/api/recover', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ secretWord, from, to }),
-    });
-
-    const data = (await response.json()) as { link: string | null };
-    setResult({ searched: true, link: data.link });
-    setBusy(false);
+    try {
+      const response = await fetch('/api/recover', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ secretWord, from, to }),
+      });
+      if (!response.ok) {
+        setResult({ searched: true, link: null, unreachable: true });
+        return;
+      }
+      const data = (await response.json()) as { link?: unknown };
+      setResult({ searched: true, link: typeof data.link === 'string' ? data.link : null });
+    } catch {
+      // Offline, or the server is down. Say so, rather than "nothing matched",
+      // which would send someone off to doubt a secret word that was right.
+      setResult({ searched: true, link: null, unreachable: true });
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -108,7 +120,7 @@ export function Recover() {
               />
               <p className="field-help" id="recover-month-help">
                 Near enough is fine — we look a month either side. Leaving it blank searches the
-                past year, which is slower and less likely to find anything.
+                last three months.
               </p>
             </div>
 
@@ -125,7 +137,12 @@ export function Recover() {
 
           {result !== null && (
             <div className="panel recover-result" aria-live="polite">
-              {result.link !== null ? (
+              {result.unreachable === true ? (
+                <>
+                  <h2 className="h3">Could not reach the server.</h2>
+                  <p className="prose">Nothing was searched. Please try again in a moment.</p>
+                </>
+              ) : result.link !== null ? (
                 <>
                   <h2 className="h3">Found it.</h2>
                   <p className="prose">Here is your link. Save it somewhere this time.</p>

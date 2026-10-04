@@ -17,10 +17,18 @@ import { createSessionId, hashSecret, verifySecret, safeEquals } from './crypto'
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 export const SESSION_COOKIE = 'afad_admin';
 
-/** Attempts allowed per key inside the window, for login and for recovery. */
+/**
+ * Attempts allowed per address inside the window.
+ *
+ * Login and recovery guard against guessing. Submitting and screening guard
+ * against someone filling the dashboard, or using the screen as a free
+ * classifier, from one address; both are generous for a real person.
+ */
 const RATE_LIMITS = {
   login: { max: 8, windowMs: 15 * 60 * 1000 },
   recover: { max: 6, windowMs: 15 * 60 * 1000 },
+  submit: { max: 10, windowMs: 60 * 60 * 1000 },
+  screen: { max: 60, windowMs: 15 * 60 * 1000 },
 } as const;
 
 export type RateBucket = keyof typeof RATE_LIMITS;

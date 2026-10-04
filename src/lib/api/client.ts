@@ -57,6 +57,7 @@ export type AdminSubmission = {
   public_state: 'not_requested' | 'in_review' | 'approved' | 'rejected';
   safety_flagged: number;
   safety_category: string | null;
+  safety_noticed: number;
   amount_minor_units: number;
   currency: string;
   category: string | null;

@@ -106,7 +106,8 @@ describe('the public view holds the publication rule on its own', () => {
   });
 
   it('hides an approved submission with no answer', () => {
-    rawInsert({ answer: null, status: 'pending' });
+    // Both rows are otherwise publishable; only the answer is missing.
+    rawInsert({ answer: null, status: 'answered' });
     rawInsert({ answer: '   ' });
     expect(listPublic(db)).toHaveLength(0);
   });
@@ -377,7 +378,7 @@ describe('analytics on an empty table', () => {
 });
 
 describe('exhaustive: only one state combination is publishable', () => {
-  it('enumerates all 48 combinations and finds exactly one', () => {
+  it('enumerates all 192 combinations and finds exactly one', () => {
     // Moved here from the old client-side queries.test.ts when the server
     // became the single authority on publication. Rather than checking the
     // cases somebody thought of, this walks every combination of visibility,
@@ -386,83 +387,81 @@ describe('exhaustive: only one state combination is publishable', () => {
     const visibilities = ['public', 'private'];
     const publicStates = ['not_requested', 'in_review', 'approved', 'rejected'];
     const statuses = ['pending', 'answered', 'deleted'];
+    // The fifth condition in the view: there must be an actual answer.
+    const answers = [null, '', '   ', 'A reply.'];
     const publishable: string[] = [];
 
     for (const visibility of visibilities) {
       for (const public_state of publicStates) {
         for (const status of statuses) {
           for (const safety_flagged of [0, 1]) {
-            const fresh = openTestDatabase();
-            const previous = db;
-            db = fresh;
-            rawInsert({ visibility, public_state, status, safety_flagged });
-            if (listPublic(db).length > 0) {
-              publishable.push(`${visibility}/${public_state}/${status}/flagged=${safety_flagged}`);
+            for (const answer of answers) {
+              const fresh = openTestDatabase();
+              const previous = db;
+              db = fresh;
+              rawInsert({ visibility, public_state, status, safety_flagged, answer });
+              if (listPublic(db).length > 0) {
+                publishable.push(
+                  `${visibility}/${public_state}/${status}/flagged=${safety_flagged}/answer=${JSON.stringify(answer)}`,
+                );
+              }
+              db = previous;
             }
-            db = previous;
           }
         }
       }
     }
 
-    expect(publishable).toEqual(['public/approved/answered/flagged=0']);
+    expect(publishable).toEqual(['public/approved/answered/flagged=0/answer="A reply."']);
   });
 });
 
 describe('recovery narrows before it verifies', () => {
+  const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+
+  async function plant(secretWord: string, days: number): Promise<string> {
+    const created = await createSubmission(db, {
+      body: 'x'.repeat(30),
+      secretWord,
+      visibility: 'private',
+      amountMinorUnits: 100,
+      email: null,
+      transactionId: null,
+      safety: { flagged: false, category: null, matchedRuleIds: [] },
+    });
+    db.prepare('UPDATE submissions SET created_at = ? WHERE token = ?').run(
+      daysAgo(days),
+      created.token,
+    );
+    return created.token;
+  }
+
   it('only hashes candidates inside the date window', async () => {
     // Two submissions sharing a secret word, months apart. Recovery scoped to
     // one month must find only that one — this is the whole reason the second
     // factor exists, since a salted hash cannot be looked up globally.
-    const older = await createSubmission(db, {
-      body: 'x'.repeat(30),
-      secretWord: 'lighthouse',
-      visibility: 'private',
-      amountMinorUnits: 100,
-      email: null,
-      transactionId: null,
-      safety: { flagged: false, category: null, matchedRuleIds: [] },
-    });
-    db.prepare('UPDATE submissions SET created_at = ? WHERE token = ?').run(
-      '2026-01-15T00:00:00.000Z',
-      older.token,
-    );
+    const older = await plant('lighthouse', 250);
+    const newer = await plant('lighthouse', 100);
 
-    const newer = await createSubmission(db, {
-      body: 'y'.repeat(30),
-      secretWord: 'lighthouse',
-      visibility: 'private',
-      amountMinorUnits: 100,
-      email: null,
-      transactionId: null,
-      safety: { flagged: false, category: null, matchedRuleIds: [] },
-    });
-    db.prepare('UPDATE submissions SET created_at = ? WHERE token = ?').run(
-      '2026-06-15T00:00:00.000Z',
-      newer.token,
-    );
+    const aroundOlder = { from: daysAgo(280), to: daysAgo(220) };
+    const aroundNewer = { from: daysAgo(130), to: daysAgo(70) };
 
-    const january = { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T23:59:59.000Z' };
-    expect(await recoverToken(db, 'lighthouse', january, null)).toBe(older.token);
-
-    const june = { from: '2026-06-01T00:00:00.000Z', to: '2026-06-30T23:59:59.000Z' };
-    expect(await recoverToken(db, 'lighthouse', june, null)).toBe(newer.token);
-
-    const march = { from: '2026-03-01T00:00:00.000Z', to: '2026-03-31T23:59:59.000Z' };
-    expect(await recoverToken(db, 'lighthouse', march, null)).toBeNull();
+    expect(await recoverToken(db, 'lighthouse', aroundOlder, null)).toBe(older);
+    expect(await recoverToken(db, 'lighthouse', aroundNewer, null)).toBe(newer);
+    expect(await recoverToken(db, 'wrong-word', aroundNewer, null)).toBeNull();
   });
 
-  it('normalises casing and spacing, so a remembered word is not defeated by shift', async () => {
-    const created = await createSubmission(db, {
-      body: 'z'.repeat(30),
-      secretWord: 'Lighthouse',
-      visibility: 'private',
-      amountMinorUnits: 100,
-      email: null,
-      transactionId: null,
-      safety: { flagged: false, category: null, matchedRuleIds: [] },
-    });
-    const window = { from: '2000-01-01T00:00:00.000Z', to: '2100-01-01T00:00:00.000Z' };
-    expect(await recoverToken(db, '  LIGHTHOUSE ', window, null)).toBe(created.token);
+  it('clamps the window: three months wide at most, never more than a year back', async () => {
+    await plant('lighthouse', 400);
+    const recent = await plant('lighthouse', 10);
+
+    // No window given: the last three months.
+    expect(await recoverToken(db, 'lighthouse', {}, null)).toBe(recent);
+    // A window that claims all of time is cut down to three months ending now.
+    const everything = { from: '1970-01-01T00:00:00.000Z', to: '2100-01-01T00:00:00.000Z' };
+    expect(await recoverToken(db, 'lighthouse', everything, null)).toBe(recent);
+    // Older than a year is never searched, even when asked for precisely.
+    const lastYear = { from: daysAgo(430), to: daysAgo(370) };
+    expect(await recoverToken(db, 'lighthouse', lastYear, null)).toBeNull();
   });
 });

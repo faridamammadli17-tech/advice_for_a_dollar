@@ -128,7 +128,10 @@ export const MASKS: readonly SafetyMask[] = [
   },
   {
     id: 'idiom.to-death',
-    pattern: /\b(?:bored to death|scared to death|sick to death of|worried to death|freezing to death)\b/g,
+    // "scared to death OF MY husband" is not an intensifier; it is the fear
+    // the abuse rule exists for, so that one form is left for it to see.
+    pattern:
+      /\b(?:bored to death|scared to death(?! of my\b)|sick to death of|worried to death|freezing to death)\b/g,
     note: 'Intensifier idioms.',
   },
 
@@ -225,7 +228,16 @@ export const RULES: readonly SafetyRule[] = [
     category: 'self_harm',
     patterns: [/\b(?:want|wanted) to die\b/],
     weight: 0.8,
-    note: 'Hyperbolic uses ("die of embarrassment") are masked first.',
+    note: 'Deliberately below threshold alone: "I wanted to die when she read it out" is embarrassment, not crisis, and the idiom masks cannot catch every form of it. The emphatic forms in the next rule flag by themselves.',
+  },
+  {
+    id: 'self_harm.want-to-die-emphatic',
+    category: 'self_harm',
+    patterns: [
+      /\b(?:just|really|honestly|genuinely|truly) want to die\b|\bwant to die so (?:bad|badly|much)\b/,
+    ],
+    weight: 1,
+    note: 'With an intensifier it is not hyperbole.',
   },
   {
     id: 'self_harm.wish-dead',
@@ -356,7 +368,7 @@ export const RULES: readonly SafetyRule[] = [
     id: 'abuse.afraid-of',
     category: 'abuse_in_progress',
     patterns: [
-      /\b(?:afraid|scared|terrified) of my (?:husband|wife|boyfriend|girlfriend|partner|father|dad|mother|mum|mom|brother|stepdad|stepfather)\b/,
+      /\b(?:afraid|scared|terrified)(?: to death)? of my (?:husband|wife|boyfriend|girlfriend|partner|father|dad|mother|mum|mom|brother|stepdad|stepfather)\b/,
     ],
     weight: 1,
     note: 'Fear of a household member.',

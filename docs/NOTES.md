@@ -1562,3 +1562,81 @@ change, not a repaint.
 **Checked in a real browser** at 1440, 1280, 1024, 768 and 390 pixels wide:
 no horizontal overflow, the bob measured at exactly one art pixel, the blink
 layer toggling, and the card and bunny above the fold on a laptop.
+
+---
+
+## The audit, and what it changed (2026-10-04, later still)
+
+Six focused audits ran against the imported code, each told to break things
+by running them rather than by reading them: admin authentication, lost-link
+recovery and secret words, payments and privacy, the public routes, the
+safety screen, and the publication rule. Everything below was reproduced
+before it was fixed, and each fix has a test. What held under every attack
+tried: no AI-written advice anywhere; the publication view; the rule that
+nothing ever rewrites a visitor's text; the secret-word hashing; the identical
+recovery responses; the security headers; no third-party resources.
+
+What did not hold, and what changed:
+
+- **Admin login could not work by following the README.** Nothing loaded
+  `.env`. Fixed in `server/index.ts`, proved against the real server.
+- **Behind any reverse proxy, everyone shared one rate limit.** Eight wrong
+  passwords from anyone locked the owner out for fifteen minutes, repeatably;
+  six recovery guesses switched recovery off for every visitor. `TRUST_PROXY`
+  now exists for that deployment, defaults off, and the README says when to
+  set it. Never `true`: that trusts a header anyone can forge.
+- **The documented backup produced an empty file.** Write-ahead-log mode kept
+  the newest rows in `advice.db-wal`, and the server never closed the database.
+  `npm run backup` takes a consistent snapshot while the server runs, and a
+  clean stop now closes the database so the file is complete on its own.
+- **A submission could be created with no payment, and one payment could pay
+  for any number of submissions.** "Received" summed what submissions claimed.
+  A transaction is now required, used once, checked before the text is stored,
+  and revenue is the sum of captured payments.
+- **The recovery window was chosen by the requester.** A window of "1970 to
+  2100" tested a guessed word against every submission ever made, at 44 ms of
+  CPU each, and above sixteen candidates the response time revealed how many
+  there were. The window is now clamped to three months and a year back, the
+  candidates capped at 48 and all checked in parallel, and the floor raised to
+  1.2 s so the time says nothing.
+- **Nothing limited text length or submissions per address.** Two hundred
+  near-megabyte submissions in twenty seconds, for free, and the dashboard
+  loads every row's full text. Now 10,000 characters, 64 KB requests, ten
+  submissions an hour and sixty screenings a quarter-hour per address.
+- **The admin list sent secret-word hashes and salts, magic-link tokens and
+  emails to the browser.** Named columns now.
+- **Invisible characters.** A reply of zero-width spaces published as a blank
+  answer; a soft hyphen split a crisis word in two; full-width letters evaded
+  the screen entirely. All format characters are stripped and compatibility
+  letters folded, on both the route and the screen.
+- **The screen's own blind spots.** An idiom mask could swallow a real
+  statement across a sentence break ("I want to kill myself. Laughing is...");
+  "scared to death of my husband" was masked away as an intensifier; "I just
+  want to die" never flagged alone. Masks now stop at sentence breaks; the
+  abuse rule hears the idiom; emphatic forms flag by themselves. "I wanted to
+  die when she read it out" still does not flag, deliberately, and the
+  dashboard now marks rows where a rule matched below the threshold with "a
+  safety rule noticed something", so Farida reads them knowing.
+- **The publication view was frozen inside existing database files.** It was
+  created with `IF NOT EXISTS`, so a tightened rule would never have reached
+  Farida's real database. Dropped and recreated on every start. The
+  48-combination test became 192 and now varies the answer too.
+- **Network addresses were kept forever** in the rate-limit table and the
+  Privacy page did not mention them. Purged once their window passes, and the
+  page says so.
+- Smaller: the category and flag routes crashed on odd input; a repeated
+  archive parameter crashed with an internal message, and no error was ever
+  logged (there is one error handler now); the Secure cookie flag depended on
+  the exact string `production`; deletion kept the secret-word hash and salt;
+  the dashboard said "published" for an approved problem nobody had answered;
+  the recover page hung forever if the server was down; email matching was
+  case-sensitive and a blank email counted as one; `PAYMENT_PROVIDER` relabelled
+  pretend payments as a real provider; amounts had no ceiling or type check.
+
+Still open, written down for whoever wires the real providers: create the
+submission only after the provider's verified confirmation (today the browser
+charges first and submits second), record the attempt before sending anyone
+to pay, and wire the refund path (`markRefunded` has no caller). The archive
+shows its first hundred entries with no paging. At the proxy, exclude `/a/`
+and `/api/a/` from access logs, and repeat the API's security headers on
+whatever serves the HTML.

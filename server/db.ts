@@ -88,7 +88,11 @@ CREATE INDEX IF NOT EXISTS idx_submissions_purge   ON submissions (email_purge_a
  * Do not add columns to this view without thinking about what becomes public.
  * The token, the hashes, the salt and the email are deliberately absent.
  */
-CREATE VIEW IF NOT EXISTS public_submissions AS
+-- Dropped and recreated on every start, so an existing database file always
+-- runs the rule written here. "IF NOT EXISTS" would have left whatever view
+-- the file was created with in place forever, however the rule changed.
+DROP VIEW IF EXISTS public_submissions;
+CREATE VIEW public_submissions AS
 SELECT
   id,
   body,

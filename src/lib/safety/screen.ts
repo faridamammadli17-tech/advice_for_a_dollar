@@ -60,11 +60,34 @@ const CATEGORY_ORDER: readonly SafetyCategory[] = [
  * match "don't", "dont" and the curly-quoted "don’t".
  */
 export function normalize(text: string): string {
+  return fold(text, false);
+}
+
+/**
+ * Invisible "format" characters: zero-width spaces and joiners, the soft
+ * hyphen, direction marks, and a few look-alike fillers. Phones and word
+ * processors insert some of them without anyone noticing; a word split by one
+ * would otherwise read as two words and match nothing.
+ */
+const INVISIBLE = /[\p{Cf}\u034F\u3164\uFFA0]/gu;
+
+/**
+ * The shared normalisation. With `keepSentenceBreaks`, a full stop, question
+ * mark or exclamation mark survives as "|" instead of becoming a space, which
+ * is what stops a mask from spanning two sentences (see screen()).
+ *
+ * NFKC first, so full-width and other compatibility letters fold to plain
+ * ones before anything else looks at them.
+ */
+function fold(text: string, keepSentenceBreaks: boolean): string {
   const folded = text
+    .normalize('NFKC')
     .toLowerCase()
+    .replace(INVISIBLE, '')
     .replace(/[‘’ʼ]/g, "'")
     .replace(/'/g, '')
-    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/[.!?]+/g, keepSentenceBreaks ? ' | ' : ' ')
+    .replace(/[^a-z0-9|]+/g, ' ')
     .trim();
 
   // Collapse spelled-out forms onto their contracted spelling, so every rule
@@ -125,7 +148,15 @@ export function screen(text: string): SafetyResult {
     return SAFE;
   }
 
-  const masked = maskBenignPhrases(normalize(text));
+  // Masks run on text where sentence breaks survive as "|", so an idiom
+  // cannot swallow a real statement that happens to start the next sentence
+  // ("I want to kill myself. Laughing is something I do not do anymore."
+  // must not become "killing myself laughing"). The rules then run on the
+  // plain form, so a phrase a visitor broke across a full stop still matches.
+  const masked = maskBenignPhrases(fold(text, true))
+    .replace(/\|/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
   const scores = new Map<SafetyCategory, number>();
   const matchedRuleIds: string[] = [];

@@ -105,3 +105,11 @@ export function toView(submission: Submission): SubmissionView {
     currency: submission.currency,
   };
 }
+
+/**
+ * The longest problem and follow-up the server accepts, in characters.
+ * Long enough for anything a person writes in one sitting; short enough that
+ * nobody can fill the dashboard with megabytes of text.
+ */
+export const MAX_BODY_CHARS = 10_000;
+export const MAX_FOLLOW_UP_CHARS = 5_000;

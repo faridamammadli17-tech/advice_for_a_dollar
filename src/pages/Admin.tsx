@@ -227,8 +227,18 @@ export function Admin() {
                     {row.public_state === 'in_review' && (
                       <span className="admin-badge admin-badge-note">awaiting review</span>
                     )}
-                    {row.public_state === 'approved' && (
+                    {row.public_state === 'approved' && row.status === 'answered' && (
                       <span className="admin-badge admin-badge-ok">published</span>
+                    )}
+                    {row.public_state === 'approved' && row.status !== 'answered' && (
+                      <span className="admin-badge admin-badge-note">
+                        approved, appears once you reply
+                      </span>
+                    )}
+                    {row.safety_flagged === 0 && row.safety_noticed === 1 && (
+                      <span className="admin-badge admin-badge-note">
+                        a safety rule noticed something: read carefully
+                      </span>
                     )}
                     {needsFollowUpReply && (
                       <span className="admin-badge admin-badge-note">follow-up waiting</span>

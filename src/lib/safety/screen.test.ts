@@ -195,3 +195,34 @@ describe('screen — contract', () => {
     expect(screen('I AM SUICIDAL!!!').flagged).toBe(true);
   });
 });
+
+describe('sentence breaks, invisible characters and look-alike letters', () => {
+  it('does not let an idiom mask swallow a real statement in the sentence before it', () => {
+    expect(
+      screen('I want to kill myself. Laughing is something I do not do anymore.').flagged,
+    ).toBe(true);
+  });
+
+  it('still masks the idiom inside one sentence', () => {
+    expect(screen('I was killing myself laughing at the video she sent').flagged).toBe(false);
+  });
+
+  it('is not fooled by a soft hyphen or a zero-width joiner inside a word', () => {
+    expect(screen('I have been sui\u00ADcidal all week').flagged).toBe(true);
+    expect(screen('I am sui\u200Dcidal').flagged).toBe(true);
+  });
+
+  it('folds full-width letters to plain ones', () => {
+    expect(screen('I am ｓｕｉｃｉｄａｌ').flagged).toBe(true);
+  });
+
+  it('flags "I just want to die" but not the embarrassed past tense', () => {
+    expect(screen('I just want to die.').flagged).toBe(true);
+    expect(screen('I wanted to die when she read my message out loud').flagged).toBe(false);
+  });
+
+  it('hears "scared to death of my husband" as fear, not as an idiom', () => {
+    expect(screen("I'm scared to death of my husband.").flagged).toBe(true);
+    expect(screen('I am scared to death about my exams next week').flagged).toBe(false);
+  });
+});

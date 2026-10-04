@@ -35,6 +35,8 @@ export type AdminRow = {
   public_state: PublicState;
   safety_flagged: number;
   safety_category: string | null;
+  /** 1 when a screening rule matched below the flag threshold. A nudge to read carefully. */
+  safety_noticed: number;
   amount_minor_units: number;
   currency: string;
   category: string | null;
@@ -188,6 +190,23 @@ export function deleteByToken(db: Database, token: string): boolean {
 
 /* -------------------------------------------------------------- recovery */
 
+/** How far back a lost-link search may look, and how wide one window may be. */
+const RECOVERY_MAX_AGE_MS = 365 * 86_400_000;
+const RECOVERY_MAX_WINDOW_MS = 92 * 86_400_000;
+/**
+ * The most candidates one search will check. The bound exists so that neither
+ * the cost of a search nor the time it takes can be chosen by the requester:
+ * before it, a window of "1970 to 2100" tested a guessed word against every
+ * submission ever made.
+ */
+const RECOVERY_MAX_CANDIDATES = 48;
+
+function clampTime(value: string | undefined, fallback: number, now: number): number {
+  if (value === undefined) return fallback;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? fallback : Math.min(parsed, now);
+}
+
 /**
  * Lost-link recovery.
  *
@@ -195,41 +214,52 @@ export function deleteByToken(db: Database, token: string): boolean {
  * identical response either way — this function deliberately gives the caller
  * nothing it could accidentally use to vary its wording.
  *
- * Candidates are narrowed by the date window first, so a secret word is only
- * ever checked against a small bounded set rather than every row in the table.
- * There is no global "does this secret word exist" lookup, because a salted
- * hash cannot support one and building one would mean storing something weaker.
+ * Candidates are narrowed by the date window first (at most three months
+ * wide and a year back, whatever was asked), newest first, and capped. Every
+ * candidate is then checked, in parallel, with no early return, so the time
+ * taken does not say where in the list the match was. There is no global
+ * "does this secret word exist" lookup, because a salted hash cannot support
+ * one and building one would mean storing something weaker.
  */
 export async function recoverToken(
   db: Database,
   secretWord: string,
-  window: { from: string; to: string },
+  window: { from?: string; to?: string },
   email: string | null,
 ): Promise<string | null> {
+  const now = Date.now();
+  const to = clampTime(window.to, now, now);
+  const from = Math.max(
+    clampTime(window.from, to - RECOVERY_MAX_WINDOW_MS, now),
+    to - RECOVERY_MAX_WINDOW_MS,
+    now - RECOVERY_MAX_AGE_MS,
+  );
+
   const rows = (
     email === null
       ? db
           .prepare(
             `SELECT token, secret_word_hash, secret_word_salt FROM submissions
-              WHERE created_at >= ? AND created_at <= ? AND status <> 'deleted'`,
+              WHERE created_at >= ? AND created_at <= ? AND status <> 'deleted'
+              ORDER BY created_at DESC LIMIT ?`,
           )
-          .all(window.from, window.to)
+          .all(new Date(from).toISOString(), new Date(to).toISOString(), RECOVERY_MAX_CANDIDATES)
       : db
           .prepare(
             `SELECT token, secret_word_hash, secret_word_salt FROM submissions
-              WHERE email = ? AND status <> 'deleted'`,
+              WHERE email = ? AND status <> 'deleted'
+              ORDER BY created_at DESC LIMIT ?`,
           )
-          .all(email)
+          .all(email, RECOVERY_MAX_CANDIDATES)
   ) as { token: string; secret_word_hash: string; secret_word_salt: string }[];
 
-  for (const row of rows) {
-    const matched = await verifySecret(secretWord, {
-      hash: row.secret_word_hash,
-      salt: row.secret_word_salt,
-    });
-    if (matched) return row.token;
-  }
-  return null;
+  const matches = await Promise.all(
+    rows.map((row) =>
+      verifySecret(secretWord, { hash: row.secret_word_hash, salt: row.secret_word_salt }),
+    ),
+  );
+  const index = matches.indexOf(true);
+  return index === -1 ? null : (rows[index]?.token ?? null);
 }
 
 /* ----------------------------------------------------------------- admin */
@@ -247,7 +277,10 @@ export function listForAdmin(db: Database, limit = 200): AdminRow[] {
   return db
     .prepare(
       `SELECT id, body, visibility, status, public_state,
-              safety_flagged, safety_category, amount_minor_units, currency,
+              safety_flagged, safety_category,
+              CASE WHEN safety_rules IS NOT NULL AND safety_rules <> '[]' THEN 1 ELSE 0 END
+                AS safety_noticed,
+              amount_minor_units, currency,
               category, created_at, answered_at, answer,
               follow_up_body, follow_up_reply
          FROM submissions

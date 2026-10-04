@@ -12,7 +12,7 @@ import { visitorApi } from '../lib/api/client';
 import { asSafetyCategory } from '../lib/safety/screen';
 import { checkSecretWord } from '../lib/submissions/secretWord';
 import { mockPaymentProvider } from '../lib/payments/MockPaymentProvider';
-import { type Visibility } from '../lib/submissions/types';
+import { MAX_BODY_CHARS, type Visibility } from '../lib/submissions/types';
 import {
   checkAmount,
   formatMinorUnits,
@@ -74,6 +74,12 @@ export function Ask() {
     setError(null);
     if (text.trim().length < 20) {
       setError('A little more to go on would help. Even a few sentences.');
+      return;
+    }
+    if (text.length > MAX_BODY_CHARS) {
+      setError(
+        `That is longer than can be read in one sitting. Please keep it under ${MAX_BODY_CHARS.toLocaleString('en')} characters.`,
+      );
       return;
     }
 
@@ -480,6 +486,7 @@ function Confirmation({
             <code className="secret-shown">{secretWord}</code>
             <p className="field-help">
               Shown once, here. If you lose the link, this is how you prove the submission is yours.
+              If you ever write again, choose a different word.
             </p>
           </div>
 

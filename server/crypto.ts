@@ -29,7 +29,7 @@ const scryptAsync = promisify(scrypt) as (
  */
 
 /**
- * ~64 MB of memory per hash. Deliberately expensive: the thing being protected
+ * ~16 MiB of memory per hash (128 × N × r bytes). Deliberately expensive: the thing being protected
  * is a short, human-chosen word, which is exactly what an offline attacker is
  * good at guessing quickly.
  */

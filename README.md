@@ -160,8 +160,31 @@ If it is lost, run the command again to set a new one.
 ### Backing up
 
 Everything, every submission, reply and payment record, lives in one file:
-`data/advice.db`. To back up, stop the server, then copy that file somewhere
-safe. That file is deliberately kept out of GitHub.
+`data/advice.db`. To back up, run:
+
+```bash
+npm run backup
+```
+
+It writes a complete copy into a `backups` folder and is safe to run while
+the server is running. Copy that file somewhere safe. Do not copy
+`data/advice.db` by hand while the server runs: the newest writes sit in a
+side file until the server stops, and the copy can come out empty. Neither
+the database nor the backups are ever uploaded to GitHub.
+
+### If it is ever put online
+
+Whoever sets up the server should know three things. All of them are in
+`.env.example` with explanations.
+
+- Set `NODE_ENV=production`. It turns on the secure cookie and the strict
+  transport headers.
+- Set `TRUST_PROXY=loopback` when the site sits behind a reverse proxy or a
+  tunnel, which it will. Otherwise every visitor shares one sign-in limit,
+  and eight wrong guesses by a stranger lock Farida out for fifteen minutes.
+- Tell the proxy not to log the addresses under `/a/` and `/api/a/`. A
+  visitor's private link is in that address, and logs are not where it
+  belongs.
 
 ---
 
@@ -184,12 +207,13 @@ safe. That file is deliberately kept out of GitHub.
 | --- | --- |
 | `npm run dev` | the website, on port 5173 |
 | `npm run server` | the API and database, on port 8787 |
-| `npm test` | all 133 tests |
+| `npm test` | all 160 tests |
 | `npm run typecheck` | checks the code for type mistakes |
 | `npm run lint` | checks code style |
 | `npm run build` | builds for release. **Refuses while anything unsafe is unfinished.** |
 | `npm run preflight` | just that safety check, without building |
 | `npm run admin:hash` | set the admin password |
+| `npm run backup` | make a complete copy of the database, even while the server runs |
 | `npm run art:check` | inspect artwork files before they are used |
 | `npm run art:recover` | recover pixel art from a clean enlargement |
 | `npm run art:recover-jpeg` | recover pixel art from an enlargement that was saved as a JPEG |

@@ -90,15 +90,6 @@
   color: var(--muted);
 }
 
-.safety-todo {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 1.6;
-  color: var(--faint);
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-}
 
 .safety-reassure {
   color: var(--muted);

@@ -651,3 +651,96 @@ describe('housekeeping', () => {
     });
   });
 });
+
+/* ------------------------------------------------- limits on public routes */
+
+describe('limits on the public routes', () => {
+  it('refuses a problem longer than anyone can read in one sitting', async () => {
+    const response = await submit({ body: 'x'.repeat(10_001) });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ reason: 'too-long' });
+    expect(countRows()).toBe(0);
+  });
+
+  it('slows down a flood of submissions from one address', async () => {
+    for (let i = 0; i < 10; i += 1) {
+      expect((await submit()).statusCode).toBe(200);
+    }
+    const eleventh = await submit();
+    expect(eleventh.statusCode).toBe(429);
+    expect(countRows()).toBe(10);
+  });
+
+  it('answers a repeated category parameter without crashing', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/archive?category=family&category=money',
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ problems: [] });
+  });
+
+  it('refuses follow-up and deletion for a token that is not even the right shape', async () => {
+    const followUp = await app.inject({
+      method: 'POST',
+      url: '/api/a/..%2F..%2Fetc/follow-up',
+      payload: { body: 'Hello?' },
+    });
+    expect(followUp.statusCode).toBe(404);
+    const deletion = await app.inject({ method: 'DELETE', url: '/api/a/short' });
+    expect(deletion.json()).toEqual({ ok: false });
+  });
+
+  it('treats a blank email as none, keeps a real one in one spelling, refuses nonsense', async () => {
+    await submit({ email: '  Someone@Example.com ' });
+    await submit({ email: '   ' });
+    const rows = db.prepare('SELECT email FROM submissions ORDER BY rowid').all() as {
+      email: string | null;
+    }[];
+    expect(rows.map((row) => row.email)).toEqual(['someone@example.com', null]);
+    expect((await submit({ email: 'not-an-address' })).statusCode).toBe(400);
+  });
+});
+
+/* ------------------------------------------------------ recovery is bounded */
+
+describe('recovery is bounded', () => {
+  const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+  const recover = (payload: Record<string, unknown>) =>
+    app.inject({ method: 'POST', url: '/api/recover', payload });
+
+  it('searches the last three months unless a month is given, never more than a year back', async () => {
+    const token = (await submit()).json().token as string;
+    db.prepare('UPDATE submissions SET created_at = ?').run(daysAgo(200));
+
+    expect((await recover({ secretWord: 'lighthouse' })).json()).toEqual({ ok: true, link: null });
+    const everything = {
+      secretWord: 'lighthouse',
+      from: '1970-01-01T00:00:00.000Z',
+      to: '2100-01-01T00:00:00.000Z',
+    };
+    expect((await recover(everything)).json()).toEqual({ ok: true, link: null });
+    const around = { secretWord: 'lighthouse', from: daysAgo(230), to: daysAgo(170) };
+    expect((await recover(around)).json()).toEqual({ ok: true, link: `/a/${token}` });
+  });
+
+  it('finds a submission by email however the address was typed', async () => {
+    const token = (await submit({ email: 'Someone@Example.com' })).json().token as string;
+    const found = await recover({ secretWord: 'lighthouse', email: '  someone@example.COM ' });
+    expect(found.json()).toEqual({ ok: true, link: `/a/${token}` });
+  });
+
+  it('takes the same time whether the window is empty or busy', async () => {
+    for (let i = 0; i < 8; i += 1) await submit({ secretWord: `word-${i}` });
+    const time = async (payload: Record<string, unknown>) => {
+      const started = Date.now();
+      await recover(payload);
+      return Date.now() - started;
+    };
+    const busy = await time({ secretWord: 'not-any-of-them' });
+    const empty = await time({ secretWord: 'not-any-of-them', from: daysAgo(300), to: daysAgo(290) });
+    expect(busy).toBeGreaterThanOrEqual(1190);
+    expect(empty).toBeGreaterThanOrEqual(1190);
+    expect(Math.abs(busy - empty)).toBeLessThan(300);
+  });
+});

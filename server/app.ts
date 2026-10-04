@@ -5,6 +5,7 @@ import { screen } from '../src/lib/safety/screen';
 import { looksLikeToken } from './crypto';
 import { isKnownCategory } from '../src/lib/archive/categories';
 import { MAXIMUM_MINOR_UNITS, MINIMUM_MINOR_UNITS } from '../src/lib/money';
+import { MAX_BODY_CHARS, MAX_FOLLOW_UP_CHARS } from '../src/lib/submissions/types';
 import {
   isValidSession,
   login,
@@ -94,8 +95,25 @@ export function buildApp(db: Database = openDatabase()) {
   const app = Fastify({
     logger: false,
     trustProxy: trustProxySetting(process.env.TRUST_PROXY),
+    // The longest legitimate request is a 10,000-character problem. Anything
+    // near a megabyte is not a person writing.
+    bodyLimit: 64 * 1024,
   });
   void app.register(cookie);
+
+  /**
+   * One shape for every error. Fastify's default handler would echo the
+   * internal message of an unexpected crash to the visitor and log nothing.
+   * This logs anything that is the server's fault and answers plainly.
+   */
+  app.setErrorHandler((error: Error & { statusCode?: number }, _request, reply) => {
+    const status =
+      error.statusCode !== undefined && error.statusCode >= 400 && error.statusCode < 600
+        ? error.statusCode
+        : 500;
+    if (status >= 500) console.error(error);
+    void reply.code(status).send({ ok: false });
+  });
 
   const adminConfig = readAdminConfig(process.env);
 
@@ -163,9 +181,11 @@ export function buildApp(db: Database = openDatabase()) {
   /* ------------------------------------------------------------- public */
 
   app.get('/api/archive', async (request) => {
-    const query = request.query as { category?: string; sort?: string };
+    const query = request.query as { category?: unknown; sort?: unknown };
     const sort = query.sort === 'oldest' ? 'oldest' : 'newest';
-    return { problems: listPublic(db, { category: query.category, sort }) };
+    // A repeated parameter arrives as an array; only a single name is a filter.
+    const category = typeof query.category === 'string' ? query.category : undefined;
+    return { problems: listPublic(db, { category, sort }) };
   });
 
   app.get('/api/problem/:id', async (request, reply) => {
@@ -177,7 +197,10 @@ export function buildApp(db: Database = openDatabase()) {
 
   /* --------------------------------------------------------- screening */
 
-  app.post('/api/screen', async (request) => {
+  app.post('/api/screen', async (request, reply) => {
+    if (!rateLimit(db, 'screen', clientKey(request))) {
+      return reply.code(429).send({ ok: false, reason: 'rate-limited' });
+    }
     const { body } = (request.body ?? {}) as { body?: unknown };
     // Returned so the client can show the interstitial immediately. The
     // verdict is recomputed on submit regardless.
@@ -187,6 +210,9 @@ export function buildApp(db: Database = openDatabase()) {
   /* -------------------------------------------------------- submission */
 
   app.post('/api/submissions', async (request, reply) => {
+    if (!rateLimit(db, 'submit', clientKey(request))) {
+      return reply.code(429).send({ ok: false, reason: 'rate-limited' });
+    }
     const input = (request.body ?? {}) as {
       body?: unknown;
       secretWord?: unknown;
@@ -200,11 +226,22 @@ export function buildApp(db: Database = openDatabase()) {
     if (body.length < 20) {
       return reply.code(400).send({ ok: false, reason: 'too-short' });
     }
+    if (body.length > MAX_BODY_CHARS) {
+      return reply.code(400).send({ ok: false, reason: 'too-long' });
+    }
     const secretWord = typeof input.secretWord === 'string' ? input.secretWord : '';
     if (secretWord.trim().length < 4) {
       return reply.code(400).send({ ok: false, reason: 'secret-word' });
     }
-    const email = typeof input.email === 'string' ? input.email : null;
+    // An email is optional. A blank one is none; a given one is kept in one
+    // spelling (trimmed, lower-cased) so that recovery by email matches
+    // however it is typed later. Only the loosest sanity check: this is not
+    // the place to argue with someone about what an address looks like.
+    const emailGiven = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
+    if (emailGiven !== '' && (!emailGiven.includes('@') || emailGiven.length > 254)) {
+      return reply.code(400).send({ ok: false, reason: 'email' });
+    }
+    const email = emailGiven === '' ? null : emailGiven;
     const transactionId = typeof input.transactionId === 'string' ? input.transactionId : null;
 
     // Screened on the server. The client's opinion is not consulted.
@@ -312,14 +349,19 @@ export function buildApp(db: Database = openDatabase()) {
 
   app.post('/api/a/:token/follow-up', async (request, reply) => {
     const { token } = request.params as { token: string };
+    if (!looksLikeToken(token)) return reply.code(404).send({ ok: false });
     const { body } = (request.body ?? {}) as { body?: unknown };
     const text = visibleText(body);
     if (text === '') return reply.code(400).send({ ok: false });
+    if (text.length > MAX_FOLLOW_UP_CHARS) {
+      return reply.code(400).send({ ok: false, reason: 'too-long' });
+    }
     return { ok: addFollowUp(db, token, text) };
   });
 
   app.delete('/api/a/:token', async (request) => {
     const { token } = request.params as { token: string };
+    if (!looksLikeToken(token)) return { ok: false };
     return { ok: deleteByToken(db, token) };
   });
 
@@ -336,7 +378,14 @@ export function buildApp(db: Database = openDatabase()) {
    * On a genuine match the link is emailed, never returned in the response.
    * Rate limited per IP.
    */
-  const MIN_RECOVERY_MS = 700;
+  /*
+   * Every recovery answer leaves after the same delay. The search itself is
+   * bounded (at most 48 candidates, all checked, in parallel; see
+   * recoverToken), and this floor sits comfortably above that bound, so the
+   * time taken says nothing about how many submissions matched the window or
+   * where in the list the match was.
+   */
+  const MIN_RECOVERY_MS = 1200;
 
   app.post('/api/recover', async (request, reply) => {
     const started = Date.now();
@@ -366,9 +415,10 @@ export function buildApp(db: Database = openDatabase()) {
       from?: unknown;
       to?: unknown;
     };
+    const emailGiven = typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
     const input = {
       secretWord: typeof raw.secretWord === 'string' ? raw.secretWord : '',
-      email: typeof raw.email === 'string' ? raw.email : null,
+      email: emailGiven === '' ? null : emailGiven,
       from: typeof raw.from === 'string' ? raw.from : undefined,
       to: typeof raw.to === 'string' ? raw.to : undefined,
     };
@@ -383,10 +433,9 @@ export function buildApp(db: Database = openDatabase()) {
     const secretWord = input.secretWord.trim();
     if (secretWord === '') return settle(nothing);
 
-    const from = input.from ?? new Date(Date.now() - 365 * 86_400_000).toISOString();
-    const to = input.to ?? new Date().toISOString();
-
-    const token = await recoverToken(db, secretWord, { from, to }, input.email);
+    // The window is clamped inside recoverToken: at most three months wide,
+    // never more than a year back, whatever the request asked for.
+    const token = await recoverToken(db, secretWord, { from: input.from, to: input.to }, input.email);
     if (token === null) return settle(nothing);
 
     /**
