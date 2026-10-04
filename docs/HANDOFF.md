@@ -171,6 +171,15 @@ production build while the crisis numbers are placeholders or copy contains
 `*_PLACEHOLDER`. Override for local testing only:
 `ALLOW_PLACEHOLDER_CONTENT=1 npm run build`.
 
+**The home page draws its sprites with `<img>`, not `SpriteCanvas`.** The
+standing bunny, her portrait and the forest are plain images with
+`image-rendering: pixelated`, sized by a CSS variable `--px` that is always a
+whole number (3 on wide screens, 2 below 1100px). `ForestScene.tsx` computes
+the smallest whole-number scale that covers the viewport. The animations are
+CSS keyframes stepped with `steps(1)`, so a sprite never lands between pixels;
+they all stop under `prefers-reduced-motion`. Everything else on the site
+still goes through `SpriteCanvas` and the shared loop.
+
 **Sprites and pixel art.** Art is scaled by **whole numbers only**, never 1.5.
 `SpriteCanvas` draws with `imageSmoothingEnabled = false` at integer scale.
 There is one shared `requestAnimationFrame` loop for the entire page — do not
@@ -204,7 +213,8 @@ src/
     payments/   mock provider
   pixel/        sprite engine — assets.ts is the manifest, assets/ holds art
   pages/        one file per route
-  components/   layout, WritingPad, SafetyInterstitial, EnvelopeCeremony
+  components/   layout, WritingPad, SafetyInterstitial, EnvelopeCeremony,
+                ForestScene and Bunny (the home page's scene and character)
 server/
   db.ts         schema + the public_submissions view (the publication rule)
   app.ts        every route
@@ -217,6 +227,8 @@ scripts/
   preflight.ts  the pre-build safety gate
   check-art.ts  artwork inspector
   downscale-art.py  lossless pixel-art recovery
+  recover-from-jpeg.py  next-best recovery when the enlargement was a JPEG
+  make-blink-frames.py  closed-eye frames for the bunny's blink
 data/advice.db  the database — this is the thing to back up (not in Git)
 docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 .github/        the checks GitHub runs on every pull request
@@ -237,10 +249,9 @@ docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 
 ### Waiting on others
 
-4. **The forest background scene** — her artist is making it. When it arrives:
-   drop the PNG in `src/pixel/assets/`, run `npm run art:check`, set `src` and
-   the true dimensions on `ASSETS.background_day`. `AmbientWorld.tsx` then
-   becomes the full-bleed background instead of a bounded stage.
+4. ~~The forest background scene~~ **Delivered 2026-10-04.** It is
+   `src/pixel/assets/forest_day.png` (480x279, recovered from a 2x JPEG) and
+   `ForestScene.tsx` draws it full-bleed behind the home page.
 5. **Epoint / Payriff API documentation.** `server/providers/*.ts` throw
    deliberately rather than guessing. The callback signature scheme is the
    security-critical part — the callback route returns 501 rather than
@@ -251,9 +262,11 @@ docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 6. **Email is written but not wired.** `server/email.ts` exists with a
    `ConsoleMailer` (logs) and `SmtpMailer`. It still needs connecting to two
    places: notify on answer, and deliver a recovered link to an inbox.
-7. **Animation frames.** Both characters have one frame each. The manifest
-   declares the intended counts and the inspector honestly says "1 of 4 frames
-   delivered".
+7. **Animation frames.** The frog has one frame. The bunny has her open
+   frame plus a closed-eye frame drawn from it by `npm run art:blink`; the
+   home page animates her with CSS (bob, blink, lantern sparkle). The
+   envelope ceremony still runs on a DRAFT placeholder. The manifest declares
+   the intended counts and the inspector honestly says how many have arrived.
 
 ---
 

@@ -20,7 +20,9 @@
     "backup": "tsx scripts/backup.ts",
     "preflight": "tsx scripts/preflight.ts",
     "art:check": "tsx scripts/check-art.ts",
-    "art:recover": "python3 scripts/downscale-art.py"
+    "art:recover": "python3 scripts/downscale-art.py",
+    "art:recover-jpeg": "python3 scripts/recover-from-jpeg.py",
+    "art:blink": "python3 scripts/make-blink-frames.py"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

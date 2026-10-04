@@ -10,9 +10,16 @@ import { COPY_IS_PLACEHOLDER } from '../../content/placeholder';
  * a banner saying so. It is loud on purpose: placeholder words have a way of
  * quietly becoming shipped words.
  */
-export function PageShell({ children }: { children: ReactNode }) {
+export function PageShell({
+  children,
+  backdrop = 'paper',
+}: {
+  children: ReactNode;
+  /** `forest` lets a fixed scene show through; the home page uses it. */
+  backdrop?: 'paper' | 'forest';
+}) {
   return (
-    <div className="shell">
+    <div className={backdrop === 'forest' ? 'shell shell-forest' : 'shell'}>
       {import.meta.env.DEV && COPY_IS_PLACEHOLDER && (
         <div className="copy-banner">
           Placeholder copy — written to be replaced, not shipped. See src/content/placeholder.ts

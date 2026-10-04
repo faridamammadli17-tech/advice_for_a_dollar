@@ -1516,3 +1516,49 @@ tests, typecheck, lint and the override build on every pull request.
 describes 137 tests in 5 files, a sixteen-frame frog writing animation and a
 `scripts/make-typing-frames.py`. None of that is in this repository. If that
 work exists on the Desktop, it still needs to be brought in.
+
+---
+
+## The forest, the bunny, and the home page redesign (2026-10-04, later)
+
+Three pieces of art arrived: the forest scene, the standing bunny with her
+lantern staff, and a close-up portrait of her. Farida's brief for the home
+page: the forest as the whole background, the writing box in the middle, the
+bunny at its bottom-right corner close enough to be listening, the portrait
+centred beneath, and everything gently alive rather than static.
+
+**Getting the art intact.** The portrait was a lossless 15x PNG with
+transparency and went straight through `downscale-art.py`. The other two were
+JPEGs, which that tool rightly refuses. The scene was a 2x enlargement of
+480x279 and the bunny a 15x enlargement of 128x128; for both, the most common
+colour of each block is the original pixel, which is what the new
+`recover-from-jpeg.py` samples. The bunny's white background was lifted by
+flood fill from the edges, so her white eye highlights survived. A first
+attempt tidied her palette down to 28 colours and lost the pink boots and the
+lantern's purple; the lesson is in the tool's help text: tidy a scene, never a
+character. The originals sit in `src/pixel/assets/originals/`.
+
+**Composition.** One card holds the headline and the writing box, on a
+translucent cream so it reads on the green. The bunny overlaps the card's
+bottom-right corner on wide screens and steps under it, still touching, below
+1100px, so nothing hangs off a tablet. The frog typist is hidden on this one
+box: the bunny is the character here, and his 128px row pushed the box below
+the fold on a laptop. He still types along on /ask. The trust section moved
+up to sit directly under the hero with the portrait centred at its top, since
+"who is reading this" is the natural next question after the box. The scene
+is drawn at the smallest whole-number scale that covers the viewport,
+anchored to the ground, and on wide screens anchored left so its own mushroom
+bunny and frog stay in view.
+
+**Motion.** A one-pixel breathing bob stepped with `steps(1)` so the sprite
+never smears; a closed-eye frame layered on top for a moment every few
+seconds; three sparkles and a soft glow at the lantern; eight fireflies and a
+slow patch of sunlight on the meadow; and the card lifts with a plum shadow
+when someone starts writing. All of it stops under `prefers-reduced-motion`.
+The closed-eye frames are drawn from the open ones by `make-blink-frames.py`,
+which records the exact eye colours, so the artist's next version is a preset
+change, not a repaint.
+
+**Checked in a real browser** at 1440, 1280, 1024, 768 and 390 pixels wide:
+no horizontal overflow, the bob measured at exactly one art pixel, the blink
+layer toggling, and the card and bunny above the fold on a laptop.

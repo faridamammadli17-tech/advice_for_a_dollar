@@ -199,9 +199,11 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
   bunny: {
     id: 'bunny',
     label: 'Bunny — the one writing back',
-    // Reconstructed from a 3968x3968 JPEG that was a 31x upscale of 128x128.
-    // NOT lossless like the frog — see NOTES.md. Close, but a real PNG export
-    // would still be better.
+    // The standing bunny with the lantern staff, delivered 2026-10-04 as a
+    // 1920x1920 JPEG that was a clean 15x upscale of 128x128. Recovered by
+    // taking the most common colour of each 15x15 block (which also shrugs
+    // off the JPEG noise) and lifting the white background to transparent.
+    // The earlier sitting bunny is kept in originals/.
     width: 128,
     height: 128,
     group: 'character',
@@ -217,7 +219,29 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
         description: 'Closed-eye overlay, fired randomly every 3–6 seconds.',
       },
     ],
-    note: 'Her shape will change later — do not over-invest in fine detail yet.',
+    note: 'The home page animates this one with CSS (bob, blink, lantern sparkle); see src/components/Bunny.tsx.',
+  },
+
+  bunny_portrait: {
+    id: 'bunny_portrait',
+    label: 'Bunny — portrait',
+    // Close-up of the same character, delivered 2026-10-04 as a lossless 15x
+    // PNG with transparency. Used on the home page, centred under the hero.
+    width: 128,
+    height: 128,
+    group: 'character',
+    src: 'bunny_portrait_01.png',
+    defaultAnimation: 'idle',
+    animations: [
+      idle(1, 'Still portrait.'),
+      {
+        id: 'blink',
+        frames: 2,
+        fps: 8,
+        loop: false,
+        description: 'Closed-eye frame, shown for a moment every few seconds.',
+      },
+    ],
   },
 
   frog: {
@@ -415,13 +439,17 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
   background_day: {
     id: 'background_day',
     label: 'Background — day',
+    // The forest scene, delivered 2026-10-04 as a 960x558 JPEG that was a 2x
+    // upscale of 480x279. Recovered per 2x2 block and tidied to 40 colours.
+    // Drawn full-bleed behind the home page at a whole-number scale that
+    // covers the viewport, anchored to the ground; see ForestScene.tsx.
     width: 480,
-    height: 270,
+    height: 279,
     group: 'scene',
-    src: null,
+    src: 'forest_day.png',
     defaultAnimation: 'idle',
     animations: [idle(1, 'Full-bleed scene.')],
-    note: 'Essential composition must sit inside the centre 192x270 safe zone.',
+    note: 'The bunny and frog on the mushroom sit at the left edge, so wide screens show them and phones show the meadow.',
   },
 
   background_night: {
