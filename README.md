@@ -1,1 +1,1 @@
-# advice_for_a_dollar
+The very first version of the repo: Advice for a Dollar!
