@@ -28,7 +28,7 @@ like a SaaS product, or like AI.
 
 ## State: working end to end
 
-All five planned phases are built. **129 tests pass**; typecheck, lint and
+All five planned phases are built. **133 tests pass**; typecheck, lint and
 build are clean.
 
 | | |
@@ -36,7 +36,7 @@ build are clean.
 | Front end | React + TypeScript + Vite |
 | Server | Fastify |
 | Database | SQLite via Node's built-in `node:sqlite` |
-| Tests | 129 across 4 files, including 27 full-stack HTTP tests |
+| Tests | 133 across 4 files, including 31 full-stack HTTP tests |
 
 A visitor can: write, be safety-screened, choose a secret word, choose private
 or public, pay (mock provider), watch the envelope ceremony, get a magic link,
@@ -55,7 +55,7 @@ npm run dev      # website, port 5173
 ```
 
 Then http://localhost:5173. Admin at `/admin`. Full operating instructions are
-in `README.md`.
+in the README at the root of the repository.
 
 ---
 
@@ -146,6 +146,11 @@ two factors verify (secret word + date window, or secret word + email).
 
 ## Things that will waste your time if you do not know them
 
+**Settings come from `.env`, and the server loads it itself.** `server/index.ts`
+reads `.env` at start with Node's built-in `process.loadEnvFile`, before anything
+looks at `process.env`. Until 2026-10-04 nothing loaded it, so the README's
+admin-password instructions could not work. Do not remove that line.
+
 **`node:sqlite` and Vite.** Vite's resolver strips the `node:` prefix and then
 fails looking for a package called "sqlite". `server/db.ts` loads it through
 `createRequire` to dodge static analysis. Do not "fix" this back to a plain
@@ -212,7 +217,9 @@ scripts/
   preflight.ts  the pre-build safety gate
   check-art.ts  artwork inspector
   downscale-art.py  lossless pixel-art recovery
-data/advice.db  the database — this is the thing to back up
+data/advice.db  the database — this is the thing to back up (not in Git)
+docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
+.github/        the checks GitHub runs on every pull request
 ```
 
 ---

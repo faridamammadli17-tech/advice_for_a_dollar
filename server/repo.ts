@@ -29,7 +29,6 @@ export type PublicProblem = {
 
 export type AdminRow = {
   id: string;
-  token: string;
   body: string;
   email: string | null;
   visibility: Visibility;
@@ -232,9 +231,25 @@ export async function recoverToken(
 
 /* ----------------------------------------------------------------- admin */
 
+/**
+ * The admin listing.
+ *
+ * Named columns, never SELECT *. The visitor's magic-link token, the
+ * secret-word hash and salt, and the screening details have no use on the
+ * dashboard, so they are not sent to the browser at all. What the browser
+ * never receives cannot leak from it.
+ */
 export function listForAdmin(db: Database, limit = 200): AdminRow[] {
   return db
-    .prepare('SELECT * FROM submissions ORDER BY created_at DESC LIMIT ?')
+    .prepare(
+      `SELECT id, body, email, visibility, status, public_state,
+              safety_flagged, safety_category, amount_minor_units, currency,
+              category, created_at, answered_at, answer,
+              follow_up_body, follow_up_reply
+         FROM submissions
+        ORDER BY created_at DESC
+        LIMIT ?`,
+    )
     .all(limit) as AdminRow[];
 }
 

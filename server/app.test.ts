@@ -363,3 +363,101 @@ describe('security headers', () => {
     expect(String(response.headers['content-security-policy'])).toContain("frame-ancestors 'none'");
   });
 });
+
+/* ------------------------------------------------------------ input hygiene */
+
+describe('input hygiene', () => {
+  async function adminList(cookie: string) {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/admin/submissions',
+      cookies: { afad_admin: cookie },
+    });
+    return response.json().submissions as Record<string, unknown>[];
+  }
+
+  it('never sends the token, the hash or the salt to the dashboard', async () => {
+    await submit();
+    const [row] = await adminList(await signIn());
+
+    expect(row).toBeDefined();
+    expect(row?.body).toBe(ORDINARY);
+    for (const secret of ['token', 'secret_word_hash', 'secret_word_salt', 'safety_rules']) {
+      expect(row).not.toHaveProperty(secret);
+    }
+  });
+
+  it('refuses a reply made only of invisible characters', async () => {
+    await submit();
+    const cookie = await signIn();
+    const [row] = await adminList(cookie);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/api/admin/${String(row?.id)}/answer`,
+      cookies: { afad_admin: cookie },
+      payload: { answer: '​‍ ﻿⁠' },
+    });
+    expect(response.statusCode).toBe(400);
+
+    const stored = db
+      .prepare('SELECT status, answer FROM submissions WHERE id = ?')
+      .get(String(row?.id)) as { status: string; answer: string | null };
+    expect(stored).toEqual({ status: 'pending', answer: null });
+  });
+
+  it('refuses a follow-up made only of invisible characters', async () => {
+    const token = (await submit()).json().token as string;
+    const cookie = await signIn();
+    const [row] = await adminList(cookie);
+    await app.inject({
+      method: 'POST',
+      url: `/api/admin/${String(row?.id)}/answer`,
+      cookies: { afad_admin: cookie },
+      payload: { answer: 'A real reply.' },
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/api/a/${token}/follow-up`,
+      payload: { body: '​​' },
+    });
+    expect(response.statusCode).toBe(400);
+    // The one allowed follow-up is still available afterwards.
+    const real = await app.inject({
+      method: 'POST',
+      url: `/api/a/${token}/follow-up`,
+      payload: { body: 'One more thing.' },
+    });
+    expect(real.json()).toEqual({ ok: true });
+  });
+
+  it('answers a malformed payload with a refusal, never a crash', async () => {
+    const screen = await app.inject({
+      method: 'POST',
+      url: '/api/screen',
+      payload: { body: ['not', 'text'] },
+    });
+    expect(screen.statusCode).toBe(200);
+    expect(screen.json()).toMatchObject({ flagged: false });
+
+    expect((await submit({ secretWord: 12345 })).statusCode).toBe(400);
+    expect((await submit({ body: 12345 })).statusCode).toBe(400);
+    expect((await submit({ body: { text: ORDINARY } })).statusCode).toBe(400);
+
+    const login = await app.inject({
+      method: 'POST',
+      url: '/api/admin/login',
+      payload: { password: { $ne: '' } },
+    });
+    expect(login.statusCode).toBe(401);
+
+    const recover = await app.inject({
+      method: 'POST',
+      url: '/api/recover',
+      payload: { secretWord: 42, email: 7, from: [], to: {} },
+    });
+    expect(recover.statusCode).toBe(200);
+    expect(recover.json()).toEqual({ ok: true, link: null });
+  });
+});

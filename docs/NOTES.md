@@ -1459,3 +1459,60 @@ Two things it states plainly that are easy to miss:
   reply and payment record.
 - **The project is still not under version control.** No undo, and the folder
   has already moved once.
+
+---
+
+## Into Git, verified end to end, and the admin login fixed (2026-10-04)
+
+The project now lives on GitHub at `faridamammadli17-tech/advice_for_a_dollar`.
+The database `data/advice.db` is deliberately ignored by Git: it holds what
+people wrote and must never be uploaded. Back it up by stopping the server and
+copying the file.
+
+**Verified by running, not by reading.** On a fresh machine with Node 22: the
+tests, typecheck, lint, the blocked build, the override build, the artwork
+inspector, a real server start, and every page in a headless browser. All as
+the handoff claimed. The screenshots in `docs/screenshots/` come from the
+production bundle, driven through the whole visitor flow with a message that
+says plainly it is a test. No invented problem and no invented advice appear
+anywhere in them.
+
+**Admin login could not work by following the README.** The README said to
+paste the two lines from `npm run admin:hash` into `.env` and restart. Nothing
+loaded `.env`: no dotenv dependency, no `loadEnvFile`, no `--env-file` flag.
+Every login was refused, with no hint why. `server/index.ts` now reads `.env`
+at start with Node's built-in `process.loadEnvFile`, before anything looks at
+`process.env`; values already in the environment win, so a hosting service can
+set them without a file. Proved against the real server: wrong password 401,
+right password 200 with the session cookie, dashboard data only with that
+cookie. `.env.example` was also stale (it named argon2, `ADMIN_SESSION_SECRET`
+and `DATABASE_URL`, none of which the server reads, and omitted the salt it
+requires). Rewritten to match reality.
+
+**Three more things from the first audit pass, fixed with tests.**
+
+- The admin list used `SELECT *`, so every dashboard refresh sent the
+  secret-word hash and salt, the visitor's magic-link token and the screening
+  details to the browser. The dashboard never showed them, so rule 5 was
+  technically kept, but anything in the browser can leak from it. The query
+  now names its columns.
+- A reply made only of invisible characters (zero-width spaces, which phones
+  and rich-text editors paste without anyone noticing) was accepted, marked
+  the submission answered, and would have published a blank answer signed
+  "From: Farida". The routes now strip those characters before deciding
+  whether text is empty. While there, every public route treats a payload
+  that is not text (a number or a list where words were expected) as empty
+  rather than crashing.
+- The homepage example is guarded by its own switch. Flipping it off before
+  replacing the text would have shown "PLACEHOLDER" under "From: Farida", and
+  the pre-build check would not have noticed. It notices now.
+
+**Housekeeping.** The four long documents moved into `docs/`, so the front of
+the repository is the README and the code. A GitHub Actions workflow runs the
+tests, typecheck, lint and the override build on every pull request.
+`package.json` states the Node requirement (22.5 or newer, for `node:sqlite`).
+
+**The newer handoff.** A `HANDOFF.md` newer than this archive exists: it
+describes 137 tests in 5 files, a sixteen-frame frog writing animation and a
+`scripts/make-typing-frames.py`. None of that is in this repository. If that
+work exists on the Desktop, it still needs to be brought in.

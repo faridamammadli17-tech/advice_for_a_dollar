@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { buildApp } from './app';
 import { openDatabase } from './db';
 import { purgeExpiredEmails } from './repo';
@@ -12,6 +12,15 @@ import { purgeExpiredSessions } from './auth';
  * addresses past their six-month retention are purged. A retention policy
  * nobody executes is a claim on a privacy page, not a practice.
  */
+
+/*
+ * Settings live in a `.env` file in the project folder, when there is one.
+ * That is where the README tells the owner to paste the two admin-password
+ * lines, so it has to be read here, before anything below looks at
+ * process.env. Values already present in the environment win over the file,
+ * which is how a hosting service can set them without a file at all.
+ */
+if (existsSync('.env')) process.loadEnvFile('.env');
 
 const PORT = Number(process.env.PORT ?? 8787);
 const DB_PATH = process.env.DATABASE_PATH ?? 'data/advice.db';

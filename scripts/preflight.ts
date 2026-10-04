@@ -64,6 +64,22 @@ if (tokens.length > 0) {
   );
 }
 
+/* ---- HARD BLOCKER: the homepage example switched on while still a placeholder ---- */
+
+// The example slot is guarded by its own switch, `awaitingOwnerContent`. If
+// that is flipped to false before the text is replaced, the home page would
+// show "PLACEHOLDER — ..." under "From: Farida", and the token check above
+// would not notice because those strings carry no `_PLACEHOLDER` token.
+const exampleBlock = copy.match(/example:\s*\{[\s\S]*?satisfies ExampleProblem/)?.[0] ?? '';
+if (/awaitingOwnerContent:\s*false/.test(exampleBlock) && /PLACEHOLDER/.test(exampleBlock)) {
+  blockers.push(
+    'The homepage example is switched on but its text is still a placeholder.\n' +
+      '    Visitors would see "PLACEHOLDER" signed "From: Farida".\n' +
+      '    Fix: replace example.problem and example.advice in src/content/placeholder.ts\n' +
+      '    with the real exchange, or set awaitingOwnerContent back to true.',
+  );
+}
+
 /* ---- report ---- */
 
 for (const warning of warnings) {

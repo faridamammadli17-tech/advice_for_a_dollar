@@ -53,6 +53,19 @@ import {
 
 const MINIMUM_MINOR_UNITS = 100;
 
+/**
+ * Text as a person would see it.
+ *
+ * Anything that is not a string counts as empty, so a payload carrying a
+ * number or an array where words were expected is refused rather than
+ * crashing the route. Zero-width and other invisible format characters are
+ * removed before trimming: phones and rich-text editors can paste them
+ * without anyone noticing, and a reply made only of them would otherwise
+ * count as an answer and publish as a blank one.
+ */
+const visibleText = (value: unknown): string =>
+  (typeof value === 'string' ? value : '').replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim();
+
 export function buildApp(db: Database = openDatabase()) {
   const app = Fastify({ logger: false });
   void app.register(cookie);
@@ -132,31 +145,34 @@ export function buildApp(db: Database = openDatabase()) {
   /* --------------------------------------------------------- screening */
 
   app.post('/api/screen', async (request) => {
-    const { body } = request.body as { body?: string };
+    const { body } = (request.body ?? {}) as { body?: unknown };
     // Returned so the client can show the interstitial immediately. The
     // verdict is recomputed on submit regardless.
-    return screen(body ?? '');
+    return screen(visibleText(body));
   });
 
   /* -------------------------------------------------------- submission */
 
   app.post('/api/submissions', async (request, reply) => {
-    const input = request.body as {
-      body?: string;
-      secretWord?: string;
-      visibility?: 'public' | 'private';
-      amountMinorUnits?: number;
-      email?: string | null;
-      transactionId?: string | null;
+    const input = (request.body ?? {}) as {
+      body?: unknown;
+      secretWord?: unknown;
+      visibility?: unknown;
+      amountMinorUnits?: unknown;
+      email?: unknown;
+      transactionId?: unknown;
     };
 
-    const body = (input.body ?? '').trim();
+    const body = visibleText(input.body);
     if (body.length < 20) {
       return reply.code(400).send({ ok: false, reason: 'too-short' });
     }
-    if (!input.secretWord || input.secretWord.trim().length < 4) {
+    const secretWord = typeof input.secretWord === 'string' ? input.secretWord : '';
+    if (secretWord.trim().length < 4) {
       return reply.code(400).send({ ok: false, reason: 'secret-word' });
     }
+    const email = typeof input.email === 'string' ? input.email : null;
+    const transactionId = typeof input.transactionId === 'string' ? input.transactionId : null;
 
     // Screened on the server. The client's opinion is not consulted.
     const safety = screen(body);
@@ -173,9 +189,9 @@ export function buildApp(db: Database = openDatabase()) {
 
     // Record the attempt before creating anything, so a payment that is
     // claimed but never confirmed still leaves a trace.
-    if (input.transactionId) {
+    if (transactionId) {
       recordAttempt(db, {
-        transactionId: input.transactionId,
+        transactionId,
         provider: process.env.PAYMENT_PROVIDER ?? 'mock',
         amountMinorUnits: amount,
       });
@@ -183,11 +199,11 @@ export function buildApp(db: Database = openDatabase()) {
 
     const created = await createSubmission(db, {
       body,
-      secretWord: input.secretWord,
+      secretWord,
       visibility: input.visibility === 'public' ? 'public' : 'private',
       amountMinorUnits: amount,
-      email: input.email ?? null,
-      transactionId: input.transactionId ?? null,
+      email,
+      transactionId,
       safety: {
         flagged: false,
         category: safety.category,
@@ -195,11 +211,11 @@ export function buildApp(db: Database = openDatabase()) {
       },
     });
 
-    if (input.transactionId) {
+    if (transactionId) {
       // In Phase 5 the amount compared here comes from the PROVIDER'S verified
       // callback, not from this request. On the mock the two are the same
       // value, so the shape is already right and only the source changes.
-      const capture = confirmCapture(db, input.transactionId, amount, created.id);
+      const capture = confirmCapture(db, transactionId, amount, created.id);
       if (!capture.ok) {
         return reply.code(402).send({ ok: false, reason: capture.reason });
       }
@@ -246,9 +262,10 @@ export function buildApp(db: Database = openDatabase()) {
 
   app.post('/api/a/:token/follow-up', async (request, reply) => {
     const { token } = request.params as { token: string };
-    const { body } = request.body as { body?: string };
-    if (!body || body.trim() === '') return reply.code(400).send({ ok: false });
-    return { ok: addFollowUp(db, token, body) };
+    const { body } = (request.body ?? {}) as { body?: unknown };
+    const text = visibleText(body);
+    if (text === '') return reply.code(400).send({ ok: false });
+    return { ok: addFollowUp(db, token, text) };
   });
 
   app.delete('/api/a/:token', async (request) => {
@@ -293,11 +310,17 @@ export function buildApp(db: Database = openDatabase()) {
 
     const nothing = { ok: true, link: null };
 
-    const input = request.body as {
-      secretWord?: string;
-      email?: string | null;
-      from?: string;
-      to?: string;
+    const raw = (request.body ?? {}) as {
+      secretWord?: unknown;
+      email?: unknown;
+      from?: unknown;
+      to?: unknown;
+    };
+    const input = {
+      secretWord: typeof raw.secretWord === 'string' ? raw.secretWord : '',
+      email: typeof raw.email === 'string' ? raw.email : null,
+      from: typeof raw.from === 'string' ? raw.from : undefined,
+      to: typeof raw.to === 'string' ? raw.to : undefined,
     };
 
     // Rate limited per IP. The secret word is short and human-chosen, and the
@@ -307,13 +330,13 @@ export function buildApp(db: Database = openDatabase()) {
       return settle(nothing);
     }
 
-    const secretWord = (input.secretWord ?? '').trim();
+    const secretWord = input.secretWord.trim();
     if (secretWord === '') return settle(nothing);
 
     const from = input.from ?? new Date(Date.now() - 365 * 86_400_000).toISOString();
     const to = input.to ?? new Date().toISOString();
 
-    const token = await recoverToken(db, secretWord, { from, to }, input.email ?? null);
+    const token = await recoverToken(db, secretWord, { from, to }, input.email);
     if (token === null) return settle(nothing);
 
     /**
@@ -338,8 +361,8 @@ export function buildApp(db: Database = openDatabase()) {
 
   app.post('/api/admin/login', async (request, reply) => {
     if (adminConfig === null) return deny(reply);
-    const { password } = request.body as { password?: string };
-    if (!password) return deny(reply);
+    const { password } = (request.body ?? {}) as { password?: unknown };
+    if (typeof password !== 'string' || password === '') return deny(reply);
 
     const sessionId = await login(db, adminConfig, password, clientKey(request));
     if (sessionId === null) return deny(reply);
@@ -372,16 +395,16 @@ export function buildApp(db: Database = openDatabase()) {
   app.post('/api/admin/:id/answer', async (request, reply) => {
     if (!requireAdmin(request, reply)) return;
     const { id } = request.params as { id: string };
-    const { answer } = request.body as { answer?: string };
-    if (!answer || answer.trim() === '') return reply.code(400).send({ ok: false });
-    return { ok: answerSubmission(db, id, answer) };
+    const text = visibleText(((request.body ?? {}) as { answer?: unknown }).answer);
+    if (text === '') return reply.code(400).send({ ok: false });
+    return { ok: answerSubmission(db, id, text) };
   });
 
   app.post('/api/admin/:id/follow-up-reply', async (request, reply) => {
     if (!requireAdmin(request, reply)) return;
     const { id } = request.params as { id: string };
-    const { reply: text } = request.body as { reply?: string };
-    if (!text || text.trim() === '') return reply.code(400).send({ ok: false });
+    const text = visibleText(((request.body ?? {}) as { reply?: unknown }).reply);
+    if (text === '') return reply.code(400).send({ ok: false });
     return { ok: replyToFollowUp(db, id, text) };
   });
 

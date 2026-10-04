@@ -51,7 +51,6 @@ async function request<T>(
 
 export type AdminSubmission = {
   id: string;
-  token: string;
   body: string;
   email: string | null;
   visibility: 'public' | 'private';
