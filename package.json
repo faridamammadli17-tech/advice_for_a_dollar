@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "A one-person advice service: write a problem anonymously, pay one manat, and a real person writes back.",
   "engines": {
-    "node": ">=22.5"
+    "node": ">=22.16"
   },
   "type": "module",
   "scripts": {
@@ -17,6 +17,7 @@
     "server": "tsx server/index.ts",
     "server:dev": "tsx watch server/index.ts",
     "admin:hash": "tsx server/bin/hash-password.ts",
+    "backup": "tsx scripts/backup.ts",
     "preflight": "tsx scripts/preflight.ts",
     "art:check": "tsx scripts/check-art.ts",
     "art:recover": "python3 scripts/downscale-art.py"

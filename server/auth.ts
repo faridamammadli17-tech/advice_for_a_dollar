@@ -127,6 +127,21 @@ export function logout(db: Database, sessionId: string | undefined): void {
   db.prepare('DELETE FROM admin_sessions WHERE id = ?').run(sessionId);
 }
 
+/**
+ * Forget rate-limit counters whose window has passed.
+ *
+ * They hold network addresses, which have no business outliving the fifteen
+ * minutes they are needed for. Without this the table would keep a permanent
+ * list of who tried to recover a link, and when.
+ */
+export function purgeStaleRateLimits(db: Database): number {
+  const longestWindowMs = Math.max(...Object.values(RATE_LIMITS).map((limit) => limit.windowMs));
+  const { changes } = db
+    .prepare('DELETE FROM rate_limits WHERE window_start <= ?')
+    .run(new Date(Date.now() - longestWindowMs).toISOString());
+  return Number(changes);
+}
+
 export function purgeExpiredSessions(db: Database): number {
   // node:sqlite reports `changes` as number | bigint; these counts are small.
   const { changes } = db

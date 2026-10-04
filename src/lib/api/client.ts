@@ -52,7 +52,6 @@ async function request<T>(
 export type AdminSubmission = {
   id: string;
   body: string;
-  email: string | null;
   visibility: 'public' | 'private';
   status: 'pending' | 'answered' | 'deleted';
   public_state: 'not_requested' | 'in_review' | 'approved' | 'rejected';

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { openTestDatabase, type Database } from './db';
+import { confirmCapture, recordAttempt } from './payments';
 import {
   addFollowUp,
   analytics,
@@ -341,17 +342,23 @@ describe('answering and analytics', () => {
     expect(answerSubmission(db, row.id, 'A reply.')).toBe(false);
   });
 
-  it('reports counts and revenue', () => {
+  it('reports counts, and revenue from captured payments only', () => {
     rawInsert();
     rawInsert({ status: 'pending', answer: null });
     rawInsert({ safety_flagged: 1 });
+    // What a submission row claims is not revenue; what was captured is.
+    recordAttempt(db, { transactionId: 'p1', provider: 'mock', amountMinorUnits: 100 });
+    confirmCapture(db, 'p1', 100, null);
+    recordAttempt(db, { transactionId: 'p2', provider: 'mock', amountMinorUnits: 300 });
+    confirmCapture(db, 'p2', 300, null);
+    recordAttempt(db, { transactionId: 'p3', provider: 'mock', amountMinorUnits: 500 });
 
     const stats = analytics(db);
     expect(stats.total).toBe(3);
     expect(stats.answered).toBe(2);
     expect(stats.pending).toBe(1);
     expect(stats.flagged).toBe(1);
-    expect(stats.revenue_minor_units).toBe(300);
+    expect(stats.revenue_minor_units).toBe(400);
   });
 });
 

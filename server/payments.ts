@@ -45,12 +45,41 @@ export function recordAttempt(
 }
 
 /**
+ * Why a transaction cannot pay for a submission, or null when it can.
+ *
+ * Checked before a submission is created, and again when the payment is
+ * confirmed. One transaction pays for one submission: a payment already
+ * captured for a DIFFERENT submission is refused. The same submission
+ * confirming again is fine, because providers retry callbacks.
+ */
+export function captureProblem(
+  db: Database,
+  transactionId: string,
+  providerReportedMinorUnits: number,
+  submissionId: string | null,
+): 'unknown-transaction' | 'failed' | 'refunded' | 'already-used' | 'amount-mismatch' | null {
+  const row = db
+    .prepare('SELECT * FROM payments WHERE transaction_id = ?')
+    .get(transactionId) as PaymentRow | undefined;
+
+  if (row === undefined) return 'unknown-transaction';
+  if (row.state === 'failed') return 'failed';
+  if (row.state === 'refunded') return 'refunded';
+  if (row.state === 'captured') {
+    return row.submission_id === null || row.submission_id === submissionId ? null : 'already-used';
+  }
+  if (row.amount_minor_units !== providerReportedMinorUnits) return 'amount-mismatch';
+  return null;
+}
+
+/**
  * Confirm a payment against what the PROVIDER reported.
  *
- * Returns false when the reported amount does not match what was attempted.
- * That mismatch is the signal that matters: it means either a bug or a
- * tampered callback, and in both cases the submission must not be treated as
- * paid for.
+ * Refuses when the reported amount does not match what was attempted. That
+ * mismatch is the signal that matters: it means either a bug or a tampered
+ * callback, and in both cases the submission must not be treated as paid for.
+ * Also refuses a payment that already paid for another submission, or that
+ * failed or was refunded.
  */
 export function confirmCapture(
   db: Database,
@@ -58,18 +87,12 @@ export function confirmCapture(
   providerReportedMinorUnits: number,
   submissionId: string | null,
 ): { ok: boolean; reason?: string } {
-  const row = db
-    .prepare('SELECT * FROM payments WHERE transaction_id = ?')
-    .get(transactionId) as PaymentRow | undefined;
+  const problem = captureProblem(db, transactionId, providerReportedMinorUnits, submissionId);
 
-  if (row === undefined) {
-    return { ok: false, reason: 'unknown-transaction' };
-  }
-  if (row.state === 'captured' || row.state === 'refunded') {
-    // Providers retry callbacks. Capturing twice must not double anything.
-    return { ok: true };
-  }
-  if (row.amount_minor_units !== providerReportedMinorUnits) {
+  if (problem === 'amount-mismatch') {
+    const row = db
+      .prepare('SELECT amount_minor_units FROM payments WHERE transaction_id = ?')
+      .get(transactionId) as { amount_minor_units: number };
     db.prepare(
       `UPDATE payments SET state = 'failed', failure_reason = ? WHERE transaction_id = ?`,
     ).run(
@@ -77,6 +100,15 @@ export function confirmCapture(
       transactionId,
     );
     return { ok: false, reason: 'amount-mismatch' };
+  }
+  if (problem !== null) return { ok: false, reason: problem };
+
+  const row = db
+    .prepare('SELECT state FROM payments WHERE transaction_id = ?')
+    .get(transactionId) as { state: PaymentState };
+  if (row.state === 'captured') {
+    // A retried callback for the same submission. Nothing to double.
+    return { ok: true };
   }
 
   db.prepare(

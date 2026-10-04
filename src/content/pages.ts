@@ -200,6 +200,7 @@ export const privacy: StaticPage = {
         'The payment transaction record, including the amount.',
         'Timestamps, and whether a submission has been reviewed or published.',
         'Your email address, only if you chose to give one, and only for six months.',
+        'The network address of anyone who tries lost-link recovery or the owner sign-in, for fifteen minutes, to stop guessing. Then it is deleted.',
       ],
     },
     {
@@ -227,7 +228,7 @@ export const privacy: StaticPage = {
     {
       heading: 'Deleting',
       paragraphs: [
-        'You can delete your submission at any time through your link. The text and the reply are destroyed. A record of the payment is kept, because refunds and accounting need it — it holds an amount and a date, not what you wrote.',
+        'You can delete your submission at any time through your link. The text and the reply are destroyed. A record of the payment is kept, because refunds and accounting need it — it holds a transaction number, an amount and dates, not what you wrote.',
       ],
     },
     {

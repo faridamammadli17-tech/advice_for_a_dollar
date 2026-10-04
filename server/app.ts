@@ -3,6 +3,8 @@ import cookie from '@fastify/cookie';
 import { openDatabase, type Database } from './db';
 import { screen } from '../src/lib/safety/screen';
 import { looksLikeToken } from './crypto';
+import { isKnownCategory } from '../src/lib/archive/categories';
+import { MAXIMUM_MINOR_UNITS, MINIMUM_MINOR_UNITS } from '../src/lib/money';
 import {
   isValidSession,
   login,
@@ -12,6 +14,7 @@ import {
   SESSION_COOKIE,
 } from './auth';
 import {
+  captureProblem,
   confirmCapture,
   listPayments,
   paymentStats,
@@ -51,7 +54,28 @@ import {
  *      public display.
  */
 
-const MINIMUM_MINOR_UNITS = 100;
+/**
+ * The only payment provider that exists today. The real adapters arrive with
+ * their documentation; until then nothing is charged, and every payment record
+ * says `mock` so it can never be mistaken for real money.
+ */
+const PAYMENT_PROVIDER = 'mock';
+
+/**
+ * Who to believe about a visitor's address.
+ *
+ * The login and recovery limits key on `request.ip`. Off by default, because
+ * trusting X-Forwarded-For from anyone would let a caller invent a fresh
+ * address for every attempt. Behind a reverse proxy or a tunnel every
+ * connection arrives from the proxy itself, so there TRUST_PROXY must be set
+ * (`loopback` is right for a proxy on the same machine); otherwise every
+ * visitor shares one limit and eight wrong guesses lock the owner out.
+ */
+function trustProxySetting(value: string | undefined): boolean | string {
+  if (value === undefined || value === '' || value === 'false' || value === '0') return false;
+  if (value === 'true' || value === '1') return true;
+  return value;
+}
 
 /**
  * Text as a person would see it.
@@ -67,7 +91,10 @@ const visibleText = (value: unknown): string =>
   (typeof value === 'string' ? value : '').replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim();
 
 export function buildApp(db: Database = openDatabase()) {
-  const app = Fastify({ logger: false });
+  const app = Fastify({
+    logger: false,
+    trustProxy: trustProxySetting(process.env.TRUST_PROXY),
+  });
   void app.register(cookie);
 
   const adminConfig = readAdminConfig(process.env);
@@ -76,6 +103,12 @@ export function buildApp(db: Database = openDatabase()) {
   const deny = (reply: FastifyReply) => reply.code(401).send({ ok: false });
 
   const requireAdmin = (request: FastifyRequest, reply: FastifyReply): boolean => {
+    // A second line behind SameSite=Strict: browsers label every request that
+    // another site started, and nothing here is ever called from another site.
+    if (request.headers['sec-fetch-site'] === 'cross-site') {
+      void deny(reply);
+      return false;
+    }
     const sessionId = request.cookies[SESSION_COOKIE];
     if (!isValidSession(db, sessionId)) {
       void deny(reply);
@@ -181,20 +214,36 @@ export function buildApp(db: Database = openDatabase()) {
     }
 
     // Amount verified here, never taken from the browser on trust. Phase 5
-    // checks it against the provider's reported amount on the callback.
-    const amount = Number(input.amountMinorUnits);
-    if (!Number.isInteger(amount) || amount < MINIMUM_MINOR_UNITS) {
+    // checks it against the provider's reported amount on the callback. The
+    // same bounds as the form: a whole number of qəpik, from the minimum up
+    // to the typo guard.
+    const amount = input.amountMinorUnits;
+    if (
+      typeof amount !== 'number' ||
+      !Number.isSafeInteger(amount) ||
+      amount < MINIMUM_MINOR_UNITS ||
+      amount > MAXIMUM_MINOR_UNITS
+    ) {
       return reply.code(400).send({ ok: false, reason: 'amount' });
+    }
+
+    // No payment, no submission. Skipping the website and posting straight to
+    // the API must not earn a free reply, and the dashboard's "Received" must
+    // never count money that was only claimed.
+    if (transactionId === null) {
+      return reply.code(400).send({ ok: false, reason: 'payment' });
     }
 
     // Record the attempt before creating anything, so a payment that is
     // claimed but never confirmed still leaves a trace.
-    if (transactionId) {
-      recordAttempt(db, {
-        transactionId,
-        provider: process.env.PAYMENT_PROVIDER ?? 'mock',
-        amountMinorUnits: amount,
-      });
+    recordAttempt(db, { transactionId, provider: PAYMENT_PROVIDER, amountMinorUnits: amount });
+
+    // Check the payment BEFORE the submission exists, so a payment that cannot
+    // pay (already used for another submission, failed, wrong amount) leaves
+    // no stranded text behind with no link to delete it.
+    const problem = captureProblem(db, transactionId, amount, null);
+    if (problem !== null) {
+      return reply.code(402).send({ ok: false, reason: problem });
     }
 
     const created = await createSubmission(db, {
@@ -211,14 +260,15 @@ export function buildApp(db: Database = openDatabase()) {
       },
     });
 
-    if (transactionId) {
-      // In Phase 5 the amount compared here comes from the PROVIDER'S verified
-      // callback, not from this request. On the mock the two are the same
-      // value, so the shape is already right and only the source changes.
-      const capture = confirmCapture(db, transactionId, amount, created.id);
-      if (!capture.ok) {
-        return reply.code(402).send({ ok: false, reason: capture.reason });
-      }
+    // In Phase 5 the amount compared here comes from the PROVIDER'S verified
+    // callback, not from this request. On the mock the two are the same
+    // value, so the shape is already right and only the source changes.
+    const capture = confirmCapture(db, transactionId, amount, created.id);
+    if (!capture.ok) {
+      // Only reachable if two requests raced on one transaction. Either way,
+      // the text must not be left behind with no link to delete it.
+      db.prepare('DELETE FROM submissions WHERE id = ?').run(created.id);
+      return reply.code(402).send({ ok: false, reason: capture.reason });
     }
 
     return { ok: true, token: created.token };
@@ -371,7 +421,9 @@ export function buildApp(db: Database = openDatabase()) {
       .setCookie(SESSION_COOKIE, sessionId, {
         httpOnly: true,
         sameSite: 'strict',
-        secure: process.env.NODE_ENV === 'production',
+        // Secure whenever the request itself arrived over HTTPS (behind a
+        // proxy that needs TRUST_PROXY), and always in production.
+        secure: process.env.NODE_ENV === 'production' ? true : 'auto',
         path: '/',
       })
       .send({ ok: true });
@@ -424,15 +476,28 @@ export function buildApp(db: Database = openDatabase()) {
   app.post('/api/admin/:id/category', async (request, reply) => {
     if (!requireAdmin(request, reply)) return;
     const { id } = request.params as { id: string };
-    const { category } = request.body as { category?: string | null };
-    return { ok: setCategory(db, id, category ?? null) };
+    const body = (request.body ?? {}) as Record<string, unknown>;
+    // An explicit null clears the category; a missing key is a malformed request.
+    if (typeof body !== 'object' || !('category' in body)) return reply.code(400).send({ ok: false });
+    const { category } = body;
+    if (category === null) return { ok: setCategory(db, id, null) };
+    if (typeof category !== 'string' || !isKnownCategory(category)) {
+      return reply.code(400).send({ ok: false });
+    }
+    return { ok: setCategory(db, id, category) };
   });
 
   app.post('/api/admin/:id/flag', async (request, reply) => {
     if (!requireAdmin(request, reply)) return;
     const { id } = request.params as { id: string };
-    const { flagged, category } = request.body as { flagged?: boolean; category?: string | null };
-    return { ok: setSafetyFlag(db, id, flagged === true, category ?? null) };
+    const { flagged, category } = (request.body ?? {}) as { flagged?: unknown; category?: unknown };
+    if (typeof flagged !== 'boolean') return reply.code(400).send({ ok: false });
+    if (category !== null && category !== undefined) {
+      if (typeof category !== 'string' || category.length === 0 || category.length > 40) {
+        return reply.code(400).send({ ok: false });
+      }
+    }
+    return { ok: setSafetyFlag(db, id, flagged, typeof category === 'string' ? category : null) };
   });
 
   /* ---------------------------------------------------------- upkeep */

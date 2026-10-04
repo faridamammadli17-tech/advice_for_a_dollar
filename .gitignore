@@ -15,3 +15,6 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 data/*.db-journal
+
+# Backups made by `npm run backup`. Copy them somewhere safe; do not commit them.
+backups/

@@ -83,6 +83,22 @@ describe('callback replay', () => {
   });
 });
 
+describe('one payment, one submission', () => {
+  it('refuses a transaction that already paid for another submission', () => {
+    attempt('tx_used', 100);
+    expect(confirmCapture(db, 'tx_used', 100, 'sub_a').ok).toBe(true);
+    const reuse = confirmCapture(db, 'tx_used', 100, 'sub_b');
+    expect(reuse).toEqual({ ok: false, reason: 'already-used' });
+    expect(listPayments(db)[0]?.submission_id).toBe('sub_a');
+  });
+
+  it('treats a failed payment as final', () => {
+    attempt('tx_bad', 500);
+    confirmCapture(db, 'tx_bad', 100, null);
+    expect(confirmCapture(db, 'tx_bad', 500, null)).toEqual({ ok: false, reason: 'failed' });
+  });
+});
+
 describe('refunds', () => {
   it('works from the transaction id alone, with no visitor contact details', () => {
     attempt('tx_7', 100);

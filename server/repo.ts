@@ -30,7 +30,6 @@ export type PublicProblem = {
 export type AdminRow = {
   id: string;
   body: string;
-  email: string | null;
   visibility: Visibility;
   status: Status;
   public_state: PublicState;
@@ -165,10 +164,11 @@ export function addFollowUp(db: Database, token: string, body: string): boolean 
 /**
  * Delete through the magic link.
  *
- * Destroys the text, the answer, the follow-up and the email. Keeps a
- * tombstone carrying the amount and transaction id, because refunds and
- * accounting need them — and a refund must be possible from the transaction
- * alone, with no contact details.
+ * Destroys the text, the answer, the follow-up and the email, and forgets
+ * the secret word's hash and salt, which protect nothing once recovery skips
+ * the row. Keeps a tombstone carrying the amount, the dates and the
+ * transaction id, because refunds and accounting need them — and a refund
+ * must be possible from the transaction alone, with no contact details.
  */
 export function deleteByToken(db: Database, token: string): boolean {
   const result = db
@@ -176,6 +176,9 @@ export function deleteByToken(db: Database, token: string): boolean {
       `UPDATE submissions
           SET body = '', answer = NULL, email = NULL, email_purge_after = NULL,
               follow_up_body = NULL, follow_up_reply = NULL,
+              follow_up_at = NULL, follow_up_reply_at = NULL,
+              secret_word_hash = '', secret_word_salt = '',
+              safety_rules = NULL, category = NULL,
               status = 'deleted', public_state = 'rejected'
         WHERE token = ?`,
     )
@@ -235,14 +238,15 @@ export async function recoverToken(
  * The admin listing.
  *
  * Named columns, never SELECT *. The visitor's magic-link token, the
- * secret-word hash and salt, and the screening details have no use on the
- * dashboard, so they are not sent to the browser at all. What the browser
- * never receives cannot leak from it.
+ * secret-word hash and salt, the email address and the screening details have
+ * no use on the dashboard, so they are not sent to the browser at all. What
+ * the browser never receives cannot leak from it. (Email is used for one thing
+ * only, the "your answer is ready" note, and that is sent by the server.)
  */
 export function listForAdmin(db: Database, limit = 200): AdminRow[] {
   return db
     .prepare(
-      `SELECT id, body, email, visibility, status, public_state,
+      `SELECT id, body, visibility, status, public_state,
               safety_flagged, safety_category, amount_minor_units, currency,
               category, created_at, answered_at, answer,
               follow_up_body, follow_up_reply
@@ -295,13 +299,15 @@ export function approveForPublication(db: Database, id: string): boolean {
 
 export function rejectForPublication(db: Database, id: string): boolean {
   const result = db
-    .prepare(`UPDATE submissions SET public_state = 'rejected' WHERE id = ?`)
+    .prepare(`UPDATE submissions SET public_state = 'rejected' WHERE id = ? AND status <> 'deleted'`)
     .run(id);
   return result.changes > 0;
 }
 
 export function setCategory(db: Database, id: string, category: string | null): boolean {
-  const result = db.prepare('UPDATE submissions SET category = ? WHERE id = ?').run(category, id);
+  const result = db
+    .prepare(`UPDATE submissions SET category = ? WHERE id = ? AND status <> 'deleted'`)
+    .run(category, id);
   return result.changes > 0;
 }
 
@@ -349,7 +355,9 @@ export function analytics(db: Database) {
          COALESCE(SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END), 0)       AS pending,
          COALESCE(SUM(CASE WHEN safety_flagged = 1  THEN 1 ELSE 0 END), 0)       AS flagged,
          COALESCE(SUM(CASE WHEN public_state = 'in_review' THEN 1 ELSE 0 END), 0) AS awaiting_review,
-         COALESCE(SUM(amount_minor_units), 0)                                    AS revenue_minor_units
+         -- Revenue is what was actually captured, never what a submission claims.
+         (SELECT COALESCE(SUM(amount_minor_units), 0) FROM payments WHERE state = 'captured')
+                                                                                 AS revenue_minor_units
        FROM submissions`,
     )
     .get();

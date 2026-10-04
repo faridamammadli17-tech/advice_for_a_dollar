@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from './app';
 import { openTestDatabase, type Database } from './db';
-import { generatePasswordEnv } from './auth';
+import { generatePasswordEnv, purgeStaleRateLimits } from './auth';
 import type { FastifyInstance } from 'fastify';
 
 /**
@@ -41,7 +41,12 @@ afterEach(async () => {
 const ORDINARY =
   'My best friend forgot my birthday and I cannot work out how to raise it without sounding petty.';
 
+// Every submission needs a payment of its own. The mock provider issues a
+// fresh transaction id per checkout; the tests do the same.
+let transactionCounter = 0;
+
 async function submit(overrides: Record<string, unknown> = {}) {
+  transactionCounter += 1;
   return app.inject({
     method: 'POST',
     url: '/api/submissions',
@@ -50,6 +55,7 @@ async function submit(overrides: Record<string, unknown> = {}) {
       secretWord: 'lighthouse',
       visibility: 'private',
       amountMinorUnits: 100,
+      transactionId: `tx_${transactionCounter}`,
       ...overrides,
     },
   });
@@ -459,5 +465,189 @@ describe('input hygiene', () => {
     });
     expect(recover.statusCode).toBe(200);
     expect(recover.json()).toEqual({ ok: true, link: null });
+  });
+});
+
+/* -------------------------------------------------- payments are the gate */
+
+describe('a submission needs a payment of its own', () => {
+  it('refuses a submission with no payment at all', async () => {
+    const response = await submit({ transactionId: null });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ reason: 'payment' });
+    expect(countRows()).toBe(0);
+  });
+
+  it('refuses to let one payment pay for a second submission', async () => {
+    expect((await submit({ transactionId: 'tx_once' })).json()).toMatchObject({ ok: true });
+    const again = await submit({ transactionId: 'tx_once' });
+    expect(again.statusCode).toBe(402);
+    expect(again.json()).toMatchObject({ reason: 'already-used' });
+    expect(countRows()).toBe(1);
+  });
+
+  it('refuses an amount above the form\'s maximum or of the wrong type', async () => {
+    expect((await submit({ amountMinorUnits: 1e12 })).statusCode).toBe(400);
+    expect((await submit({ amountMinorUnits: '100' })).statusCode).toBe(400);
+    expect((await submit({ amountMinorUnits: [100] })).statusCode).toBe(400);
+    expect(countRows()).toBe(0);
+  });
+
+  it('counts as received only what was actually captured', async () => {
+    await submit({ amountMinorUnits: 300 });
+    const cookie = await signIn();
+    const stats = await app.inject({
+      method: 'GET',
+      url: '/api/admin/analytics',
+      cookies: { afad_admin: cookie },
+    });
+    expect(stats.json().stats.revenue_minor_units).toBe(300);
+  });
+});
+
+/* ------------------------------------------------------ admin input checks */
+
+describe('admin actions check their input', () => {
+  async function firstRowId(cookie: string): Promise<string> {
+    const list = await app.inject({
+      method: 'GET',
+      url: '/api/admin/submissions',
+      cookies: { afad_admin: cookie },
+    });
+    return String(list.json().submissions[0].id);
+  }
+
+  it('accepts only a known category, or none', async () => {
+    await submit();
+    const cookie = await signIn();
+    const id = await firstRowId(cookie);
+    const post = (payload: unknown) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/admin/${id}/category`,
+        cookies: { afad_admin: cookie },
+        payload: payload as Record<string, unknown>,
+      });
+
+    expect((await post({ category: 'not-a-real-category' })).statusCode).toBe(400);
+    expect((await post({ category: 42 })).statusCode).toBe(400);
+    expect((await post(undefined)).statusCode).toBe(400);
+    expect((await post({ category: 'money' })).json()).toEqual({ ok: true });
+    expect((await post({ category: null })).json()).toEqual({ ok: true });
+  });
+
+  it('flags only on a real yes or no', async () => {
+    await submit();
+    const cookie = await signIn();
+    const id = await firstRowId(cookie);
+    const post = (payload: unknown) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/admin/${id}/flag`,
+        cookies: { afad_admin: cookie },
+        payload: payload as Record<string, unknown>,
+      });
+
+    expect((await post({ flagged: 'true' })).statusCode).toBe(400);
+    expect((await post({ flagged: 1 })).statusCode).toBe(400);
+    expect((await post(undefined)).statusCode).toBe(400);
+    expect((await post({ flagged: true, category: 'manual' })).json()).toEqual({ ok: true });
+    const row = db.prepare('SELECT safety_flagged FROM submissions WHERE id = ?').get(id) as {
+      safety_flagged: number;
+    };
+    expect(row.safety_flagged).toBe(1);
+  });
+
+  it('refuses a request another site started, even with a valid session', async () => {
+    const cookie = await signIn();
+    const crossSite = await app.inject({
+      method: 'GET',
+      url: '/api/admin/submissions',
+      cookies: { afad_admin: cookie },
+      headers: { 'sec-fetch-site': 'cross-site' },
+    });
+    expect(crossSite.statusCode).toBe(401);
+    const sameSite = await app.inject({
+      method: 'GET',
+      url: '/api/admin/submissions',
+      cookies: { afad_admin: cookie },
+      headers: { 'sec-fetch-site': 'same-origin' },
+    });
+    expect(sameSite.statusCode).toBe(200);
+  });
+});
+
+/* -------------------------------------------------------- behind a proxy */
+
+describe('rate limits behind a proxy', () => {
+  const wrongLogins = async (count: number) => {
+    for (let i = 0; i < count; i += 1) {
+      await app.inject({
+        method: 'POST',
+        url: '/api/admin/login',
+        remoteAddress: '127.0.0.1',
+        headers: { 'x-forwarded-for': `203.0.113.${i}` },
+        payload: { password: 'wrong' },
+      });
+    }
+  };
+  const ownerLogin = () =>
+    app.inject({
+      method: 'POST',
+      url: '/api/admin/login',
+      remoteAddress: '127.0.0.1',
+      headers: { 'x-forwarded-for': '198.51.100.7' },
+      payload: { password: PASSWORD },
+    });
+
+  it('without TRUST_PROXY, everyone arriving through one proxy shares a limit', async () => {
+    await wrongLogins(8);
+    expect((await ownerLogin()).statusCode).toBe(401);
+  });
+
+  it('with TRUST_PROXY=loopback, the limit follows the forwarded address', async () => {
+    await app.close();
+    process.env.TRUST_PROXY = 'loopback';
+    try {
+      app = buildApp(db);
+      await app.ready();
+      await wrongLogins(8);
+      expect((await ownerLogin()).statusCode).toBe(200);
+    } finally {
+      delete process.env.TRUST_PROXY;
+    }
+  });
+});
+
+/* --------------------------------------------------------- housekeeping */
+
+describe('housekeeping', () => {
+  it('forgets rate-limit entries once their window has passed', async () => {
+    const stale = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    db.prepare('INSERT INTO rate_limits (bucket, key, window_start, count) VALUES (?,?,?,?)').run(
+      'recover',
+      '203.0.113.9',
+      stale,
+      3,
+    );
+    await app.inject({ method: 'POST', url: '/api/recover', payload: { secretWord: 'x' } });
+    expect(purgeStaleRateLimits(db)).toBe(1);
+    const left = db.prepare('SELECT key FROM rate_limits').all() as { key: string }[];
+    expect(left.map((row) => row.key)).not.toContain('203.0.113.9');
+    expect(left).toHaveLength(1);
+  });
+
+  it('deletion also forgets the secret word and the follow-up timestamps', async () => {
+    const token = (await submit()).json().token as string;
+    await app.inject({ method: 'DELETE', url: `/api/a/${token}` });
+    const row = db
+      .prepare('SELECT secret_word_hash, secret_word_salt, follow_up_at, category FROM submissions')
+      .get() as Record<string, unknown>;
+    expect(row).toEqual({
+      secret_word_hash: '',
+      secret_word_salt: '',
+      follow_up_at: null,
+      category: null,
+    });
   });
 });

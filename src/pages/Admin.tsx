@@ -59,7 +59,7 @@ export function Admin() {
     setBusy(false);
     if (!result.ok) {
       // Deliberately vague: the server does not say which part was wrong.
-      setLoginError('That did not work.');
+      setLoginError('That did not work. After several wrong tries in a row, wait 15 minutes and try again.');
       return;
     }
     setPassword('');
