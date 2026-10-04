@@ -250,6 +250,8 @@ data/           the database file, created on first run (not in GitHub)
 
 - [`docs/HANDOFF.md`](docs/HANDOFF.md): start here if you are picking the
   project up. The rules, the decisions, and the traps.
+- [`docs/NEXT_SESSION.md`](docs/NEXT_SESSION.md): the short brief to paste
+  into a new Claude chat so it can carry on where the last one stopped.
 - [`docs/NOTES.md`](docs/NOTES.md): the full decision log, in order, with the
   reasoning behind every choice.
 - [`docs/PROMPT.md`](docs/PROMPT.md): the original brief the project was built
