@@ -1,0 +1,204 @@
+/* The submission flow, and the confirmation that ends it. */
+
+.ask {
+  padding: 48px 0 96px;
+}
+
+.ask-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.ask-next {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+
+.ask-devnote {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--faint);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+/* ---------------------------------------------------------------- the trail */
+
+.trail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trail-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border: 2px solid var(--border);
+  color: var(--faint);
+}
+
+.trail-step[data-state='now'] {
+  border-color: var(--accent-strong);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.trail-step[data-state='done'] {
+  border-color: var(--accent-cool);
+  color: var(--accent-cool);
+}
+
+.trail-num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------- choices */
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  padding: 18px;
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  cursor: pointer;
+  box-shadow: 4px 4px 0 transparent;
+}
+
+.choice:hover {
+  border-color: var(--border-strong);
+}
+
+.choice[aria-pressed='true'] {
+  border-color: var(--accent-strong);
+  box-shadow: 4px 4px 0 var(--accent-strong);
+}
+
+.choice-title {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.choice-body {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------- amounts */
+
+.amounts {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.amount {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 20px;
+  background: var(--surface-alt);
+  color: var(--text);
+  border: var(--border-width) solid var(--border-strong);
+  cursor: pointer;
+}
+
+.amount[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* -------------------------------------------------------------- ceremony */
+
+.ceremony {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 72px 0;
+}
+
+.ceremony-caption {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------- confirmation */
+
+.confirm-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.magic-link,
+.secret-shown {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px 14px;
+  background: var(--surface-alt);
+  border: 2px solid var(--border);
+  word-break: break-all;
+}
+
+.secret-shown {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  word-break: normal;
+}
+
+.confirm-body {
+  white-space: pre-wrap;
+  color: var(--muted);
+}
+
+.next-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 60ch;
+}
+
+.next-list li::marker {
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .ask {
+    padding: 28px 0 64px;
+  }
+}

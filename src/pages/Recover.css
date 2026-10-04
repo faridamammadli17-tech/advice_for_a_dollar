@@ -1,0 +1,12 @@
+/* Lost magic link. Warm, not a corporate password reset. */
+
+.recover {
+  padding: 48px 0 96px;
+}
+
+.recover-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}

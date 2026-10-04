@@ -1,0 +1,150 @@
+/* ===========================================================================
+   Advice for a Dollar — theme tokens
+   ===========================================================================
+
+   Two layers, and components may only ever touch the second one.
+
+   1. BRAND PALETTE (--c-*)
+      The five fixed brand colours from the art brief, plus the two proposed
+      neutrals. Named for what they are, never for their hex value.
+      Sprites reference these by CSS custom property name so that re-theming
+      is a token change, not a re-export of the artwork.
+
+   2. SEMANTIC TOKENS (--bg, --surface, --text, ...)
+      What a component actually asks for. Re-mapped per theme.
+
+   THEME RESOLUTION — three states, not two:
+     - no data-theme attribute  -> follow the operating system
+     - [data-theme='day']       -> forced day, beats a dark OS
+     - [data-theme='night']     -> forced night, beats a light OS
+
+   The [data-theme] selectors are plain attribute selectors rather than
+   :root-scoped ones, so a *nested* container can force a theme. The sprite
+   inspector relies on that to show day and night side by side on one page.
+   =========================================================================== */
+
+:root {
+  /* ---- 1. brand palette — never referenced directly by components ---- */
+  --c-plum: #752445;
+  --c-rose: #ea6993;
+  --c-blush: #f8cae4;
+  --c-sage: #cfdd9d;
+  --c-fern: #2f582c;
+
+  /* The sixth palette colour. Approved 2026-09-20: paper, the letter, the
+     envelope, mushroom spots and stems. Same 2-shade allowance as the others.
+     A wood neutral (Bark, #7a5236) was proposed alongside it and NOT approved,
+     so wood, the desk and the computer are built from these six colours —
+     see ART_GUIDELINES.md §3. Do not reintroduce a brown without asking. */
+  --c-cream: #f2e6c9;
+
+  /* ---- type ---- */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* ---- spacing / geometry ----
+     No border radii anywhere. The art has hard pixel edges; the interface
+     around it should not contradict that. */
+  --radius: 0;
+  --border-width: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   DAY — the default, and the baseline every token is defined in.
+   Defined on :root and on [data-theme='day'] so nested forcing works.
+   --------------------------------------------------------------------------- */
+:root,
+[data-theme='day'] {
+  --bg: #f3f1e2;
+  --surface: #fbfaf1;
+  --surface-alt: #e6e9d5;
+  --text: #1e2c1b;
+  --muted: #55634f;
+  --faint: #7c8874;
+  --border: #c8cfb6;
+  --border-strong: #1e2c1b;
+  --shadow: #c8cfb6;
+
+  --accent: var(--c-rose);
+  --accent-strong: var(--c-plum);
+  /* Plum at brand strength is ~4.2:1 on our light surfaces — just under the
+     4.5:1 needed for small text. This is the same hue pushed darker, used for
+     TEXT only; --accent-strong stays the brand colour for borders and fills. */
+  --accent-text: #5e1a34;
+  --accent-cool: var(--c-fern);
+  --highlight: var(--c-sage);
+  --on-accent: #ffffff;
+  --focus-ring: var(--c-plum);
+
+  /* Rim light applied by SpriteCanvas when rimLight is on. */
+  --rim-light: var(--c-blush);
+
+  /* Placeholder art that has not been delivered yet. Deliberately not a
+     brand colour — a DRAFT block must never be mistaken for finished art. */
+  --draft-fill: #d5d9c2;
+  --draft-edge: #8d9a83;
+}
+
+/* ---------------------------------------------------------------------------
+   NIGHT — applied when the OS is dark and the visitor has not forced day,
+   or when night is explicitly chosen.
+
+   Only tokens are redefined here. No component styling lives inside a theme
+   block, so nothing can end up with a colour that only exists in one theme.
+   --------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='day']) {
+    --bg: #12180f;
+    --surface: #1b2318;
+    --surface-alt: #242d20;
+    --text: #e9eedc;
+    --muted: #aab59e;
+    --faint: #7f8b76;
+    --border: #313a2c;
+    --border-strong: #4c5a45;
+    --shadow: #080b07;
+
+    /* Rose and plum are both too dark to sit on a near-black ground, so the
+       accent roles shift lighter. The hue is held; only the value moves. */
+    --accent: #f386a7;
+    --accent-strong: #c2567a;
+    /* On the dark ground the accent must go lighter, not darker. */
+    --accent-text: #f7a3bd;
+    --accent-cool: #93ba6f;
+    --highlight: var(--c-sage);
+    --on-accent: #16100f;
+    --focus-ring: #f386a7;
+
+    --rim-light: #fbe0ee;
+
+    --draft-fill: #2c3527;
+    --draft-edge: #5d6b54;
+  }
+}
+
+[data-theme='night'] {
+  --bg: #12180f;
+  --surface: #1b2318;
+  --surface-alt: #242d20;
+  --text: #e9eedc;
+  --muted: #aab59e;
+  --faint: #7f8b76;
+  --border: #313a2c;
+  --border-strong: #4c5a45;
+  --shadow: #080b07;
+
+  --accent: #f386a7;
+  --accent-strong: #c2567a;
+  --accent-text: #f7a3bd;
+  --accent-cool: #93ba6f;
+  --highlight: var(--c-sage);
+  --on-accent: #16100f;
+  --focus-ring: #f386a7;
+
+  --rim-light: #fbe0ee;
+
+  --draft-fill: #2c3527;
+  --draft-edge: #5d6b54;
+}

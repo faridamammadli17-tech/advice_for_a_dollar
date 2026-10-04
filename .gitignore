@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+coverage
+
+# The live database: every submission, reply and payment record.
+# Back it up by copying it. Never commit it.
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal

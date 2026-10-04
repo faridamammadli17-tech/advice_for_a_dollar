@@ -1,0 +1,365 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { buildApp } from './app';
+import { openTestDatabase, type Database } from './db';
+import { generatePasswordEnv } from './auth';
+import type { FastifyInstance } from 'fastify';
+
+/**
+ * Full-stack HTTP tests.
+ *
+ * Everything below goes through the real routes, the real screening, the real
+ * database and the real publication view — `app.inject()` drives Fastify
+ * directly, so there is no network and no browser, but nothing is mocked out
+ * either.
+ *
+ * These exist because the important behaviours had only ever been checked by
+ * hand in a browser. Walking a flow once proves it worked once; these run on
+ * every change. The ones that matter most are the refusals — a test that
+ * proves something is *allowed* is far less valuable here than one proving
+ * something is *impossible*.
+ */
+
+const PASSWORD = 'correct-horse-battery-staple';
+
+let db: Database;
+let app: FastifyInstance;
+
+beforeEach(async () => {
+  const env = await generatePasswordEnv(PASSWORD);
+  process.env.ADMIN_PASSWORD_HASH = env.ADMIN_PASSWORD_HASH;
+  process.env.ADMIN_PASSWORD_SALT = env.ADMIN_PASSWORD_SALT;
+
+  db = openTestDatabase();
+  app = buildApp(db);
+  await app.ready();
+});
+
+afterEach(async () => {
+  await app.close();
+});
+
+const ORDINARY =
+  'My best friend forgot my birthday and I cannot work out how to raise it without sounding petty.';
+
+async function submit(overrides: Record<string, unknown> = {}) {
+  return app.inject({
+    method: 'POST',
+    url: '/api/submissions',
+    payload: {
+      body: ORDINARY,
+      secretWord: 'lighthouse',
+      visibility: 'private',
+      amountMinorUnits: 100,
+      ...overrides,
+    },
+  });
+}
+
+async function signIn(): Promise<string> {
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/admin/login',
+    payload: { password: PASSWORD },
+  });
+  const cookie = response.cookies.find((c) => c.name === 'afad_admin');
+  return cookie?.value ?? '';
+}
+
+function countRows(): number {
+  return (db.prepare('SELECT COUNT(*) AS n FROM submissions').get() as { n: number }).n;
+}
+
+/* ------------------------------------------------------------------ safety */
+
+describe('safety screening cannot be skipped by calling the API directly', () => {
+  it('blocks a crisis submission and creates nothing', async () => {
+    const response = await submit({
+      body: 'I have no reason to live and I do not want to be here anymore.',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({ ok: false, blocked: true, category: 'self_harm' });
+    // Nothing created means nothing charged and nothing publishable.
+    expect(countRows()).toBe(0);
+  });
+
+  it('does not block an ordinary problem that merely sounds dramatic', async () => {
+    const response = await submit({
+      body: 'I am dying of embarrassment about what I said at the work party last night.',
+    });
+    expect(response.json()).toMatchObject({ ok: true });
+    expect(countRows()).toBe(1);
+  });
+});
+
+/* ----------------------------------------------------------------- amounts */
+
+describe('the amount is verified on the server', () => {
+  it('refuses less than the minimum, whatever the client claims', async () => {
+    const response = await submit({ amountMinorUnits: 1 });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ reason: 'amount' });
+    expect(countRows()).toBe(0);
+  });
+
+  it('refuses a non-integer amount', async () => {
+    expect((await submit({ amountMinorUnits: 100.5 })).statusCode).toBe(400);
+    expect(countRows()).toBe(0);
+  });
+
+  it('refuses a submission that is too short to answer', async () => {
+    expect((await submit({ body: 'help' })).statusCode).toBe(400);
+  });
+
+  it('refuses a secret word that is too short to be a credential', async () => {
+    expect((await submit({ secretWord: 'ab' })).statusCode).toBe(400);
+  });
+});
+
+/* -------------------------------------------------------- publication gate */
+
+describe('the publication rule, over HTTP', () => {
+  it('a public request is not public until it is approved AND answered', async () => {
+    const created = await submit({ visibility: 'public' });
+    const token = created.json().token as string;
+
+    // asked for, but not granted
+    expect((await app.inject({ method: 'GET', url: '/api/archive' })).json().problems).toHaveLength(0);
+
+    const session = await signIn();
+    const id = (db.prepare('SELECT id FROM submissions').get() as { id: string }).id;
+
+    // approved, but still no answer to show
+    await app.inject({
+      method: 'POST',
+      url: `/api/admin/${id}/approve`,
+      cookies: { afad_admin: session },
+    });
+    expect((await app.inject({ method: 'GET', url: '/api/archive' })).json().problems).toHaveLength(0);
+
+    // answered as well — now it appears
+    await app.inject({
+      method: 'POST',
+      url: `/api/admin/${id}/answer`,
+      cookies: { afad_admin: session },
+      payload: { answer: 'A reply.' },
+    });
+    expect((await app.inject({ method: 'GET', url: '/api/archive' })).json().problems).toHaveLength(1);
+
+    // and the visitor's token still works
+    expect((await app.inject({ method: 'GET', url: `/api/a/${token}` })).statusCode).toBe(200);
+  });
+
+  it('a private submission can never be published, however it is poked', async () => {
+    await submit({ visibility: 'private' });
+    const session = await signIn();
+    const id = (db.prepare('SELECT id FROM submissions').get() as { id: string }).id;
+
+    await app.inject({
+      method: 'POST',
+      url: `/api/admin/${id}/answer`,
+      cookies: { afad_admin: session },
+      payload: { answer: 'A reply.' },
+    });
+    const approve = await app.inject({
+      method: 'POST',
+      url: `/api/admin/${id}/approve`,
+      cookies: { afad_admin: session },
+    });
+
+    expect(approve.json()).toMatchObject({ ok: false });
+    expect((await app.inject({ method: 'GET', url: '/api/archive' })).json().problems).toHaveLength(0);
+    // Not reachable by its id either.
+    expect((await app.inject({ method: 'GET', url: `/api/problem/${id}` })).statusCode).toBe(404);
+  });
+
+  it('flagging a published problem removes it immediately', async () => {
+    await submit({ visibility: 'public' });
+    const session = await signIn();
+    const id = (db.prepare('SELECT id FROM submissions').get() as { id: string }).id;
+    const auth = { afad_admin: session };
+
+    await app.inject({ method: 'POST', url: `/api/admin/${id}/answer`, cookies: auth, payload: { answer: 'A reply.' } });
+    await app.inject({ method: 'POST', url: `/api/admin/${id}/approve`, cookies: auth });
+    expect((await app.inject({ method: 'GET', url: '/api/archive' })).json().problems).toHaveLength(1);
+
+    await app.inject({
+      method: 'POST',
+      url: `/api/admin/${id}/flag`,
+      cookies: auth,
+      payload: { flagged: true, category: 'manual' },
+    });
+    expect((await app.inject({ method: 'GET', url: '/api/archive' })).json().problems).toHaveLength(0);
+  });
+});
+
+/* -------------------------------------------------------------------- auth */
+
+describe('admin access', () => {
+  const routes: [string, string][] = [
+    ['GET', '/api/admin/submissions'],
+    ['GET', '/api/admin/analytics'],
+    ['GET', '/api/admin/payments'],
+    ['POST', '/api/admin/anything/approve'],
+    ['POST', '/api/admin/anything/flag'],
+  ];
+
+  it.each(routes)('%s %s refuses without a session', async (method, url) => {
+    const response = await app.inject({ method: method as 'GET' | 'POST', url });
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('refuses a wrong password with the same body as any other failure', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/admin/login',
+      payload: { password: 'not-it' },
+    });
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ ok: false });
+  });
+
+  it('refuses a forged session cookie', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/admin/submissions',
+      cookies: { afad_admin: 'made-up-session-value-that-looks-plausible' },
+    });
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('sets an httpOnly SameSite cookie on success', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/admin/login',
+      payload: { password: PASSWORD },
+    });
+    const cookie = response.cookies.find((c) => c.name === 'afad_admin');
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.sameSite).toBe('Strict');
+  });
+
+  it('signing out revokes the session rather than just forgetting it', async () => {
+    const session = await signIn();
+    const auth = { afad_admin: session };
+    expect((await app.inject({ method: 'GET', url: '/api/admin/submissions', cookies: auth })).statusCode).toBe(200);
+
+    await app.inject({ method: 'POST', url: '/api/admin/logout', cookies: auth });
+    expect((await app.inject({ method: 'GET', url: '/api/admin/submissions', cookies: auth })).statusCode).toBe(401);
+  });
+});
+
+/* ---------------------------------------------------------------- recovery */
+
+describe('recovery never confirms existence', () => {
+  it('answers identically for a wrong word and an empty one', async () => {
+    await submit({ secretWord: 'lighthouse' });
+
+    const wrong = await app.inject({ method: 'POST', url: '/api/recover', payload: { secretWord: 'harbour' } });
+    const empty = await app.inject({ method: 'POST', url: '/api/recover', payload: { secretWord: '' } });
+
+    expect(wrong.statusCode).toBe(empty.statusCode);
+    expect(wrong.body).toBe(empty.body);
+    expect(wrong.json()).toEqual({ ok: true, link: null });
+  });
+
+  it('returns the link only when the secret word verifies', async () => {
+    const created = await submit({ secretWord: 'lighthouse' });
+    const token = created.json().token as string;
+
+    const found = await app.inject({
+      method: 'POST',
+      url: '/api/recover',
+      payload: { secretWord: '  LIGHTHOUSE ' },
+    });
+    expect(found.json()).toEqual({ ok: true, link: `/a/${token}` });
+  });
+});
+
+/* ------------------------------------------------------- the visitor's own */
+
+describe('what the magic link gives back', () => {
+  it('never exposes the hash, the salt or the email', async () => {
+    const created = await submit({ email: 'someone@example.com' });
+    const token = created.json().token as string;
+
+    const response = await app.inject({ method: 'GET', url: `/api/a/${token}` });
+    const body = response.body;
+
+    expect(body).not.toContain('someone@example.com');
+    expect(body).not.toContain('secret_word_hash');
+    expect(body).not.toContain('secretWordHash');
+    expect(body).not.toContain('lighthouse');
+  });
+
+  it('404s an unknown token without saying why', async () => {
+    expect((await app.inject({ method: 'GET', url: '/api/a/totallyMadeUpTokenValue123' })).statusCode).toBe(404);
+  });
+
+  it('accepts exactly one follow-up', async () => {
+    const created = await submit();
+    const token = created.json().token as string;
+    const session = await signIn();
+    const id = (db.prepare('SELECT id FROM submissions').get() as { id: string }).id;
+
+    await app.inject({
+      method: 'POST',
+      url: `/api/admin/${id}/answer`,
+      cookies: { afad_admin: session },
+      payload: { answer: 'A reply.' },
+    });
+
+    const first = await app.inject({ method: 'POST', url: `/api/a/${token}/follow-up`, payload: { body: 'One more thing.' } });
+    const second = await app.inject({ method: 'POST', url: `/api/a/${token}/follow-up`, payload: { body: 'And another.' } });
+
+    expect(first.json()).toMatchObject({ ok: true });
+    expect(second.json()).toMatchObject({ ok: false });
+  });
+
+  it('deletion destroys the text and kills the link', async () => {
+    const created = await submit();
+    const token = created.json().token as string;
+
+    await app.inject({ method: 'DELETE', url: `/api/a/${token}` });
+
+    const after = await app.inject({ method: 'GET', url: `/api/a/${token}` });
+    expect(after.statusCode).toBe(410);
+    expect((db.prepare('SELECT body FROM submissions').get() as { body: string }).body).toBe('');
+  });
+});
+
+/* -------------------------------------------------------------- payments */
+
+describe('payments', () => {
+  it('records the attempt and captures it', async () => {
+    await submit({ transactionId: 'tx_abc' });
+    const row = db.prepare('SELECT * FROM payments WHERE transaction_id = ?').get('tx_abc') as
+      | { state: string; amount_minor_units: number }
+      | undefined;
+    expect(row?.state).toBe('captured');
+    expect(row?.amount_minor_units).toBe(100);
+  });
+
+  it('refuses an unverified provider callback rather than believing it', async () => {
+    // Until the signature scheme is known, accepting a callback would let
+    // anyone who finds this URL mark a submission as paid.
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/payments/callback/epoint',
+      payload: { ok: true, amountMinorUnits: 999999 },
+    });
+    expect(response.statusCode).toBe(501);
+  });
+});
+
+/* ------------------------------------------------------- security headers */
+
+describe('security headers', () => {
+  it('sends no-referrer, so a magic link cannot leak through Referer', async () => {
+    const response = await app.inject({ method: 'GET', url: '/api/health' });
+    expect(response.headers['referrer-policy']).toBe('no-referrer');
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('DENY');
+    expect(String(response.headers['content-security-policy'])).toContain("frame-ancestors 'none'");
+  });
+});

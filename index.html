@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Site-wide no-referrer. The spec (§5) requires this on magic-link token
+      pages so tokens never leak through Referer headers. Applying it globally
+      is strictly more private and removes the risk of a future page forgetting.
+    -->
+    <meta name="referrer" content="no-referrer" />
+
+    <title>Advice for a Dollar</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

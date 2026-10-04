@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Renderer check — Advice for a Dollar</title>
+
+<!--
+  VERIFICATION HARNESS — not part of the app, not shipped.
+
+  Node.js is not installed on this machine, so `npm run build` / `npm run dev`
+  cannot run yet. This page exists so the parts of Phase 1 that CAN be checked
+  are actually checked rather than assumed.
+
+  It loads the REAL theme stylesheet (../src/styles/theme.css) and runs a
+  JavaScript port of the real rendering logic from src/pixel/ — same
+  algorithms, same sprite data, type annotations stripped.
+
+  What this proves:   theme tokens parse and resolve in both themes; palette
+                      resolution works; frame rasterisation and integer
+                      scaling produce crisp output; DRAFT placeholder
+                      generation produces correct geometry; sprite validation
+                      passes.
+  What it does NOT:   TypeScript compilation, ESLint, the React components,
+                      the shared rAF loop, routing.
+-->
+
+<link rel="stylesheet" href="../src/styles/theme.css">
+
+<style>
+  * { box-sizing: border-box; border-radius: 0; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 28px 22px 80px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+  h1 { font-family: var(--font-mono); font-size: 1.5rem; text-transform: uppercase; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-family: var(--font-mono); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 12px; color: var(--accent-cool); }
+  .lede { margin: 0; color: var(--muted); max-width: 70ch; font-size: 14.5px; }
+  .panel {
+    border: var(--border-width) solid var(--border-strong);
+    background: var(--surface);
+    box-shadow: 5px 5px 0 var(--shadow);
+    padding: 18px 20px;
+  }
+  .results { list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
+  .results li { display: flex; gap: 10px; align-items: baseline; }
+  .tag { font-weight: 700; flex: none; width: 5ch; }
+  .pass .tag { color: var(--accent-cool); }
+  .fail .tag { color: var(--accent-strong); }
+  .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 14px; }
+  .tpanel { border: 1px solid var(--border); background: var(--bg); padding: 14px; overflow-x: auto; }
+  .tname { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 700; display: block; margin-bottom: 10px; }
+  .ladder { display: flex; align-items: flex-end; gap: 16px; }
+  .sample { display: flex; flex-direction: column; align-items: center; gap: 7px; flex: none; }
+  .sample span { font-family: var(--font-mono); font-size: 10px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  canvas { image-rendering: pixelated; display: block; }
+  .zone { position: relative; width: 480px; max-width: 100%; aspect-ratio: 480/270; border: 2px solid var(--border-strong); background: var(--surface-alt); }
+  .zone-safe { position: absolute; top: 0; bottom: 0; left: 30%; width: 40%; border-left: 2px solid var(--accent-strong); border-right: 2px solid var(--accent-strong); background: var(--highlight); opacity: 0.55; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 0; border: 2px solid var(--border-strong); }
+  .sw { flex: 1 1 96px; }
+  .sw .c { height: 44px; }
+  .sw .m { padding: 6px 8px; background: var(--surface); border-top: 2px solid var(--border-strong); font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div>
+    <h1>Renderer check</h1>
+    <p class="lede">Runs the real rendering logic and the real theme tokens in a browser, because Node isn't installed yet. Every check below is computed live from the same algorithms the app uses.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Checks</h2>
+    <ul class="results" id="results"></ul>
+  </div>
+
+  <div class="panel">
+    <h2>Test card — integer scaling, both themes</h2>
+    <p class="lede" style="margin-bottom:12px;">1px checkerboard, 1px horizontal rules, 1px vertical rules, and a six-colour palette ramp. If any of it goes soft or uneven, the renderer is smoothing something it shouldn't.</p>
+    <div class="themes">
+      <div class="tpanel" data-theme="day"><span class="tname">day</span><div class="ladder" id="ladder-day"></div></div>
+      <div class="tpanel" data-theme="night"><span class="tname">night</span><div class="ladder" id="ladder-night"></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Rim light — off vs on</h2>
+    <div class="themes">
+      <div class="tpanel" data-theme="day"><span class="tname">day</span><div class="ladder" id="rim-day"></div></div>
+      <div class="tpanel" data-theme="night"><span class="tname">night</span><div class="ladder" id="rim-night"></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>DRAFT placeholders — generated at exact final dimensions</h2>
+    <p class="lede" style="margin-bottom:12px;">No artwork delivered yet. Pips along the bottom count the frame, so animation timing can be verified before any art exists. Deliberately ugly — a placeholder must never read as finished.</p>
+    <div class="themes">
+      <div class="tpanel" data-theme="day"><span class="tname">day</span><div class="ladder" id="draft-day"></div></div>
+      <div class="tpanel" data-theme="night"><span class="tname">night</span><div class="ladder" id="draft-night"></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Brand palette resolution</h2>
+    <div class="themes">
+      <div class="tpanel" data-theme="day"><span class="tname">day</span><div class="swatches" id="sw-day"></div></div>
+      <div class="tpanel" data-theme="night"><span class="tname">night</span><div class="swatches" id="sw-night"></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Mobile safe zone — 480 × 270, centre 192 survives</h2>
+    <div class="zone"><div class="zone-safe"></div></div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================================
+   Port of src/pixel/ — same logic, type annotations stripped.
+   ========================================================================= */
+
+var TRANSPARENT_CHAR = '.';
+
+function resolvePalette(palette, element) {
+  var computed = getComputedStyle(element);
+  var resolved = {};
+  for (var char in palette) {
+    var value = computed.getPropertyValue(palette[char]).trim();
+    resolved[char] = value === '' ? 'magenta' : value;
+  }
+  return resolved;
+}
+
+function isOpaqueAt(frame, width, height, x, y) {
+  if (x < 0 || y < 0 || x >= width || y >= height) return false;
+  var row = frame.rows[y];
+  if (row === undefined) return false;
+  var char = row[x];
+  return char !== undefined && char !== TRANSPARENT_CHAR;
+}
+
+function buildFrameCanvas(sprite, frame, colors, rimLightColor) {
+  var canvas = document.createElement('canvas');
+  canvas.width = sprite.width;
+  canvas.height = sprite.height;
+  var ctx = canvas.getContext('2d');
+
+  if (rimLightColor) {
+    ctx.fillStyle = rimLightColor;
+    for (var ry = 0; ry < sprite.height; ry++) {
+      for (var rx = 0; rx < sprite.width; rx++) {
+        if (isOpaqueAt(frame, sprite.width, sprite.height, rx, ry)) continue;
+        if (isOpaqueAt(frame, sprite.width, sprite.height, rx + 1, ry + 1)) {
+          ctx.fillRect(rx, ry, 1, 1);
+        }
+      }
+    }
+  }
+
+  for (var y = 0; y < sprite.height; y++) {
+    var row = frame.rows[y];
+    if (row === undefined) continue;
+    for (var x = 0; x < sprite.width; x++) {
+      var char = row[x];
+      if (char === undefined || char === TRANSPARENT_CHAR) continue;
+      var color = colors[char];
+      if (color === undefined) continue;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+  return canvas;
+}
+
+/** Mirrors SpriteCanvas's draw(): integer scale, DPR-aware backing store. */
+function paint(canvas, sprite, frame, scale, flipX, rimLight) {
+  var ctx = canvas.getContext('2d');
+  var dprInt = Math.max(1, Math.round(window.devicePixelRatio || 1));
+  var cssW = sprite.width * scale;
+  var cssH = sprite.height * scale;
+  var bufW = cssW * dprInt;
+  var bufH = cssH * dprInt;
+
+  if (canvas.width !== bufW || canvas.height !== bufH) {
+    canvas.width = bufW;
+    canvas.height = bufH;
+  }
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+
+  ctx.clearRect(0, 0, bufW, bufH);
+
+  var colors = resolvePalette(sprite.palette, canvas);
+  var rimColor = rimLight
+    ? (getComputedStyle(canvas).getPropertyValue('--rim-light').trim() || null)
+    : null;
+  var source = buildFrameCanvas(sprite, frame, colors, rimColor);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.save();
+  if (flipX) { ctx.translate(bufW, 0); ctx.scale(-1, 1); }
+  ctx.drawImage(source, 0, 0, bufW, bufH);
+  ctx.restore();
+
+  return { bufW: bufW, bufH: bufH, dprInt: dprInt, colors: colors };
+}
+
+function validateSprite(sprite) {
+  var problems = [];
+  var known = Object.keys(sprite.palette);
+
+  if (sprite.width <= 0 || sprite.height <= 0) problems.push('non-positive canvas');
+  if (known.indexOf(TRANSPARENT_CHAR) !== -1) problems.push("'.' must not be in the palette");
+  if (!(sprite.defaultAnimation in sprite.animations)) problems.push('defaultAnimation missing');
+
+  for (var animId in sprite.animations) {
+    var anim = sprite.animations[animId];
+    if (anim.frames.length === 0) problems.push(animId + ': no frames');
+    if (!(anim.fps > 0)) problems.push(animId + ': fps must be > 0');
+
+    for (var f = 0; f < anim.frames.length; f++) {
+      var frame = anim.frames[f];
+      if (frame.rows.length !== sprite.height) {
+        problems.push(animId + ' frame ' + f + ': ' + frame.rows.length + ' rows, expected ' + sprite.height);
+      }
+      for (var y = 0; y < frame.rows.length; y++) {
+        var row = frame.rows[y];
+        if (row.length !== sprite.width) {
+          problems.push(animId + ' frame ' + f + ' row ' + y + ': ' + row.length + ' chars, expected ' + sprite.width);
+        }
+        for (var c = 0; c < row.length; c++) {
+          if (row[c] !== TRANSPARENT_CHAR && known.indexOf(row[c]) === -1) {
+            problems.push(animId + ' frame ' + f + ' row ' + y + ": '" + row[c] + "' not in palette");
+            break;
+          }
+        }
+      }
+    }
+  }
+  return problems;
+}
+
+/* ---- DRAFT generation, ported from assets.ts ---- */
+
+function draftFrame(width, height, frameIndex) {
+  var grid = [];
+  for (var y = 0; y < height; y++) {
+    var row = [];
+    for (var x = 0; x < width; x++) {
+      var onEdge = x === 0 || y === 0 || x === width - 1 || y === height - 1;
+      row.push(onEdge ? 'o' : 'd');
+    }
+    grid.push(row);
+  }
+  for (var hy = 1; hy < height - 1; hy++) {
+    var hrow = grid[hy];
+    if (hrow === undefined) continue;
+    for (var hx = 1; hx < width - 1; hx++) {
+      if ((hx + hy) % 6 === 0) hrow[hx] = 'o';
+    }
+  }
+  var pipRow = grid[height - 3];
+  if (pipRow !== undefined && height >= 6 && width >= 6) {
+    var maxPips = Math.floor((width - 4) / 2);
+    var pipCount = Math.min(frameIndex + 1, Math.max(maxPips, 1));
+    for (var p = 0; p < pipCount; p++) {
+      var px = 2 + p * 2;
+      if (px < width - 1) pipRow[px] = 'p';
+    }
+  }
+  return { rows: grid.map(function (r) { return r.join(''); }) };
+}
+
+var DRAFT_PALETTE = { o: '--draft-edge', d: '--draft-fill', p: '--accent' };
+
+function draftSprite(id, width, height, frameCount) {
+  var frames = [];
+  for (var i = 0; i < frameCount; i++) frames.push(draftFrame(width, height, i));
+  return {
+    id: id, width: width, height: height, palette: DRAFT_PALETTE, isDraft: true,
+    defaultAnimation: 'idle',
+    animations: { idle: { id: 'idle', frames: frames, fps: 6, loop: true } }
+  };
+}
+
+/* ---- the real test card data, copied verbatim from testcard.ts ---- */
+
+var FRAME_A = [
+  'oooooooooooooooo','o.B.B.B.B.B.B.Bo','oB.B.B.B.B.B.B.o','o.B.B.B.B.B.B.Bo',
+  'oB.B.B.B.B.B.B.o','oRRRRRRRRRRRRRRo','o..............o','oRRRRRRRRRRRRRRo',
+  'oS.S.S.S.S.S.S.o','oS.S.S.S.S.S.S.o','oS.S.S.S.S.S.S.o','oPPPRRRBBSSFFCCo',
+  'oPPPRRRBBSSFFCCo','oPPPRRRBBSSFFCCo','o..............o','oooooooooooooooo'
+];
+var FRAME_B = [
+  'oooooooooooooooo','oB.B.B.B.B.B.B.o','o.B.B.B.B.B.B.Bo','oB.B.B.B.B.B.B.o',
+  'o.B.B.B.B.B.B.Bo','oRRRRRRRRRRRRRRo','o..............o','oRRRRRRRRRRRRRRo',
+  'o.S.S.S.S.S.S.So','o.S.S.S.S.S.S.So','o.S.S.S.S.S.S.So','oCCFFSSBBRRRPPPo',
+  'oCCFFSSBBRRRPPPo','oCCFFSSBBRRRPPPo','o..............o','oooooooooooooooo'
+];
+
+var testCard = {
+  id: 'testcard', width: 16, height: 16, isDraft: false,
+  palette: { o: '--text', P: '--c-plum', R: '--c-rose', B: '--c-blush', S: '--c-sage', F: '--c-fern', C: '--c-cream' },
+  defaultAnimation: 'static',
+  animations: {
+    static:    { id: 'static',    frames: [{ rows: FRAME_A }], fps: 1, loop: false },
+    alternate: { id: 'alternate', frames: [{ rows: FRAME_A }, { rows: FRAME_B }], fps: 2, loop: true }
+  }
+};
+
+/* =========================================================================
+   Run
+   ========================================================================= */
+
+var results = [];
+function check(name, ok, detail) {
+  results.push({ name: name, ok: ok, detail: detail || '' });
+}
+
+function sample(container, sprite, frame, scale, label, flipX, rimLight) {
+  var box = document.createElement('div');
+  box.className = 'sample';
+  var canvas = document.createElement('canvas');
+  var cap = document.createElement('span');
+  cap.textContent = label;
+  box.appendChild(canvas);
+  box.appendChild(cap);
+  container.appendChild(box);
+  // Paint only once attached: custom properties resolve to nothing on a
+  // detached element, which is exactly the fault this harness caught.
+  return paint(canvas, sprite, frame, scale, !!flipX, !!rimLight);
+}
+
+// --- test card ladders, day and night ---
+var scaleInfo = null;
+[['day', 'ladder-day'], ['night', 'ladder-night']].forEach(function (pair) {
+  var host = document.getElementById(pair[1]);
+  [1, 2, 3, 4].forEach(function (s) {
+    var info = sample(host, testCard, testCard.animations.static.frames[0], s, '×' + s + ' · ' + (16 * s) + 'px');
+    if (pair[0] === 'day' && s === 3) scaleInfo = info;
+  });
+});
+
+// --- rim light comparison ---
+[['day', 'rim-day'], ['night', 'rim-night']].forEach(function (pair) {
+  var host = document.getElementById(pair[1]);
+  sample(host, testCard, testCard.animations.static.frames[0], 4, 'rim off');
+  sample(host, testCard, testCard.animations.static.frames[0], 4, 'rim on', false, true);
+  sample(host, testCard, testCard.animations.alternate.frames[1], 4, 'frame 2');
+  sample(host, testCard, testCard.animations.static.frames[0], 4, 'flipX', true);
+});
+
+// --- draft placeholders ---
+var draftBunny = draftSprite('bunny', 64, 64, 3);
+var draftIcon = draftSprite('icon_heart', 16, 16, 1);
+var draftEnvelope = draftSprite('envelope', 64, 64, 26);
+var draftTypist = draftSprite('typist', 96, 80, 4);
+
+[['day', 'draft-day'], ['night', 'draft-night']].forEach(function (pair) {
+  var host = document.getElementById(pair[1]);
+  sample(host, draftIcon, draftIcon.animations.idle.frames[0], 3, 'icon 16×16 ×3');
+  sample(host, draftBunny, draftBunny.animations.idle.frames[1], 2, 'bunny 64×64 ×2 f2');
+  sample(host, draftTypist, draftTypist.animations.idle.frames[3], 2, 'typist 96×80 ×2 f4');
+  sample(host, draftEnvelope, draftEnvelope.animations.idle.frames[9], 2, 'envelope f10');
+});
+
+// --- palette swatches ---
+var BRAND = [['plum','--c-plum'],['rose','--c-rose'],['blush','--c-blush'],['sage','--c-sage'],['fern','--c-fern'],['cream','--c-cream']];
+var tokenTrouble = [];
+[['day','sw-day'],['night','sw-night']].forEach(function (pair) {
+  var host = document.getElementById(pair[1]);
+  BRAND.forEach(function (entry) {
+    var cell = document.createElement('div');
+    cell.className = 'sw';
+    var chip = document.createElement('div');
+    chip.className = 'c';
+    var meta = document.createElement('div');
+    meta.className = 'm';
+    cell.appendChild(chip); cell.appendChild(meta); host.appendChild(cell);
+    var value = getComputedStyle(chip).getPropertyValue(entry[1]).trim();
+    chip.style.background = value || 'magenta';
+    meta.textContent = entry[0] + ' ' + (value || 'UNRESOLVED');
+    if (!value) tokenTrouble.push(pair[0] + '/' + entry[0]);
+  });
+});
+
+// --- semantic token check, both themes ---
+var SEMANTIC = ['--bg','--surface','--surface-alt','--text','--muted','--faint','--border',
+                '--border-strong','--shadow','--accent','--accent-strong','--accent-cool',
+                '--highlight','--on-accent','--focus-ring','--rim-light','--draft-fill','--draft-edge'];
+var missing = [];
+['day','night'].forEach(function (themeName) {
+  var probe = document.createElement('div');
+  probe.setAttribute('data-theme', themeName);
+  document.body.appendChild(probe);
+  var cs = getComputedStyle(probe);
+  SEMANTIC.forEach(function (token) {
+    if (!cs.getPropertyValue(token).trim()) missing.push(themeName + token);
+  });
+  document.body.removeChild(probe);
+});
+
+/* ---- assemble the checks ---- */
+
+var tcProblems = validateSprite(testCard);
+check('Test card passes sprite validation', tcProblems.length === 0, tcProblems.join('; '));
+
+var bunnyProblems = validateSprite(draftBunny);
+check('DRAFT bunny (64×64, 3 frames) passes validation', bunnyProblems.length === 0, bunnyProblems.join('; '));
+
+var envProblems = validateSprite(draftEnvelope);
+check('DRAFT envelope (64×64, 26 frames) passes validation', envProblems.length === 0, envProblems.join('; '));
+
+var typProblems = validateSprite(draftTypist);
+check('DRAFT typist (96×80, 4 frames) passes validation', typProblems.length === 0, typProblems.join('; '));
+
+var bigBg = draftSprite('background_day', 480, 270, 1);
+var bgProblems = validateSprite(bigBg);
+check('DRAFT background (480×270) generates at exact size', bgProblems.length === 0,
+  bgProblems.length ? bgProblems.join('; ') : bigBg.animations.idle.frames[0].rows.length + ' rows × ' + bigBg.animations.idle.frames[0].rows[0].length + ' chars');
+
+check('Every semantic token resolves in both themes', missing.length === 0, missing.join(', '));
+check('Every brand colour resolves in both themes', tokenTrouble.length === 0, tokenTrouble.join(', '));
+
+// The check above probes a plain div. This one interrogates the colours the
+// SPRITE actually resolved, which is the thing that was silently broken:
+// a detached canvas resolves every custom property to '' and paints magenta.
+var tcColors = scaleInfo ? scaleInfo.colors : {};
+var magentas = Object.keys(tcColors).filter(function (k) { return tcColors[k] === 'magenta'; });
+check('Sprite resolves real colours (no magenta fallback)', magentas.length === 0,
+  magentas.length ? 'unresolved: ' + magentas.join(', ')
+                  : 'rose=' + tcColors.R + ' fern=' + tcColors.F + ' plum=' + tcColors.P);
+
+// Day and night must actually differ, or one theme is silently inheriting the other.
+var nightProbeHost = document.querySelector('#ladder-night');
+var nightCanvas = nightProbeHost ? nightProbeHost.querySelector('canvas') : null;
+var nightColors = nightCanvas ? resolvePalette(testCard.palette, nightCanvas) : {};
+check('Day and night resolve different ink', tcColors.o !== undefined && nightColors.o !== undefined && tcColors.o !== nightColors.o,
+  'day text=' + tcColors.o + ' · night text=' + nightColors.o);
+
+var expectedBuf = 16 * 3 * Math.max(1, Math.round(window.devicePixelRatio || 1));
+check('Backing store is width × scale × DPR (integer)',
+  scaleInfo !== null && scaleInfo.bufW === expectedBuf,
+  'dpr=' + (window.devicePixelRatio || 1) + ' → buffer ' + (scaleInfo ? scaleInfo.bufW : '?') + 'px, expected ' + expectedBuf);
+
+// A frame's pip count must differ between frames, or timing can't be read.
+var f0 = draftEnvelope.animations.idle.frames[0].rows[61];
+var f9 = draftEnvelope.animations.idle.frames[9].rows[61];
+check('DRAFT frames are visually distinct (pip row differs)', f0 !== f9,
+  'frame 1 pips ≠ frame 10 pips');
+
+// Deliberately broken sprite: validation must catch it.
+var broken = {
+  id: 'broken', width: 16, height: 16, palette: { o: '--text' },
+  defaultAnimation: 'x', isDraft: false,
+  animations: { x: { id: 'x', frames: [{ rows: ['ooo', 'oQo'] }], fps: 6, loop: true } }
+};
+var brokenProblems = validateSprite(broken);
+check('Validation catches a malformed sprite', brokenProblems.length >= 3,
+  brokenProblems.length + ' problems found: ' + brokenProblems.join('; '));
+
+/* ---- render results ---- */
+
+var list = document.getElementById('results');
+results.forEach(function (r) {
+  var li = document.createElement('li');
+  li.className = r.ok ? 'pass' : 'fail';
+  var tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = r.ok ? 'PASS' : 'FAIL';
+  var text = document.createElement('span');
+  text.textContent = r.name + (r.detail ? '  — ' + r.detail : '');
+  li.appendChild(tag); li.appendChild(text);
+  list.appendChild(li);
+});
+
+var failed = results.filter(function (r) { return !r.ok; }).length;
+document.title = failed === 0
+  ? 'Renderer check — all ' + results.length + ' pass'
+  : 'Renderer check — ' + failed + ' FAILING';
+</script>
+</body>
+</html>

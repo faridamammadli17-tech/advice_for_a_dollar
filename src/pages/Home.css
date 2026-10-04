@@ -1,0 +1,271 @@
+/* Homepage. */
+
+.hero {
+  padding: 56px 0 64px;
+  border-bottom: var(--border-width) solid var(--border-strong);
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.hero-words {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.hero-pad {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-actions {
+  justify-content: flex-start;
+}
+
+.hero-price {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.hero-assurance {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.hero-alt {
+  margin: 0;
+  font-size: 15px;
+}
+
+.hero-alt-muted {
+  color: var(--faint);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------- the writing pad */
+
+.pad {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pad-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  /* Pulls the frog down so he sits on the top edge of the textarea. */
+  margin-bottom: -4px;
+}
+
+.pad-head .field-label {
+  padding-bottom: 6px;
+}
+
+.pad-textarea {
+  background: var(--bg);
+}
+
+/* ------------------------------------------------------------- the world */
+
+.world {
+  border: var(--border-width) solid var(--border-strong);
+  box-shadow: 5px 5px 0 var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+
+.world-sky {
+  flex: 1;
+  background: var(--surface-alt);
+  min-height: 40px;
+}
+
+.world-ground {
+  background: var(--highlight);
+  border-top: var(--border-width) solid var(--accent-cool);
+  padding: 22px 18px 24px;
+}
+
+.world-cast {
+  display: flex;
+  gap: 26px;
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.world-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.world-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  /* Deliberately dark: this band is always the sage highlight, in both themes. */
+  color: #2f582c;
+}
+
+.world-role {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  /* Fixed dark green: this band is always the sage highlight in both themes,
+     and the lighter shade failed contrast at this size. */
+  color: #38512c;
+}
+
+.world-note {
+  margin: 0;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--faint);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+/* ---------------------------------------------------------------- bands */
+
+.band {
+  background: var(--surface);
+  border-bottom: var(--border-width) solid var(--border-strong);
+}
+
+.not-therapy {
+  margin: 8px 0 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  border-left: 4px solid var(--accent-strong);
+  padding-left: 14px;
+  max-width: 58ch;
+}
+
+/* -------------------------------------------------------------- example */
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.example-category {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.example-rule {
+  border: 0;
+  border-top: 2px solid var(--border);
+  width: 100%;
+  margin: 6px 0;
+}
+
+.example-from {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+.example-awaiting {
+  border-style: dashed;
+  box-shadow: none;
+  background: var(--surface-alt);
+}
+
+.example-awaiting-title {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--accent-text);
+}
+
+/* ---------------------------------------------------------------- trust */
+
+.one-human {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  line-height: 1.45;
+  margin: 0;
+  max-width: 34ch;
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.trust-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trust-card .prose {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ----------------------------------------------------------- final call */
+
+.final {
+  padding-bottom: 88px;
+}
+
+/* --------------------------------------------------------------- mobile */
+
+@media (max-width: 900px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  /* Writing first. Someone who came here to write should not scroll past
+     scenery to reach the box. */
+  .hero-world {
+    order: 2;
+  }
+
+  .world {
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 32px 0 44px;
+  }
+}
