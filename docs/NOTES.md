@@ -1688,3 +1688,61 @@ opened from here. Instead a static preview build (`VITE_PREVIEW_ROUTER=hash`,
 relative paths) is published as a private page: the whole front end, no server
 behind it, so the writing flow stops politely at its first step. A real shared
 preview needs either that policy widened or the server hosted somewhere.
+
+---
+
+## The frog at his computer, the creatures, and the dark green band (2026-10-04, night)
+
+Farida's third brief, all design: swap the box's colours, bring the dark green
+in at the top, delete the close-up under the staff, build the typing frog
+properly, stop dimming the forest, and make it move. Not a word of copy changed.
+
+**Colours.** The box is light green with the pale-pink writing area inside
+it; the header and footer are the dark green band, with pale pink for the
+menu and footer text (5.7:1 on it) and white for the page you are on (8.2:1).
+Text is chosen after the background now, not before it: wine on the light
+green box (6.9:1), dark green for the quieter line under the button (5.7:1).
+Nothing on the page falls under 4.5:1. The sections below the hero keep their
+pale pink and light green.
+
+**The frog.** The second delivered frame (128px, recovered losslessly from a
+15x enlargement, the first version kept in `originals/`) is cut into layers
+by `scripts/make-typist-layers.py`: desk, body, head, closed-eye head, arm,
+and lines of text for the screen. Nothing is redrawn. He is drawn at 3x
+(a 264px-wide figure) at the foot of the writing box. His chest rises one
+pixel as he breathes, his head drops two pixels to look at the keys and
+lifts again, his hand taps and reaches, he blinks, and seven lines of text
+type themselves onto the monitor, then the screen clears and starts over.
+Every move is a whole-pixel `steps()` translate. The head is cut at the chin
+and only ever drops, which is why no neck gap can open; the pixels the arm
+would uncover when it lifts are filled from their neighbours in the layer
+behind. The one visible arm is the only arm the artist drew, so it is the
+only one that types.
+
+**Where he sits.** The scene's own frog and bunny on their mushroom occupy
+the leftmost 148 scene pixels, which on a wide screen (scene at 4x, anchored
+left) is the leftmost 592px of the window, under the box's left edge. So on
+wide screens he slides right along the box's bottom edge until he clears
+them by twelve pixels: at 1440px wide he starts about 200px in from the box's
+left corner, at 1280px about 125px in. Below 1160px the scene is centred and
+the painted pair is off screen, so he sits at the bottom-left corner proper,
+flush with the box's edge. Measured at 1440, 1280, 1160, 1024, 768 and 390:
+no overlap with the painted characters at any of them, no horizontal
+scrollbar, and the monitor tucks seven art pixels into the box's bottom
+padding, eleven pixels under the last line of text.
+
+**The forest.** The pink radial overlay that wandered over it is gone; the
+scene is drawn at full colour. Its seven little black creatures are lifted
+out by `scripts/cut-scene-creatures.py` into sprites, with the holes painted
+over in `stage.png`, and drawn back at their exact spots, so at rest the page
+shows the delivered picture to the pixel. Each one bobs, shuffles a pixel to
+the side and back, and blinks on its own rhythm. Detection alone found
+sixteen candidates, because the painted bunny's outline and skin share the
+creatures' fur and eye colours; the seven real ones are picked by hand in
+the script. Two more at the right edge are left painted (they are cut off by
+the image edge and off screen at every common size). Fireflies: ten, slow.
+
+**Checked.** Chromium at six widths; `prefers-reduced-motion` leaves every
+animation off (frog, creatures, fireflies hidden, bunny) and the frog's
+screen fully typed; no console errors. 160 tests, typecheck, lint, the
+override build. The preview page is republished at the same address.

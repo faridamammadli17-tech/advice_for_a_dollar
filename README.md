@@ -22,11 +22,11 @@ It is at the bottom of this page.
 
 <table>
   <tr>
-    <td width="66%"><img src="docs/screenshots/home.png" alt="The home page: the forest, the writing box in the middle, and the bunny with her lantern standing at its corner"></td>
+    <td width="66%"><img src="docs/screenshots/home.png" alt="The home page: the forest at full strength, the writing box in the middle, the bunny with her lantern at its top-right corner and the frog typing at his computer at its foot"></td>
     <td width="34%"><img src="docs/screenshots/home-mobile.png" alt="The home page on a phone"></td>
   </tr>
   <tr>
-    <td>The home page, in Farida's five colours and her pixel font. The writing box sits in the forest; the bunny who writes back stands at its top-right corner, listening, with her portrait beneath her staff. She breathes and blinks, her lantern sparkles, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
+    <td>The home page, in Farida's five colours and her pixel font. The writing box sits in the forest; the bunny who writes back stands at its top-right corner, listening, and the frog who writes types at his computer at its foot. She breathes and blinks and her lantern sparkles; he breathes, taps at the keys, glances from the screen to the keyboard and back, and lines of text appear on his monitor. In the forest, the little black creatures bob, shuffle and blink, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
     <td>The same page on a phone: the box first, the bunny beside it.</td>
   </tr>
 </table>
@@ -34,11 +34,11 @@ It is at the bottom of this page.
 <table>
   <tr>
     <td width="50%"><img src="docs/screenshots/home-writing.png" alt="While someone writes, the box lifts and the pink comes forward"></td>
-    <td width="50%"><img src="docs/screenshots/home-tablet.png" alt="On a tablet the bunny stands on the top edge of the box instead of beside it"></td>
+    <td width="50%"><img src="docs/screenshots/home-mobile-frog.png" alt="On a phone the frog sits at the bottom-left corner of the box"></td>
   </tr>
   <tr>
     <td>While someone writes, the box lifts and the pink comes forward.</td>
-    <td>On a tablet or phone the bunny steps onto the top edge of the box instead of standing beside it.</td>
+    <td>On a phone the bunny steps onto the top edge of the box, and the frog sits at its bottom-left corner.</td>
   </tr>
 </table>
 
@@ -199,7 +199,7 @@ Whoever sets up the server should know three things. All of them are in
 | A real problem and reply for the home page example | Farida | The slot is empty on purpose. A made-up example would be worse than a gap. |
 | Epoint or Payriff API documentation | The payment provider | Real payments cannot be wired safely without it. The code refuses to guess. |
 | Connecting email | A developer | The mailer is written but not switched on: "your answer is ready" and sending a recovered link to an inbox. |
-| More artwork | Her artist | The envelope for the sending ceremony, and more frames for the frog. The bunny's blink is drawn from her delivered art. |
+| More artwork | Her artist | The envelope for the sending ceremony. The bunny's blink and the frog's typing are drawn from the delivered art. |
 
 ---
 
@@ -220,6 +220,8 @@ Whoever sets up the server should know three things. All of them are in
 | `npm run art:recover` | recover pixel art from a clean enlargement |
 | `npm run art:recover-jpeg` | recover pixel art from an enlargement that was saved as a JPEG |
 | `npm run art:blink` | redraw the bunny's closed-eye frames from her open-eye art |
+| `npm run art:typist` | cut the frog at his computer into the layers the home page animates |
+| `npm run art:creatures` | lift the little black creatures out of the forest so they can move |
 
 The release build refuses on purpose while the crisis numbers are placeholders
 or the copy still contains an unfilled blank. To build anyway for local

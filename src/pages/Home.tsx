@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { WritingPad } from '../components/WritingPad';
 import { ForestScene } from '../components/ForestScene';
-import { PortraitBunny, StandingBunny } from '../components/Bunny';
+import { StandingBunny } from '../components/Bunny';
+import { TypingFrog } from '../components/TypingFrog';
 import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
 import { readDraft, writeDraft } from '../lib/submissions/draft';
@@ -16,8 +17,9 @@ import './Home.css';
  *
  * The forest fills the whole page. In the middle of it sits the writing box;
  * the bunny stands at its top-right corner, close enough to be listening, and
- * her portrait sits centred beneath the staff she holds. Then: who is writing
- * back, why it costs what it costs, a real example, and a final invitation.
+ * the frog types away at his computer along its bottom edge. Then: who is
+ * writing back, why it costs what it costs, a real example, and a final
+ * invitation.
  *
  * The writing box is the hero rather than a thing below it. Someone arriving
  * mid-crisis should not have to read a landing page before they find out
@@ -53,9 +55,10 @@ export function Home() {
                 <p className="lede">{copy.hero.subhead}</p>
               </div>
 
-              {/* No frog on this box: the bunny beside it is the character
-                  here, and his 128px row would push the box below the fold.
-                  He types along on the /ask page, where writing is the job. */}
+              {/* The frog is not on the label row here: he sits at the foot of
+                  the box instead (TypingFrog below), where his desk does not
+                  push the box down the page. He types along on the /ask
+                  page, where writing is the job. */}
               <WritingPad
                 id="home-write"
                 label={copy.hero.writePrompt}
@@ -79,13 +82,13 @@ export function Home() {
               </p>
             </div>
 
-            {/* The cast stands beside the card on a wide screen (top-right,
-                portrait under the staff) and steps above and below it on
-                narrower ones. Order and placement live in Home.css. */}
+            {/* The bunny stands beside the card on a wide screen (top-right)
+                and on its top edge on narrower ones; the frog sits at its
+                foot. Order and placement live in Home.css. */}
             <div className="hero-cast">
               <StandingBunny />
-              <PortraitBunny />
             </div>
+            <TypingFrog className="hero-frog" />
           </div>
 
           {FEATURES.archive ? (

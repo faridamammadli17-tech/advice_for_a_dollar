@@ -22,7 +22,9 @@
     "art:check": "tsx scripts/check-art.ts",
     "art:recover": "python3 scripts/downscale-art.py",
     "art:recover-jpeg": "python3 scripts/recover-from-jpeg.py",
-    "art:blink": "python3 scripts/make-blink-frames.py"
+    "art:blink": "python3 scripts/make-blink-frames.py",
+    "art:typist": "python3 scripts/make-typist-layers.py",
+    "art:creatures": "python3 scripts/cut-scene-creatures.py"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

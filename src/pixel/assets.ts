@@ -258,8 +258,11 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
   typist: {
     id: 'typist',
     label: 'Typist — frog at the computer',
-    // The delivered art is 128x128. Recovered losslessly from a clean 15x
-    // nearest-neighbour upscale — see scripts/downscale-art.py.
+    // The delivered art is 128x128 (the second version, 2026-10-04).
+    // Recovered losslessly from a clean 15x nearest-neighbour upscale — see
+    // scripts/downscale-art.py. The home page does not draw this frame: it
+    // draws the same pixels cut into layers (assets/typist/, made by
+    // scripts/make-typist-layers.py) so the head, arm and chest can move.
     width: 128,
     height: 128,
     group: 'character',
@@ -276,6 +279,7 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
           'Two alternating hand positions plus a slower head bob. Eases in while the visitor types, returns to idle ~700ms after they stop.',
       },
     ],
+    note: 'On the home page he is animated from layers of this frame (TypingFrog.tsx); here and on /ask he is the single frame.',
   },
 
   /* ---- the submission ceremony ---- */
@@ -449,7 +453,7 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
     src: 'forest_day.png',
     defaultAnimation: 'idle',
     animations: [idle(1, 'Full-bleed scene.')],
-    note: 'The bunny and frog on the mushroom sit at the left edge, so wide screens show them and phones show the meadow.',
+    note: 'The bunny and frog on the mushroom sit at the left edge, so wide screens show them and phones show the meadow. The home page draws it as assets/creatures/stage.png plus the seven creatures as sprites (scripts/cut-scene-creatures.py), which lines up with this file to the pixel.',
   },
 
   background_night: {

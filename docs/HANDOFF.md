@@ -189,13 +189,32 @@ production build while the crisis numbers are placeholders or copy contains
 `ALLOW_PLACEHOLDER_CONTENT=1 npm run build`.
 
 **The home page draws its sprites with `<img>`, not `SpriteCanvas`.** The
-standing bunny, her portrait and the forest are plain images with
-`image-rendering: pixelated`, sized by a CSS variable `--px` that is always a
-whole number (3 on wide screens, 2 below 1100px). `ForestScene.tsx` computes
-the smallest whole-number scale that covers the viewport. The animations are
-CSS keyframes stepped with `steps(1)`, so a sprite never lands between pixels;
-they all stop under `prefers-reduced-motion`. Everything else on the site
-still goes through `SpriteCanvas` and the shared loop.
+standing bunny, the frog at his computer, the forest and its creatures are
+plain images with `image-rendering: pixelated`, sized by a CSS variable
+`--px` that is always a whole number (the bunny 3 on wide screens and 2
+below 1400px; the frog 3 everywhere). `ForestScene.tsx` computes the smallest
+whole-number scale that covers the viewport. The animations are CSS keyframes
+stepped with `steps(1)`, moving by whole art pixels, so a sprite never lands
+between pixels; they all stop under `prefers-reduced-motion`. Everything else
+on the site still goes through `SpriteCanvas` and the shared loop.
+
+**The frog and the creatures are the delivered art cut into layers, not
+redrawn.** `npm run art:typist` splits the 128px frog into desk, body, head,
+closed-eye head, arm and screen text (`src/pixel/assets/typist/`); the head
+is cut at the chin and only ever moves down, and the pixels the arm would
+uncover are filled from their neighbours, so a one-pixel move never shows a
+hole. `npm run art:creatures` lifts the seven little black creatures out of
+`forest_day.png` into `src/pixel/assets/creatures/` and paints the holes over
+in `stage.png`; the home page draws the stage plus the sprites, which at rest
+is the original picture to the pixel. If the artist sends a new frog or a new
+scene, run the script again rather than editing the layers by hand.
+
+**The frog slides along the box's bottom edge on wide screens.** The scene's
+own frog and bunny sit in its leftmost 148 pixels. `.hero-frog` in `Home.css`
+mirrors `ForestScene.tsx`'s scale in CSS and moves the typing frog right just
+far enough to clear them, so the two frogs never overlap. Below 1160px the
+scene is centred and the painted pair is off screen, so he sits at the box's
+bottom-left corner.
 
 **The header logo is 128px because nothing smaller is allowed.** Whole-number
 scaling means the portrait cannot shrink to 64px without the artist exporting
@@ -250,6 +269,8 @@ scripts/
   downscale-art.py  lossless pixel-art recovery
   recover-from-jpeg.py  next-best recovery when the enlargement was a JPEG
   make-blink-frames.py  closed-eye frames for the bunny's blink
+  make-typist-layers.py  the frog at his computer, cut into layers to animate
+  cut-scene-creatures.py  the forest's creatures as sprites, and the scene without them
 data/advice.db  the database — this is the thing to back up (not in Git)
 docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 .github/        the checks GitHub runs on every pull request
@@ -283,11 +304,13 @@ docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 6. **Email is written but not wired.** `server/email.ts` exists with a
    `ConsoleMailer` (logs) and `SmtpMailer`. It still needs connecting to two
    places: notify on answer, and deliver a recovered link to an inbox.
-7. **Animation frames.** The frog has one frame. The bunny has her open
-   frame plus a closed-eye frame drawn from it by `npm run art:blink`; the
-   home page animates her with CSS (bob, blink, lantern sparkle). The
-   envelope ceremony still runs on a DRAFT placeholder. The manifest declares
-   the intended counts and the inspector honestly says how many have arrived.
+7. **Animation frames.** The bunny has her open frame plus a closed-eye
+   frame drawn from it by `npm run art:blink`; the home page animates her
+   with CSS (bob, blink, lantern sparkle). The frog has one delivered frame,
+   which the home page animates as layers (breath, head, arm, blink, screen
+   text); on /ask he is still that single frame. The envelope ceremony still
+   runs on a DRAFT placeholder. The manifest declares the intended counts and
+   the inspector honestly says how many have arrived.
 
 ---
 

@@ -2,12 +2,10 @@ import { type CSSProperties } from 'react';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import standingOpen from '../pixel/assets/bunny_idle_01.png';
 import standingBlink from '../pixel/assets/bunny_blink_01.png';
-import portraitOpen from '../pixel/assets/bunny_portrait_01.png';
-import portraitBlink from '../pixel/assets/bunny_portrait_blink_01.png';
 
 /**
- * The bunny on the home page, in two views: standing beside the writing box
- * with the lantern staff, and the close-up portrait centred under the hero.
+ * The bunny on the home page, standing beside the writing box with the
+ * lantern staff. (Her close-up portrait is the site's logo, in the header.)
  *
  * Drawn with plain <img> elements at a whole-number scale, so every art pixel
  * is a crisp square. The life in it is a few CSS animations (Home.css):
@@ -91,25 +89,6 @@ export function StandingBunny() {
       scale={wide ? 3 : 2}
       className="bunny-standing"
       label="The bunny who writes back, standing beside the writing box with a lantern"
-    />
-  );
-}
-
-/** The close-up, centred under the hero. */
-export function PortraitBunny() {
-  return (
-    <Figure
-      open={portraitOpen}
-      blink={portraitBlink}
-      sparkles={[
-        [118, 57],
-        [98, 67],
-        [121, 82],
-      ]}
-      glow={{ x: 98, y: 60, w: 22, h: 30 }}
-      scale={2}
-      className="bunny-portrait"
-      label="A close-up of the bunny who writes back"
     />
   );
 }

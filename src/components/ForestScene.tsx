@@ -1,9 +1,9 @@
-import { useEffect, useState, type CSSProperties } from 'react';
-import forestDay from '../pixel/assets/forest_day.png';
-import { ASSETS } from '../pixel/assets';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import stage from '../pixel/assets/creatures/stage.png';
+import creatureData from '../pixel/assets/creatures/creatures.json';
 
 /**
- * The forest, full-bleed behind the home page.
+ * The forest, full-bleed behind the home page, with its creatures awake.
  *
  * Fixed to the viewport and drawn at a WHOLE-NUMBER scale (never 1.5x, see
  * HANDOFF.md) large enough to cover it, anchored to the ground so that what
@@ -11,34 +11,101 @@ import { ASSETS } from '../pixel/assets';
  * The bunny and the frog on the mushroom sit at the left edge of the scene,
  * so a wide screen shows them and a phone shows the open meadow.
  *
- * A handful of fireflies drift over it. They are the only ambient motion:
- * enough to feel alive, not enough to compete with the writing box. Every
- * animation on this page stops under prefers-reduced-motion (Home.css).
+ * The scene is drawn in two parts that line up to the pixel: the delivered
+ * painting with its seven little black creatures painted out (`stage.png`),
+ * and each creature as its own sprite at the exact spot it was painted
+ * (scripts/cut-scene-creatures.py). At rest the result is the original
+ * picture; the sprites then bob, shuffle and blink by one art pixel at a
+ * time. A handful of fireflies drift over everything. All of it stops under
+ * prefers-reduced-motion (Home.css).
  */
 
-const SCENE_WIDTH = ASSETS.background_day?.width ?? 480;
-const SCENE_HEIGHT = ASSETS.background_day?.height ?? 279;
+const SCENE_WIDTH = creatureData.scene.width;
+const SCENE_HEIGHT = creatureData.scene.height;
 
-/** The smallest whole-number scale at which the scene covers the viewport. */
-function useCoverScale(): number {
-  const [scale, setScale] = useState(1);
+/** Wide screens anchor the scene left so its painted characters stay in view. */
+const ANCHOR_LEFT_FROM = 1160;
 
-  useEffect(() => {
+const creatureFrames = import.meta.glob('../pixel/assets/creatures/creature_*.png', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>;
+
+function frame(id: number, blink: boolean): string {
+  const key = `../pixel/assets/creatures/creature_${id}${blink ? '_blink' : ''}.png`;
+  const url = creatureFrames[key];
+  if (url === undefined) throw new Error(`Missing creature frame ${key}`);
+  return url;
+}
+
+/** How each creature fidgets: its own rhythm, so no two move together. */
+const RHYTHMS: readonly { seconds: number; delay: number; blink: number }[] = [
+  { seconds: 9.3, delay: -2.1, blink: 4.7 },
+  { seconds: 8.1, delay: -5.4, blink: 5.9 },
+  { seconds: 10.6, delay: -0.7, blink: 4.1 },
+  { seconds: 8.8, delay: -3.9, blink: 6.3 },
+  { seconds: 7.4, delay: -6.2, blink: 5.2 },
+  { seconds: 11.2, delay: -1.5, blink: 4.4 },
+  { seconds: 9.9, delay: -7.3, blink: 5.6 },
+];
+
+type Layout = { readonly scale: number; readonly left: number; readonly top: number };
+
+function layoutFor(viewportWidth: number, viewportHeight: number, width: number, height: number): Layout {
+  const scale = Math.max(
+    1,
+    Math.ceil(viewportWidth / SCENE_WIDTH),
+    Math.ceil(viewportHeight / SCENE_HEIGHT),
+  );
+  const sceneWidth = SCENE_WIDTH * scale;
+  const sceneHeight = SCENE_HEIGHT * scale;
+  return {
+    scale,
+    left: viewportWidth >= ANCHOR_LEFT_FROM ? 0 : Math.floor((width - sceneWidth) / 2),
+    top: Math.floor(height - sceneHeight),
+  };
+}
+
+/**
+ * The smallest whole-number scale at which the scene covers the viewport, and
+ * where the scene's corner lands inside the fixed layer. The scale follows
+ * the viewport (as the CSS breakpoints do); the offset follows the layer's
+ * real size, which excludes any scrollbar.
+ */
+function useSceneLayout(ref: RefObject<HTMLDivElement | null>): Layout {
+  const [layout, setLayout] = useState<Layout>(() =>
+    layoutFor(window.innerWidth, window.innerHeight, window.innerWidth, window.innerHeight),
+  );
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (element === null) return;
+
     const update = () => {
-      setScale(
-        Math.max(
-          1,
-          Math.ceil(window.innerWidth / SCENE_WIDTH),
-          Math.ceil(window.innerHeight / SCENE_HEIGHT),
-        ),
+      const next = layoutFor(
+        window.innerWidth,
+        window.innerHeight,
+        element.clientWidth,
+        element.clientHeight,
+      );
+      setLayout((previous) =>
+        previous.scale === next.scale && previous.left === next.left && previous.top === next.top
+          ? previous
+          : next,
       );
     };
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
 
-  return scale;
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    window.addEventListener('resize', update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [ref]);
+
+  return layout;
 }
 
 /** Where each firefly lives (percent of the viewport) and how it drifts. */
@@ -51,20 +118,60 @@ const FIREFLIES: readonly { x: number; y: number; seconds: number; delay: number
   { x: 80, y: 46, seconds: 16, delay: -7 },
   { x: 91, y: 84, seconds: 18, delay: -11 },
   { x: 47, y: 56, seconds: 21, delay: -15 },
+  { x: 14, y: 24, seconds: 20, delay: -4 },
+  { x: 74, y: 88, seconds: 16, delay: -13 },
 ];
 
 export function ForestScene() {
-  const scale = useCoverScale();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scale, left, top } = useSceneLayout(ref);
+  const width = SCENE_WIDTH * scale;
+  const height = SCENE_HEIGHT * scale;
 
   return (
-    <div
-      className="forest"
-      aria-hidden="true"
-      style={{
-        backgroundImage: `url(${forestDay})`,
-        backgroundSize: `${SCENE_WIDTH * scale}px ${SCENE_HEIGHT * scale}px`,
-      }}
-    >
+    <div className="forest" aria-hidden="true" ref={ref}>
+      <div
+        className="forest-stage"
+        style={{
+          width,
+          height,
+          left,
+          top,
+          backgroundImage: `url(${stage})`,
+          backgroundSize: `${width}px ${height}px`,
+        }}
+      >
+        {creatureData.creatures.map((creature, index) => {
+          const rhythm = RHYTHMS[index % RHYTHMS.length] ?? RHYTHMS[0];
+          const size = { width: creature.width * scale, height: creature.height * scale };
+          return (
+            <span
+              key={creature.id}
+              className="critter"
+              style={
+                {
+                  '--px': `${scale}px`,
+                  left: creature.x * scale,
+                  top: creature.y * scale,
+                  ...size,
+                  animationDuration: `${rhythm?.seconds ?? 9}s`,
+                  animationDelay: `${rhythm?.delay ?? 0}s`,
+                } as CSSProperties
+              }
+            >
+              <img className="critter-frame" src={frame(creature.id, false)} alt="" {...size} />
+              <img
+                className="critter-frame critter-blink"
+                src={frame(creature.id, true)}
+                alt=""
+                {...size}
+                style={{ animationDuration: `${rhythm?.blink ?? 5}s`, animationDelay: `${rhythm?.delay ?? 0}s` }}
+              />
+            </span>
+          );
+        })}
+      </div>
+
       {FIREFLIES.map((fly) => (
         <span
           key={`${fly.x}-${fly.y}`}
