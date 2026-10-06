@@ -201,10 +201,11 @@ site still goes through `SpriteCanvas` and the shared loop.
 
 **The frog and the creatures are the delivered art cut into layers, not
 redrawn.** `npm run art:typist` splits the 128px frog into desk, body, head,
-closed-eye head, arm and screen text (`src/pixel/assets/typist/`); the head
-is cut at the chin and only ever moves down, and the pixels the arm would
-uncover are filled from their neighbours, so a one-pixel move never shows a
-hole. `npm run art:creatures` finds the seven little black creatures on the
+closed-eye head, arm and screen text (`src/pixel/assets/typist/`). Since
+2026-10-06 only the screen text is animated: the frog holds still by the
+owner's decision, so the body, head and arm layers never move and the
+closed-eye head is not drawn (the cut layers are kept so the text can be
+separated from the screen). `npm run art:creatures` finds the seven little black creatures on the
 clean 480px copy (`forest_day.png`) and cuts them out of the DELIVERED file
 (`originals/forest-scene-2x-jpeg.jpg`, 960x558) at its own pixel grid, into
 `src/pixel/assets/creatures/`: each one as a sprite, a closed-eye frame, and

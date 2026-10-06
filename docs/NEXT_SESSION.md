@@ -94,10 +94,9 @@ code. The project owner is Farida, also not an engineer. What they want:
 - The frog at his computer at the right end of that line, 3x where the box
   has its full width and 2x below 700px, his desk on the writing area's top
   edge (`src/components/TypingFrog.tsx` and `.css`; placement under "the
-  frog" in `src/pages/Home.css`). Breath, head to the keys and back, hand
-  tapping, blink, seven lines typed then cleared. **The owner wants this
-  animation replaced by her sprite sheet** (see the last NOTES entry): the
-  file has not arrived yet.
+  frog" in `src/pages/Home.css`). **The frog himself never moves** (owner,
+  2026-10-06): only his screen, where seven lines are typed, held, then
+  cleared. The sprite-sheet idea was dropped; do not add body movement.
 - Under the reply line, Chiron's name card: the bunny's portrait (the logo's
   art, 1x) over the word "Chiron", cream with a wine border, hanging 44px
   off the box's bottom edge. Just the name, no title. He blinks.
@@ -123,9 +122,6 @@ stump with its creatures at the right is off screen there.
   artifact preview is the workaround.
 - Whether the fourth and fifth rounds go onto the pull request's branch or
   into a second pull request; then merge when happy.
-- The frog sprite sheet (`frog-writing-spritesheet.png`, 2048x128, sixteen
-  128x128 frames): attach it, then swap the animation as the last NOTES
-  entry describes.
 - Whether the hot-pink shadows and firefly glow should go too, now that pale
   pink is out as a fill.
 - Whether anything is wanted on the right of the page at laptop widths now

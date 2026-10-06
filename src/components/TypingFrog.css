@@ -1,4 +1,4 @@
-/* The frog at his computer: layered art, moved by whole pixels. */
+/* The frog at his computer: still, except for the writing on his screen. */
 
 .typist {
   position: relative;
@@ -18,16 +18,6 @@
   pointer-events: none;
 }
 
-.typist-torso,
-.typist-head {
-  position: absolute;
-  inset: 0;
-}
-
-.typist-blink {
-  opacity: 0;
-}
-
 /* Each line of text on the screen is the whole text layer clipped to its own
    row. `--line-*` are art-pixel numbers set per line by TypingFrog.tsx. At
    rest (and under reduced motion) every line shows in full. */
@@ -44,23 +34,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .typist-torso {
-    animation: typist-breathe 3.4s steps(1, end) infinite;
-  }
-
-  .typist-head {
-    animation: typist-glance 7.2s steps(1, end) infinite;
-  }
-
-  .typist-blink {
-    animation: typist-blink 5.1s steps(1, end) infinite;
-    animation-delay: 1.3s;
-  }
-
-  .typist-arm {
-    animation: typist-type 0.56s steps(1, end) infinite;
-  }
-
   /* One fourteen-second page: seven lines typed one after another, a pause
      to read it back, then a clear screen and a fresh start. Each line's
      typing segment runs in as many steps as it has pixels, so the text
@@ -95,70 +68,6 @@
 
   .typist-line-7 {
     animation-name: typist-line-7;
-  }
-}
-
-/* The chest rises one pixel for half of each breath. */
-@keyframes typist-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(calc(var(--px) * -1));
-  }
-}
-
-/* Screen, then down to the keys for a while, then back to the screen. The
-   head only ever drops from its drawn position (its cut is at the chin). */
-@keyframes typist-glance {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  42% {
-    transform: translateY(var(--px));
-  }
-  47% {
-    transform: translateY(calc(var(--px) * 2));
-  }
-  80% {
-    transform: translateY(var(--px));
-  }
-  85% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes typist-blink {
-  0%,
-  92% {
-    opacity: 0;
-  }
-  93%,
-  96% {
-    opacity: 1;
-  }
-  97%,
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Tap, rest, tap-and-reach, rest: about seven taps a second. */
-@keyframes typist-type {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(0, calc(var(--px) * -1));
-  }
-  50% {
-    transform: translate(0, 0);
-  }
-  75% {
-    transform: translate(calc(var(--px) * -1), calc(var(--px) * -1));
   }
 }
 

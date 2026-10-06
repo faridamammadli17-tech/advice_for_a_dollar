@@ -1852,3 +1852,18 @@ hundredths of her frame step: 16 frames in 2.286s), delete the typist layers
 and `scripts/make-typist-layers.py` from the build, keep the reduced-motion
 rule, and check the transparent margins of her frames so the desk still
 sits on the writing area's edge.
+
+---
+
+## The frog holds still (2026-10-06, later still)
+
+The copy of the sprite sheet that reached the chat was a 500x31 JPEG preview
+of the 2048x128 sheet, shrunk by a non-whole factor and unusable, and Farida
+chose not to pursue it: the delivered frog stays as drawn, completely still,
+and only his screen moves. So `TypingFrog` no longer breathes, glances,
+taps or blinks; the layers (desk, body, head, arm) are drawn once and never
+move, and the closed-eye head is no longer rendered. The lines of writing
+still appear on the monitor one at a time, pause, clear and start again, by
+whole pixels, and stop under reduced motion with the page fully written.
+Checked in Chromium: with motion allowed the only animations on the page are
+the seven screen lines, the creatures, Chiron's blink and the fireflies.
