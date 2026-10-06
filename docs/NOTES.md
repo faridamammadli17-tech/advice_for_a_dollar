@@ -1746,3 +1746,70 @@ the image edge and off screen at every common size). Fireflies: ten, slow.
 animation off (frog, creatures, fireflies hidden, bunny) and the frog's
 screen fully typed; no console errors. 160 tests, typecheck, lint, the
 override build. The preview page is republished at the same address.
+
+---
+
+## Cream, one line, Chiron, and the forest as delivered (2026-10-06)
+
+Farida's fourth brief, with one deliberate change to her earlier rule: the
+deletions in it are hers. Everything she did not mention stays as it was.
+
+**The box.** The writing area is cream (#fcffe1), her choice; the first
+colour outside the five. Wine stays the text colour on it (9.8:1) and dark
+green the placeholder (8.0:1). Above the writing area there is one line now,
+"Write down the thing you have been carrying", which is the textarea's label
+and so its accessible name, set at 24px (20px on a phone) in sentence case
+as she wrote it. The small site-name line, the headline, the paragraph and
+the "What is on your mind?" label are gone from the home page; the /ask page
+keeps its own label and placeholder. The placeholder reads "Try giving as
+much detail as possible". The button, the price line and the line about a
+real person replying are untouched.
+
+**The frog** moved from the foot of the box to the label row, at 1x (his
+native 96x68 canvas; there is no smaller whole number), at the right end of
+the row with his desk's feet two pixels into the writing area's top border.
+The line wraps to two lines beside him on a box of full width and three on a
+phone. All his animation is as before. The CSS that slid him along the
+bottom edge to clear the painted frog is gone with him.
+
+**The standing bunny** with the lantern staff is removed from the page
+(`Bunny.tsx` now holds only the portrait; the art files stay for the
+inspector). The logo stays.
+
+**Chiron.** The bunny has a name. A name card hangs off the bottom edge of
+the box, centred: his portrait, the logo's artwork at 1x, over the word
+"Chiron" and nothing else, by her instruction, so the character does not
+look like the one who answers. Pale pink on the light-green box, wine border,
+pink hard shadow; it comes after the reply line in the flow, so it can never
+cover it, and 44px of it hang below the border (the stage reserves that
+room). He blinks.
+
+**The forest is her file.** Her rule: pixel for pixel, no filter, no
+re-encoding, nothing between the image and the screen. Measured first: the
+480px copy the page used to draw (recovered from her 2x JPEG and tidied to
+40 colours) differed from her file by more than 24 levels in some channel at
+10.3% of pixels, because the JPEG carries compression noise (only 36% of its
+2x2 blocks are uniform) and the tidying moved colours. So the page now draws
+the delivered JPEG itself. Vite copies it unchanged (the checksum in `dist/`
+is the file's). The seven creatures are cut out of that file at its own grid
+by the same script, each with a patch of meadow for its hole; at rest a
+creature covers its patch exactly. Checked in Chromium: the served file drawn
+into a canvas matches the file decoded outside the browser at all 535,680
+pixels; a screenshot at 1440x900 matches the file at all 611,798 visible
+forest pixels; `.forest` and `.forest-stage` report filter none, opacity 1,
+blend normal, image-rendering pixelated. The one cost: the 2x file's
+whole-number scales are 2 and 4 screen pixels per art pixel, never 3, so at
+1366x768, 1280x800 and 1024x768 the scene is a step larger and more of its
+right side (the stump with three creatures) is off screen than before. A 1x
+PNG from the artist would give the 3x step back and be pixel-exact as well.
+
+**Balance.** With the bunny gone the right side of the page at laptop
+widths is open meadow and the dark bush; the scene cannot show both the
+mushroom pair and the stump at that width at any whole-number scale. The
+box carries itself: the frog at its top right, Chiron at its bottom centre.
+Reported to Farida as a question rather than filled.
+
+**Checked.** Chromium at 1440, 1280, 1160, 1024, 768 and 390 wide: no
+horizontal scroll, the font loaded, no console errors; reduced motion leaves
+no visible element animating (fireflies hidden). 160 tests, typecheck, lint,
+the override build. README screenshots retaken; the preview page republished.

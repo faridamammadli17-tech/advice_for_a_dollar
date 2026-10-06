@@ -188,33 +188,45 @@ production build while the crisis numbers are placeholders or copy contains
 `*_PLACEHOLDER`. Override for local testing only:
 `ALLOW_PLACEHOLDER_CONTENT=1 npm run build`.
 
-**The home page draws its sprites with `<img>`, not `SpriteCanvas`.** The
-standing bunny, the frog at his computer, the forest and its creatures are
-plain images with `image-rendering: pixelated`, sized by a CSS variable
-`--px` that is always a whole number (the bunny 3 on wide screens and 2
-below 1400px; the frog 3 everywhere). `ForestScene.tsx` computes the smallest
-whole-number scale that covers the viewport. The animations are CSS keyframes
-stepped with `steps(1)`, moving by whole art pixels, so a sprite never lands
-between pixels; they all stop under `prefers-reduced-motion`. Everything else
-on the site still goes through `SpriteCanvas` and the shared loop.
+**The home page draws its sprites with `<img>`, not `SpriteCanvas`.** Chiron's
+portrait, the frog at his computer, the forest and its creatures are plain
+images with `image-rendering: pixelated`, sized by a CSS variable `--px` that
+is always a whole number (the portrait and the frog 1x, their native size;
+the creatures move in art pixels, which are two of the delivered file's
+pixels). `ForestScene.tsx` computes the smallest whole-number scale that
+covers the viewport. The animations are CSS keyframes stepped with
+`steps(1)`, moving by whole art pixels, so a sprite never lands between
+pixels; they all stop under `prefers-reduced-motion`. Everything else on the
+site still goes through `SpriteCanvas` and the shared loop.
 
 **The frog and the creatures are the delivered art cut into layers, not
 redrawn.** `npm run art:typist` splits the 128px frog into desk, body, head,
 closed-eye head, arm and screen text (`src/pixel/assets/typist/`); the head
 is cut at the chin and only ever moves down, and the pixels the arm would
 uncover are filled from their neighbours, so a one-pixel move never shows a
-hole. `npm run art:creatures` lifts the seven little black creatures out of
-`forest_day.png` into `src/pixel/assets/creatures/` and paints the holes over
-in `stage.png`; the home page draws the stage plus the sprites, which at rest
-is the original picture to the pixel. If the artist sends a new frog or a new
-scene, run the script again rather than editing the layers by hand.
+hole. `npm run art:creatures` finds the seven little black creatures on the
+clean 480px copy (`forest_day.png`) and cuts them out of the DELIVERED file
+(`originals/forest-scene-2x-jpeg.jpg`, 960x558) at its own pixel grid, into
+`src/pixel/assets/creatures/`: each one as a sprite, a closed-eye frame, and
+a patch of meadow for the hole it leaves. If the artist sends a new frog or a
+new scene, run the script again rather than editing the layers by hand.
 
-**The frog slides along the box's bottom edge on wide screens.** The scene's
-own frog and bunny sit in its leftmost 148 pixels. `.hero-frog` in `Home.css`
-mirrors `ForestScene.tsx`'s scale in CSS and moves the typing frog right just
-far enough to clear them, so the two frogs never overlap. Below 1160px the
-scene is centred and the painted pair is off screen, so he sits at the box's
-bottom-left corner.
+**The forest is Farida's file, untouched, and nothing may sit between it and
+the screen.** (Her rule, 2026-10-06.) `ForestScene.tsx` draws the delivered
+JPEG itself as the background; Vite copies it byte for byte (same checksum in
+`dist/`). No CSS filter, opacity, blend mode, gradient or tinted layer may go
+on `.forest` or `.forest-stage`, only whole-number scaling and pixelated
+rendering. Each creature is drawn over its meadow patch at the exact spot it
+was painted, so at rest the screen is the file to the pixel; the patch shows
+only where a creature has stepped. Verified by drawing the served file into a
+canvas (0 of 535,680 pixels differ from the file decoded outside the browser)
+and by comparing a screenshot with the file (0 of 611,798 visible forest
+pixels differ at 1440x900). The 480px copy is used only to find the creatures
+and in the sprite inspector. The cost of serving the 2x file is that its
+whole-number scales are 2 or 4 screen pixels per art pixel, never 3, so on a
+1366x768 or 1280x800 laptop the scene is shown a step larger (and more
+cropped on the right) than the 480px copy allowed. A 1x export from the
+artist (480x279 PNG) would restore the 3x step and would be pixel-exact too.
 
 **The header logo is 128px because nothing smaller is allowed.** Whole-number
 scaling means the portrait cannot shrink to 64px without the artist exporting
@@ -254,7 +266,7 @@ src/
   pixel/        sprite engine — assets.ts is the manifest, assets/ holds art
   pages/        one file per route
   components/   layout, WritingPad, SafetyInterstitial, EnvelopeCeremony,
-                ForestScene and Bunny (the home page's scene and character)
+                ForestScene, Bunny (Chiron's portrait) and TypingFrog
 server/
   db.ts         schema + the public_submissions view (the publication rule)
   app.ts        every route
@@ -270,7 +282,7 @@ scripts/
   recover-from-jpeg.py  next-best recovery when the enlargement was a JPEG
   make-blink-frames.py  closed-eye frames for the bunny's blink
   make-typist-layers.py  the frog at his computer, cut into layers to animate
-  cut-scene-creatures.py  the forest's creatures as sprites, and the scene without them
+  cut-scene-creatures.py  the forest's creatures as sprites cut from the delivered file
 data/advice.db  the database — this is the thing to back up (not in Git)
 docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 .github/        the checks GitHub runs on every pull request
@@ -291,9 +303,10 @@ docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 
 ### Waiting on others
 
-4. ~~The forest background scene~~ **Delivered 2026-10-04.** It is
-   `src/pixel/assets/forest_day.png` (480x279, recovered from a 2x JPEG) and
-   `ForestScene.tsx` draws it full-bleed behind the home page.
+4. ~~The forest background scene~~ **Delivered 2026-10-04.** The delivered
+   file (`src/pixel/assets/originals/forest-scene-2x-jpeg.jpg`, 960x558) is
+   what `ForestScene.tsx` draws full-bleed behind the home page, untouched.
+   A 1x PNG export from the artist would allow a 3x step on laptops.
 5. **Epoint / Payriff API documentation.** `server/providers/*.ts` throw
    deliberately rather than guessing. The callback signature scheme is the
    security-critical part — the callback route returns 501 rather than

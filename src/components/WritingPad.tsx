@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { typistSprite } from '../pixel/sprites';
 import { useMediaQuery } from '../hooks/useMediaQuery';
@@ -16,6 +16,12 @@ export type WritingPadProps = {
   autoFocus?: boolean;
   /** Show the frog. Off on steps where he would be a distraction. */
   showTypist?: boolean;
+  /**
+   * Something else to sit beside the label instead of the still frog: the
+   * home page puts the animated TypingFrog here, perched on the top edge of
+   * the writing area.
+   */
+  typist?: ReactNode;
 };
 
 /**
@@ -40,6 +46,7 @@ export function WritingPad({
   id = 'writing-pad',
   autoFocus = false,
   showTypist = true,
+  typist,
 }: WritingPadProps) {
   const [isTyping, setIsTyping] = useState(false);
   const idleTimer = useRef<number | null>(null);
@@ -85,14 +92,15 @@ export function WritingPad({
           <label className="field-label" htmlFor={id}>
             {label}
           </label>
-          {showTypist && !isNarrow && (
-            <SpriteCanvas
-              sprite={typistSprite}
-              animation={isTyping ? 'typing' : 'idle'}
-              scale={typistScale}
-              alt={null}
-            />
-          )}
+          {typist ??
+            (showTypist && !isNarrow && (
+              <SpriteCanvas
+                sprite={typistSprite}
+                animation={isTyping ? 'typing' : 'idle'}
+                scale={typistScale}
+                alt={null}
+              />
+            ))}
         </div>
         {helpText !== undefined && (
           <p className="field-help" id={helpId}>

@@ -22,23 +22,23 @@ It is at the bottom of this page.
 
 <table>
   <tr>
-    <td width="66%"><img src="docs/screenshots/home.png" alt="The home page: the forest at full strength, the writing box in the middle, the bunny with her lantern at its top-right corner and the frog typing at his computer at its foot"></td>
+    <td width="66%"><img src="docs/screenshots/home.png" alt="The home page: the forest at full strength, the writing box in the middle with one line above the writing area, the frog typing at his computer beside it, and Chiron's name card at its foot"></td>
     <td width="34%"><img src="docs/screenshots/home-mobile.png" alt="The home page on a phone"></td>
   </tr>
   <tr>
-    <td>The home page, in Farida's five colours and her pixel font. The writing box sits in the forest; the bunny who writes back stands at its top-right corner, listening, and the frog who writes types at his computer at its foot. She breathes and blinks and her lantern sparkles; he breathes, taps at the keys, glances from the screen to the keyboard and back, and lines of text appear on his monitor. In the forest, the little black creatures bob, shuffle and blink, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
-    <td>The same page on a phone: the box first, the bunny beside it.</td>
+    <td>The home page, in Farida's colours and her pixel font. The forest is her artist's file exactly as delivered, with nothing between it and the screen. The writing box sits in the middle of it: one line, the frog who writes typing at his computer beside it on the edge of the cream writing area, the button, and Chiron the bunny's name card hanging off the bottom edge. The frog breathes, taps at the keys, glances from the screen to the keyboard and back, and lines of text appear on his monitor; Chiron blinks. In the forest, the little black creatures bob, shuffle and blink, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
+    <td>The same page on a phone: the box first, the frog beside the line.</td>
   </tr>
 </table>
 
 <table>
   <tr>
     <td width="50%"><img src="docs/screenshots/home-writing.png" alt="While someone writes, the box lifts and the pink comes forward"></td>
-    <td width="50%"><img src="docs/screenshots/home-mobile-frog.png" alt="On a phone the frog sits at the bottom-left corner of the box"></td>
+    <td width="50%"><img src="docs/screenshots/home-mobile-chiron.png" alt="On a phone, Chiron's name card hangs off the bottom edge of the box"></td>
   </tr>
   <tr>
     <td>While someone writes, the box lifts and the pink comes forward.</td>
-    <td>On a phone the bunny steps onto the top edge of the box, and the frog sits at its bottom-left corner.</td>
+    <td>On a phone, Chiron's card hangs off the bottom edge of the box, the same as on a wide screen.</td>
   </tr>
 </table>
 
@@ -221,7 +221,7 @@ Whoever sets up the server should know three things. All of them are in
 | `npm run art:recover-jpeg` | recover pixel art from an enlargement that was saved as a JPEG |
 | `npm run art:blink` | redraw the bunny's closed-eye frames from her open-eye art |
 | `npm run art:typist` | cut the frog at his computer into the layers the home page animates |
-| `npm run art:creatures` | lift the little black creatures out of the forest so they can move |
+| `npm run art:creatures` | cut the little black creatures out of the delivered forest file so they can move |
 
 The release build refuses on purpose while the crisis numbers are placeholders
 or the copy still contains an unfilled blank. To build anyway for local

@@ -453,7 +453,7 @@ export const ASSETS: Readonly<Record<string, AssetEntry>> = {
     src: 'forest_day.png',
     defaultAnimation: 'idle',
     animations: [idle(1, 'Full-bleed scene.')],
-    note: 'The bunny and frog on the mushroom sit at the left edge, so wide screens show them and phones show the meadow. The home page draws it as assets/creatures/stage.png plus the seven creatures as sprites (scripts/cut-scene-creatures.py), which lines up with this file to the pixel.',
+    note: 'The bunny and frog on the mushroom sit at the left edge, so wide screens show them and phones show the meadow. The home page does not draw this copy: since 2026-10-06 it draws the delivered file itself (originals/forest-scene-2x-jpeg.jpg, untouched) plus the seven creatures cut out of that file (scripts/cut-scene-creatures.py). This copy is used to find the creatures, and here in the inspector.',
   },
 
   background_night: {

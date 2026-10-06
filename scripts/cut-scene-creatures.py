@@ -2,25 +2,30 @@
 """
 Lift the little black creatures out of the forest scene so they can move.
 
-    python3 scripts/cut-scene-creatures.py [SCENE] [OUT_DIR]
+    python3 scripts/cut-scene-creatures.py [CLEAN] [DELIVERED] [OUT_DIR]
 
-SCENE defaults to src/pixel/assets/forest_day.png and OUT_DIR to
-src/pixel/assets/creatures/. The delivered scene is never changed. The script
-writes:
+CLEAN defaults to src/pixel/assets/forest_day.png (the 480x279 copy with a
+tidy palette, used only to FIND the creatures), DELIVERED to the file Farida
+sent, src/pixel/assets/originals/forest-scene-2x-jpeg.jpg (960x558, a 2x
+enlargement with JPEG noise in it), and OUT_DIR to src/pixel/assets/creatures/.
+Neither input is ever changed. The script writes, all cut from the DELIVERED
+file at its own pixel grid:
 
-    stage.png          the scene with the creatures painted out (each hole is
-                       filled from its nearest surrounding pixels, so the base
-                       looks like meadow where a creature used to be)
-    creature_N.png     one sprite per creature, cropped to its own pixels
+    creature_N.png        one sprite per creature, cropped to its own pixels
     creature_N_blink.png  the same with its eyes shut (eye pixels become fur)
-    creatures.json     where each one sits in the scene, in scene pixels
+    creature_N_patch.png  meadow for the hole it leaves: its own pixels filled
+                          from the nearest surrounding ones, transparent
+                          elsewhere
+    creatures.json        where each one sits, in DELIVERED pixels
 
-ForestScene.tsx draws stage.png, then every creature at its recorded spot, so
-at rest the result is pixel-identical to the delivered scene; the animation
-only ever moves each creature by whole pixels from there.
+ForestScene.tsx draws the delivered file itself, untouched, then each
+creature's patch and the creature on top of it at its recorded spot. At rest
+the creature covers its patch exactly, so the screen shows the delivered
+picture to the pixel; the animation moves each creature by whole art pixels
+(two delivered pixels) and the patch shows through where it stepped from.
 
 A creature is a connected patch of fur colour with at least one eye pixel
-touching it. Requires Pillow.
+touching it, found on the clean copy. Requires Pillow.
 """
 from __future__ import annotations
 
@@ -32,7 +37,10 @@ from pathlib import Path
 from PIL import Image
 
 SRC = Path(sys.argv[1] if len(sys.argv) > 1 else 'src/pixel/assets/forest_day.png')
-OUT = Path(sys.argv[2] if len(sys.argv) > 2 else 'src/pixel/assets/creatures')
+DELIVERED = Path(
+    sys.argv[2] if len(sys.argv) > 2 else 'src/pixel/assets/originals/forest-scene-2x-jpeg.jpg'
+)
+OUT = Path(sys.argv[3] if len(sys.argv) > 3 else 'src/pixel/assets/creatures')
 
 FUR = (0x15, 0x1c, 0x23)
 EYE = (0xe5, 0xc2, 0xae)
@@ -159,53 +167,87 @@ def main() -> None:
 
     creatures.sort(key=lambda c: (c['box'][1], c['box'][0]))
 
-    # ---- paint them out of the stage
-    stage = im.copy()
-    spx = stage.load()
+    # ---- the delivered file, at its own grid
+    delivered = Image.open(DELIVERED).convert('RGB')
+    dw, dh = delivered.size
+    if dw % w or dh % h or dw // w != dh // h:
+        sys.exit(f'{DELIVERED} ({dw}x{dh}) is not a whole-number enlargement of {SRC} ({w}x{h})')
+    factor = dw // w
+    dpx = delivered.load()
+
+    def enlarge(points):
+        return {(x * factor + dx, y * factor + dy)
+                for (x, y) in points for dy in range(factor) for dx in range(factor)}
+
     all_pixels = set()
     for c in creatures:
+        c['pixels'] = enlarge(c['pixels'])
+        c['eyes'] = enlarge(c['eyes'])
         all_pixels |= c['pixels']
-    for (x, y) in all_pixels:
+
+    def nearest(x, y, avoid, allow=None):
+        """The closest pixel outside `avoid` (and inside `allow`, if given)."""
         best = None
-        for r in range(1, 12):
+        for r in range(1, 12 * factor):
             for dy in range(-r, r + 1):
                 for dx in range(-r, r + 1):
                     if max(abs(dx), abs(dy)) != r:
                         continue
                     nx, ny = x + dx, y + dy
-                    if not (0 <= nx < w and 0 <= ny < h) or (nx, ny) in all_pixels:
+                    if not (0 <= nx < dw and 0 <= ny < dh) or (nx, ny) in avoid:
+                        continue
+                    if allow is not None and (nx, ny) not in allow:
                         continue
                     d = dx * dx + dy * dy
                     if best is None or d < best[0]:
                         best = (d, (nx, ny))
             if best is not None:
-                break
-        if best is not None:
-            spx[x, y] = px[best[1]]
+                return best[1]
+        return None
 
-    # ---- the sprites
+    # ---- the sprites, the blink frames and the patches
     OUT.mkdir(parents=True, exist_ok=True)
-    stage.save(OUT / 'stage.png', optimize=True)
+    for stale in OUT.glob('creature_*.png'):
+        stale.unlink()
+    (OUT / 'stage.png').unlink(missing_ok=True)
     out = []
     for index, c in enumerate(creatures, start=1):
-        x0, y0, x1, y1 = c['box']
+        xs = [p[0] for p in c['pixels']]
+        ys = [p[1] for p in c['pixels']]
+        x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
         cw, ch = x1 - x0 + 1, y1 - y0 + 1
+        fur_pixels = c['pixels'] - c['eyes']
         sprite = Image.new('RGBA', (cw, ch), (0, 0, 0, 0))
         blink = Image.new('RGBA', (cw, ch), (0, 0, 0, 0))
+        patch = Image.new('RGBA', (cw, ch), (0, 0, 0, 0))
         for (x, y) in c['pixels']:
-            sprite.putpixel((x - x0, y - y0), px[x, y])
-            blink.putpixel((x - x0, y - y0), FUR + (255,) if (x, y) in c['eyes'] else px[x, y])
+            colour = dpx[x, y] + (255,)
+            sprite.putpixel((x - x0, y - y0), colour)
+            if (x, y) in c['eyes']:
+                # Shut: the eye takes the colour of the nearest fur pixel, so
+                # the JPEG's own grain carries on across it.
+                source = nearest(x, y, c['eyes'], allow=fur_pixels)
+                colour = dpx[source] + (255,) if source is not None else colour
+            blink.putpixel((x - x0, y - y0), colour)
+            # The meadow under it: the nearest pixel that is not a creature.
+            source = nearest(x, y, all_pixels)
+            if source is not None:
+                patch.putpixel((x - x0, y - y0), dpx[source] + (255,))
         sprite.save(OUT / f'creature_{index}.png', optimize=True)
         blink.save(OUT / f'creature_{index}_blink.png', optimize=True)
+        patch.save(OUT / f'creature_{index}_patch.png', optimize=True)
         out.append({
             'id': index, 'x': x0, 'y': y0, 'width': cw, 'height': ch,
-            'eyes': len(c['eyes']), 'fur': len(c['pixels']) - len(c['eyes']),
-            'touchesEdge': x0 == 0 or y0 == 0 or x1 == w - 1 or y1 == h - 1,
+            'eyes': len(c['eyes']), 'fur': len(fur_pixels),
+            'touchesEdge': x0 == 0 or y0 == 0 or x1 == dw - 1 or y1 == dh - 1,
         })
-    (OUT / 'creatures.json').write_text(json.dumps({'scene': {'width': w, 'height': h}, 'creatures': out}, indent=2) + '\n')
+    (OUT / 'creatures.json').write_text(json.dumps({
+        'scene': {'width': dw, 'height': dh, 'artPixel': factor, 'file': DELIVERED.name},
+        'creatures': out,
+    }, indent=2) + '\n')
     for c in out:
         print(c)
-    print(f'{len(out)} creatures, {len(all_pixels)} pixels painted out of the stage')
+    print(f'{len(out)} creatures, {len(all_pixels)} delivered pixels covered by sprites')
 
 
 if __name__ == '__main__':

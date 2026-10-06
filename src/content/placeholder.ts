@@ -38,11 +38,12 @@ export const copy = {
 
   /* ------------------------------------------------------------------ hero */
   hero: {
-    // PLACEHOLDER
-    headline: 'Tell a stranger what is going on.',
-    // PLACEHOLDER
-    subhead:
-      'Write down the thing you have been carrying. A real person reads it and writes back. One manat, because the price should never be the reason you stay quiet.',
+    // The home page's writing box carries one line above the writing area and
+    // nothing else (Farida, 2026-10-06: the headline, the paragraph and the
+    // "What is on your mind?" label were deleted by her, deliberately).
+    writeLine: 'Write down the thing you have been carrying',
+    writeHint: 'Try giving as much detail as possible',
+    // The /ask page keeps its own label and placeholder.
     writePrompt: 'What is on your mind?',
     writePlaceholder: 'Start anywhere. It does not have to be tidy.',
     primaryCta: 'Get advice',

@@ -1,27 +1,33 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
-import stage from '../pixel/assets/creatures/stage.png';
+import scene from '../pixel/assets/originals/forest-scene-2x-jpeg.jpg';
 import creatureData from '../pixel/assets/creatures/creatures.json';
 
 /**
  * The forest, full-bleed behind the home page, with its creatures awake.
  *
- * Fixed to the viewport and drawn at a WHOLE-NUMBER scale (never 1.5x, see
- * HANDOFF.md) large enough to cover it, anchored to the ground so that what
- * gets cropped is sky and far meadow, never the grass under everyone's feet.
- * The bunny and the frog on the mushroom sit at the left edge of the scene,
- * so a wide screen shows them and a phone shows the open meadow.
+ * The picture is the file Farida delivered, byte for byte (a 960x558 JPEG,
+ * itself a 2x enlargement of the painting), with nothing between it and the
+ * screen: no filter, no overlay, no blend, no opacity, and no re-encoding in
+ * the build (Vite copies it as it is). Fixed to the viewport and drawn at a
+ * WHOLE-NUMBER scale (never 1.5x, see HANDOFF.md) large enough to cover it,
+ * anchored to the ground so that what gets cropped is sky and far meadow,
+ * never the grass under everyone's feet. The bunny and the frog on the
+ * mushroom sit at the left edge of the scene, so a wide screen shows them and
+ * a phone shows the open meadow.
  *
- * The scene is drawn in two parts that line up to the pixel: the delivered
- * painting with its seven little black creatures painted out (`stage.png`),
- * and each creature as its own sprite at the exact spot it was painted
- * (scripts/cut-scene-creatures.py). At rest the result is the original
- * picture; the sprites then bob, shuffle and blink by one art pixel at a
- * time. A handful of fireflies drift over everything. All of it stops under
- * prefers-reduced-motion (Home.css).
+ * The seven little black creatures are cut out of that same file by
+ * scripts/cut-scene-creatures.py and drawn back at the exact spot each was
+ * painted, over a patch of meadow that fills the hole it leaves. At rest each
+ * creature covers its patch exactly, so the screen shows the delivered
+ * picture to the pixel; the sprites then bob, shuffle and blink by one art
+ * pixel (two of the file's pixels) at a time. A handful of fireflies drift
+ * over everything. All of it stops under prefers-reduced-motion (Home.css).
  */
 
 const SCENE_WIDTH = creatureData.scene.width;
 const SCENE_HEIGHT = creatureData.scene.height;
+/** The file's pixels per art pixel: the creatures move in art pixels. */
+const ART_PIXEL = creatureData.scene.artPixel;
 
 /** Wide screens anchor the scene left so its painted characters stay in view. */
 const ANCHOR_LEFT_FROM = 1160;
@@ -31,8 +37,8 @@ const creatureFrames = import.meta.glob('../pixel/assets/creatures/creature_*.pn
   import: 'default',
 }) as Record<string, string>;
 
-function frame(id: number, blink: boolean): string {
-  const key = `../pixel/assets/creatures/creature_${id}${blink ? '_blink' : ''}.png`;
+function frame(id: number, kind: '' | '_blink' | '_patch'): string {
+  const key = `../pixel/assets/creatures/creature_${id}${kind}.png`;
   const url = creatureFrames[key];
   if (url === undefined) throw new Error(`Missing creature frame ${key}`);
   return url;
@@ -137,36 +143,37 @@ export function ForestScene() {
           height,
           left,
           top,
-          backgroundImage: `url(${stage})`,
+          backgroundImage: `url(${scene})`,
           backgroundSize: `${width}px ${height}px`,
         }}
       >
         {creatureData.creatures.map((creature, index) => {
           const rhythm = RHYTHMS[index % RHYTHMS.length] ?? RHYTHMS[0];
           const size = { width: creature.width * scale, height: creature.height * scale };
+          const spot = { left: creature.x * scale, top: creature.y * scale, ...size };
           return (
-            <span
-              key={creature.id}
-              className="critter"
-              style={
-                {
-                  '--px': `${scale}px`,
-                  left: creature.x * scale,
-                  top: creature.y * scale,
-                  ...size,
-                  animationDuration: `${rhythm?.seconds ?? 9}s`,
-                  animationDelay: `${rhythm?.delay ?? 0}s`,
-                } as CSSProperties
-              }
-            >
-              <img className="critter-frame" src={frame(creature.id, false)} alt="" {...size} />
-              <img
-                className="critter-frame critter-blink"
-                src={frame(creature.id, true)}
-                alt=""
-                {...size}
-                style={{ animationDuration: `${rhythm?.blink ?? 5}s`, animationDelay: `${rhythm?.delay ?? 0}s` }}
-              />
+            <span key={creature.id} className="critter-spot" style={spot}>
+              {/* The meadow under the creature: only visible where it has stepped away. */}
+              <img className="critter-frame" src={frame(creature.id, '_patch')} alt="" {...size} />
+              <span
+                className="critter"
+                style={
+                  {
+                    '--px': `${scale * ART_PIXEL}px`,
+                    animationDuration: `${rhythm?.seconds ?? 9}s`,
+                    animationDelay: `${rhythm?.delay ?? 0}s`,
+                  } as CSSProperties
+                }
+              >
+                <img className="critter-frame" src={frame(creature.id, '')} alt="" {...size} />
+                <img
+                  className="critter-frame critter-blink"
+                  src={frame(creature.id, '_blink')}
+                  alt=""
+                  {...size}
+                  style={{ animationDuration: `${rhythm?.blink ?? 5}s`, animationDelay: `${rhythm?.delay ?? 0}s` }}
+                />
+              </span>
             </span>
           );
         })}

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { WritingPad } from '../components/WritingPad';
 import { ForestScene } from '../components/ForestScene';
-import { StandingBunny } from '../components/Bunny';
+import { BunnyPortrait } from '../components/Bunny';
 import { TypingFrog } from '../components/TypingFrog';
 import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
@@ -15,15 +15,16 @@ import './Home.css';
 /**
  * The homepage.
  *
- * The forest fills the whole page. In the middle of it sits the writing box;
- * the bunny stands at its top-right corner, close enough to be listening, and
- * the frog types away at his computer along its bottom edge. Then: who is
- * writing back, why it costs what it costs, a real example, and a final
- * invitation.
+ * The forest fills the whole page. In the middle of it sits the writing box:
+ * one line, the frog typing at his computer beside it on the top edge of the
+ * writing area, the writing area itself, the button, and Chiron's name card
+ * hanging off the bottom edge. Then: who is writing back, why it costs what
+ * it costs, a real example, and a final invitation.
  *
  * The writing box is the hero rather than a thing below it. Someone arriving
  * mid-crisis should not have to read a landing page before they find out
- * where to put the sentence they came here to write.
+ * where to put the sentence they came here to write. Farida cut the headline
+ * and the paragraph above the writing area on 2026-10-06 for that reason.
  */
 export function Home() {
   const navigate = useNavigate();
@@ -49,23 +50,17 @@ export function Home() {
         <div className="wrap hero-inner">
           <div className="hero-stage">
             <div className="hero-card">
-              <div className="hero-words">
-                <span className="eyebrow">{copy.siteName}</span>
-                <h1 className="h1">{copy.hero.headline}</h1>
-                <p className="lede">{copy.hero.subhead}</p>
-              </div>
-
-              {/* The frog is not on the label row here: he sits at the foot of
-                  the box instead (TypingFrog below), where his desk does not
-                  push the box down the page. He types along on the /ask
-                  page, where writing is the job. */}
+              {/* The one line above the writing area is the textarea's label,
+                  so it is also its accessible name. The frog at his computer
+                  sits beside it, at 1x, his desk on the writing area's top
+                  edge (TypingFrog; placement in Home.css). */}
               <WritingPad
                 id="home-write"
-                label={copy.hero.writePrompt}
-                placeholder={copy.hero.writePlaceholder}
+                label={copy.hero.writeLine}
+                placeholder={copy.hero.writeHint}
                 value={text}
                 onChange={handleChange}
-                showTypist={false}
+                typist={<TypingFrog scale={1} className="hero-frog" />}
               />
 
               <div className="row hero-actions">
@@ -80,15 +75,15 @@ export function Home() {
               <p className="hero-assurance">
                 A real person reads this and writes back. {copy.responseTime}
               </p>
-            </div>
 
-            {/* The bunny stands beside the card on a wide screen (top-right)
-                and on its top edge on narrower ones; the frog sits at its
-                foot. Order and placement live in Home.css. */}
-            <div className="hero-cast">
-              <StandingBunny />
+              {/* Chiron's name card: the bunny's portrait (the same art as the
+                  logo) and the name, nothing else. It hangs off the box's
+                  bottom edge, below the line above, never over it. */}
+              <figure className="chiron">
+                <BunnyPortrait label="Chiron, the bunny" />
+                <figcaption className="chiron-name">Chiron</figcaption>
+              </figure>
             </div>
-            <TypingFrog className="hero-frog" />
           </div>
 
           {FEATURES.archive ? (

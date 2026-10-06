@@ -1,13 +1,14 @@
-/* Homepage: the forest, the writing box, the bunny beside it, the frog at its foot. */
+/* Homepage: the forest, the writing box, the frog on its edge, Chiron's card at its foot. */
 
 /* ------------------------------------------------- the palette on the forest */
 
-/* Farida's five colours, and nothing neutral (2026-10-04). The rule is
+/* Farida's five colours, and nothing neutral (2026-10-04), plus the cream she
+   chose for the writing area itself on 2026-10-06 (#fcffe1). The rule is
    background first, then whichever text colour reads best on it: wine on the
-   light greens and pinks (6.9:1), dark green as the quieter second colour on
-   them (5.7:1), and pale pink or white on the dark-green bands (5.4:1 and
-   8.3:1). Pink never carries text: it is 3.3:1 at best. It is used for
-   fills, shadows and glows. */
+   light greens and pinks (6.9:1) and on the cream (9.8:1), dark green as the
+   quieter second colour on them (5.7:1; 8.0:1 on the cream), and pale pink or
+   white on the dark-green bands (5.4:1 and 8.3:1). Pink never carries text:
+   it is 3.3:1 at best. It is used for fills, shadows and glows. */
 .shell-forest {
   --bg: #cfdd9d;
   --surface: #f8cae4;
@@ -110,8 +111,10 @@
 /* The fixed layer behind the page. The scene itself is `.forest-stage`,
    sized and placed by ForestScene.tsx at a whole-number scale, anchored to
    the ground (and to the left edge on wide screens, so the painted bunny
-   and frog on their mushroom stay in view). Nothing dims it: no overlay, no
-   filter, no blend, full colour. */
+   and frog on their mushroom stay in view). Nothing sits between the
+   delivered file and the screen: no overlay, no filter, no blend, no
+   opacity, no tint. Only whole-number scaling and pixelated rendering,
+   which change no colour. */
 .forest {
   position: fixed;
   inset: 0;
@@ -127,9 +130,17 @@
   image-rendering: crisp-edges;
 }
 
-/* The little black creatures, each at the exact spot it was painted. */
+/* The little black creatures, each at the exact spot it was painted. The
+   spot holds the meadow patch for the hole the creature leaves; the creature
+   itself moves inside it. */
+.critter-spot {
+  position: absolute;
+  display: block;
+}
+
 .critter {
   position: absolute;
+  inset: 0;
   display: block;
 }
 
@@ -165,8 +176,7 @@
   min-height: calc(100vh - 190px);
   display: flex;
   align-items: center;
-  /* The bunny stands past the card's right edge on wide screens. Clip
-     sideways only, so nothing can add a horizontal scrollbar. */
+  /* Clip sideways only, so nothing can ever add a horizontal scrollbar. */
   overflow-x: clip;
 }
 
@@ -177,17 +187,18 @@
   gap: 22px;
 }
 
-/* The card and the cast share a stage, so the bunny and the frog can be
-   placed against the card rather than against the page. The stage is a
-   column: bunny (on narrow screens), card, frog. */
+/* The stage is the card and the room Chiron's card needs below it. */
 .hero-stage {
   position: relative;
   width: min(100%, 640px);
   display: flex;
   flex-direction: column;
+  /* The name card hangs this far below the box's bottom border. */
+  --chiron-hang: 44px;
+  margin-bottom: var(--chiron-hang);
 }
 
-/* The box is pale green; the writing area inside it is pale pink. */
+/* The box is pale green; the writing area inside it is cream. */
 .hero-card {
   order: 1;
   position: relative;
@@ -218,7 +229,7 @@
 }
 
 .hero-card .pad-textarea {
-  background: #f8cae4;
+  background: #fcffe1;
   color: #752445;
   border-color: #752445;
   transition:
@@ -233,20 +244,18 @@
     0 0 0 4px rgba(234, 105, 147, 0.4);
 }
 
-.hero-words {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 8px;
-}
-
-.hero-words .h1 {
-  font-size: clamp(1.8rem, 4.2vw, 2.6rem);
-}
-
-.hero-words .lede {
-  max-width: 46ch;
+/* The one line above the writing area is the textarea's label, sized to
+   carry the box now that there is no headline. It wraps beside the frog. */
+.hero-card .field-label {
+  font-size: clamp(1.25rem, 2.6vw, 1.5rem);
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #752445;
+  padding-bottom: 6px;
+  /* Two lines beside the frog on a wide box ("Write down the thing you /
+     have been carrying"); three on a phone, where the row is narrower. */
+  max-width: 25ch;
 }
 
 .hero-actions {
@@ -281,109 +290,50 @@
   font-style: italic;
 }
 
-/* ---------------------------------------------------------------- the cast */
-
-/* `--cast` is the standing bunny's scale in CSS pixels per art pixel. It must
-   match the breakpoint in Bunny.tsx (3x from 1400px, 2x below). */
-.hero-cast {
-  --cast: 2px;
-  display: contents;
-}
-
-/* Narrow: the bunny stands on the card's top edge, right-aligned, feet on the
-   border. */
-.hero-cast .bunny-standing {
-  order: 0;
-  align-self: flex-end;
-  position: relative;
-  z-index: 2;
-  margin-bottom: calc(var(--cast) * -10);
-}
-
-/* Wide: the bunny is pinned to the card's top-right corner, overlapping it by
-   ten art pixels (her cloak tip, inside the padding, so she never covers
-   text). */
-@media (min-width: 1160px) {
-  .hero-cast {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    position: absolute;
-    top: calc(var(--cast) * -8);
-    right: calc(var(--cast) * -91);
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .hero-cast .bunny-standing {
-    margin: 0;
-    align-self: auto;
-  }
-}
-
-@media (min-width: 1400px) {
-  .hero-cast {
-    --cast: 3px;
-  }
-}
-
 /* ------------------------------------------------------------- the frog */
 
-/* The frog at his computer sits at the foot of the card, in the flow after
-   it, with the top of his monitor tucked seven art pixels into the card's
-   bottom padding, under the last line of text. `--fx` is his scale (3x everywhere; TypingFrog.tsx).
+/* The frog at his computer, 1x (his native 96x68 canvas), at the right end
+   of the label row. The desk's bottom row is six art pixels above the
+   bottom of his canvas; the row sits four pixels above the writing area, so
+   pulling him down twelve pixels lands the desk's feet two pixels into the
+   writing area's top border. He is drawn by TypingFrog.tsx and animated by
+   TypingFrog.css. */
+.hero-card .pad-head {
+  align-items: flex-end;
+}
 
-   He starts at the card's left edge, except where that would put him on top
-   of the scene's own frog and bunny on their mushroom. Those sit in the
-   leftmost 148 scene pixels, drawn at the scene's scale (`--scene`, kept in
-   step with ForestScene.tsx below) and anchored left from 1160px or centred
-   under that. Where the card's left edge is inside that strip, he slides
-   right along the card's bottom edge until he clears it by twelve pixels. */
 .hero-frog {
-  --fx: 3px;
-  --scene: 1;
-  --painted-right: calc(148px * var(--scene) + (100vw - 480px * var(--scene)) / 2);
-  --card-left: calc((100vw - 640px) / 2);
-  order: 2;
-  align-self: flex-start;
+  margin-bottom: -12px;
   position: relative;
-  z-index: 2;
-  margin-top: calc(var(--fx) * -7);
-  margin-left: max(
-    calc(var(--fx) * -4),
-    calc(var(--painted-right) + 12px - var(--card-left) - var(--fx) * 4)
-  );
+  z-index: 1;
   pointer-events: none;
 }
 
-@media (min-width: 481px), (min-height: 280px) {
-  .hero-frog {
-    --scene: 2;
-  }
+/* ---------------------------------------------------------- Chiron's card */
+
+/* The bunny's name card: his portrait (the logo's artwork, 1x) over his name,
+   centred, hanging off the box's bottom edge. Pale pink on the light-green
+   box, the same wine border and hard shadow as everything else. It comes
+   after the line about a real person replying, so it can never cover it. */
+.chiron {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: 2px 0 calc(-24px - var(--chiron-hang));
+  padding: 8px 14px 8px;
+  background: #f8cae4;
+  border: var(--border-width) solid #752445;
+  box-shadow: 4px 4px 0 #ea6993;
 }
 
-@media (min-width: 961px), (min-height: 559px) {
-  .hero-frog {
-    --scene: 3;
-  }
-}
-
-@media (min-width: 1441px), (min-height: 838px) {
-  .hero-frog {
-    --scene: 4;
-  }
-}
-
-@media (min-width: 1921px), (min-height: 1117px) {
-  .hero-frog {
-    --scene: 5;
-  }
-}
-
-@media (min-width: 1160px) {
-  .hero-frog {
-    --painted-right: calc(148px * var(--scene));
-  }
+.chiron-name {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #752445;
 }
 
 /* ------------------------------------------------------------- the bunny */
@@ -411,29 +361,6 @@
 
 /* The closed-eye frame sits on top and is shown only for the blink. */
 .bunny-blink {
-  opacity: 0;
-}
-
-.bunny-glow {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(248, 202, 228, 0.75) 0%,
-    rgba(234, 105, 147, 0.25) 45%,
-    transparent 70%
-  );
-  filter: blur(calc(var(--px) * 1.2));
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.sparkle {
-  position: absolute;
-  width: var(--px);
-  height: var(--px);
-  background: #f8cae4;
-  box-shadow: 0 0 calc(var(--px) * 1.5) rgba(234, 105, 147, 0.9);
   opacity: 0;
 }
 
@@ -603,20 +530,8 @@
 /* --------------------------------------------------------------- motion */
 
 @media (prefers-reduced-motion: no-preference) {
-  .bunny-standing .bunny-body {
-    animation: bob 2.4s steps(1, end) infinite;
-  }
-
   .bunny-blink {
     animation: blink 4.8s steps(1, end) infinite;
-  }
-
-  .sparkle {
-    animation: twinkle 2.7s steps(1, end) infinite;
-  }
-
-  .bunny-glow {
-    animation: glow 3.6s ease-in-out infinite;
   }
 
   /* Each creature has its own duration and delay (ForestScene.tsx). */
@@ -646,18 +561,6 @@
   }
 }
 
-/* One art pixel up and back, held rather than eased, so the sprite never
-   lands between pixels. */
-@keyframes bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(calc(var(--px) * -1));
-  }
-}
-
 @keyframes blink {
   0%,
   92% {
@@ -670,33 +573,6 @@
   97%,
   100% {
     opacity: 0;
-  }
-}
-
-@keyframes twinkle {
-  0%,
-  55% {
-    opacity: 0;
-  }
-  60%,
-  80% {
-    opacity: 1;
-  }
-  85%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes glow {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.95;
-    transform: scale(1.12);
   }
 }
 
@@ -760,9 +636,8 @@
     padding: 22px 18px 20px;
   }
 
-  /* The card's bottom padding is shallower here, so the monitor tucks in
-     by six pixels instead of seven. */
-  .hero-frog {
-    margin-top: calc(var(--fx) * -6);
+  /* The card's bottom padding is shallower here. */
+  .chiron {
+    margin-bottom: calc(-20px - var(--chiron-hang));
   }
 }
