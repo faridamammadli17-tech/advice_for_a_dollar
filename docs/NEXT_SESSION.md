@@ -53,8 +53,10 @@ code. The project owner is Farida, also not an engineer. What they want:
    bundle must never go online).
 4. **Palette on the home page is five colours and nothing else**: wine
    `#752445`, pink `#EA6993`, pale pink `#F8CAE4`, light green `#CFDD9D`,
-   dark green `#2F582C`, plus the cream `#fcffe1` the owner chose for the
-   writing area itself. Pick the background first, then the text colour
+   dark green `#2F582C`, plus the cream `#fcffe1` the owner chose. Since
+   2026-10-06 (later) pale pink is never a fill: every pale-pink background
+   is cream; pale pink remains only as text on the dark-green bands and the
+   button. Pick the background first, then the text colour
    (white, black or palette) that reads best. Body text at 4.5:1 or better;
    pink never carries text (3.3:1 at best). Measured pairs are in
    `docs/NOTES.md`.
@@ -87,20 +89,24 @@ code. The project owner is Farida, also not an engineer. What they want:
 - Writing box in the middle: light green `#CFDD9D`, cream `#fcffe1` writing
   area, wine text, dark-green placeholder. Hover and focus states lift it.
   Above the writing area only the line "Write down the thing you have been
-  carrying" (the textarea's label, 24px, two lines beside the frog).
-- The frog at his computer at 1x at the right end of that line, his desk on
-  the writing area's top edge (`src/components/TypingFrog.tsx` and `.css`;
-  placement under "the frog" in `src/pages/Home.css`). Breath, head to the
-  keys and back, hand tapping, blink, seven lines typed then cleared.
+  carrying" (the textarea's label, 24px, beside the frog; full width with
+  the frog under it on a phone).
+- The frog at his computer at the right end of that line, 3x where the box
+  has its full width and 2x below 700px, his desk on the writing area's top
+  edge (`src/components/TypingFrog.tsx` and `.css`; placement under "the
+  frog" in `src/pages/Home.css`). Breath, head to the keys and back, hand
+  tapping, blink, seven lines typed then cleared. **The owner wants this
+  animation replaced by her sprite sheet** (see the last NOTES entry): the
+  file has not arrived yet.
 - Under the reply line, Chiron's name card: the bunny's portrait (the logo's
-  art, 1x) over the word "Chiron", pale pink with a wine border, hanging 44px
+  art, 1x) over the word "Chiron", cream with a wine border, hanging 44px
   off the box's bottom edge. Just the name, no title. He blinks.
   `src/components/Bunny.tsx` (`BunnyPortrait`).
 - The standing bunny with the staff is gone from the page. The logo stays.
 - Header and footer are the dark green band; menu and footer text pale pink,
   current page white. Logo = the bunny's close-up portrait at 128px (also
   the Instagram picture); on phones the written name hides.
-- Sections below the hero alternate pale pink and light green.
+- Sections below the hero alternate cream and light green.
 
 Known cosmetic things nobody asked about yet: at 1440×900 the header hides
 the top of the painted bunny's ears; at tablet widths the menu wraps under
@@ -115,8 +121,13 @@ stump with its creatures at the right is off screen there.
 - Widen the cloud environment's network policy if a real tunnel link is
   wanted (api.trycloudflare.com and localtunnel.me are refused there); the
   artifact preview is the workaround.
-- Whether the fourth round goes onto the pull request's branch or into a
-  second pull request; then merge when happy.
+- Whether the fourth and fifth rounds go onto the pull request's branch or
+  into a second pull request; then merge when happy.
+- The frog sprite sheet (`frog-writing-spritesheet.png`, 2048x128, sixteen
+  128x128 frames): attach it, then swap the animation as the last NOTES
+  entry describes.
+- Whether the hot-pink shadows and firefly glow should go too, now that pale
+  pink is out as a fill.
 - Whether anything is wanted on the right of the page at laptop widths now
   that the standing bunny is gone (open meadow and the dark bush today).
 - Ask the artist for a 1x export of the forest (480x279 PNG): it would be

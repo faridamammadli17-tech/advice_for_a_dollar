@@ -8,6 +8,7 @@ import { TypingFrog } from '../components/TypingFrog';
 import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
 import { readDraft, writeDraft } from '../lib/submissions/draft';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { formatMinorUnits, MINIMUM_MINOR_UNITS } from '../lib/money';
 
 import './Home.css';
@@ -29,6 +30,10 @@ import './Home.css';
 export function Home() {
   const navigate = useNavigate();
   const [text, setText] = useState(readDraft);
+  // The frog is 3x where the box has its full width and 2x below that; the
+  // writing on his monitor is the thing that has to stay readable (Farida,
+  // 2026-10-06), and Home.css wraps him under the line on a phone.
+  const wideBox = useMediaQuery('(min-width: 700px)');
 
   const handleChange = (value: string) => {
     setText(value);
@@ -52,15 +57,15 @@ export function Home() {
             <div className="hero-card">
               {/* The one line above the writing area is the textarea's label,
                   so it is also its accessible name. The frog at his computer
-                  sits beside it, at 1x, his desk on the writing area's top
-                  edge (TypingFrog; placement in Home.css). */}
+                  sits beside it, his desk on the writing area's top edge
+                  (TypingFrog; placement in Home.css). */}
               <WritingPad
                 id="home-write"
                 label={copy.hero.writeLine}
                 placeholder={copy.hero.writeHint}
                 value={text}
                 onChange={handleChange}
-                typist={<TypingFrog scale={1} className="hero-frog" />}
+                typist={<TypingFrog scale={wideBox ? 3 : 2} className="hero-frog" />}
               />
 
               <div className="row hero-actions">

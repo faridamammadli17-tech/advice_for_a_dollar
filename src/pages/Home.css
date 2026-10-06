@@ -2,16 +2,18 @@
 
 /* ------------------------------------------------- the palette on the forest */
 
-/* Farida's five colours, and nothing neutral (2026-10-04), plus the cream she
-   chose for the writing area itself on 2026-10-06 (#fcffe1). The rule is
-   background first, then whichever text colour reads best on it: wine on the
-   light greens and pinks (6.9:1) and on the cream (9.8:1), dark green as the
-   quieter second colour on them (5.7:1; 8.0:1 on the cream), and pale pink or
-   white on the dark-green bands (5.4:1 and 8.3:1). Pink never carries text:
-   it is 3.3:1 at best. It is used for fills, shadows and glows. */
+/* Farida's colours (2026-10-04), with the cream she chose on 2026-10-06
+   (#fcffe1) in place of every pale-pink fill: pale pink is no longer a
+   background anywhere, only the text colour on the dark-green bands and the
+   button. The rule is background first, then whichever text colour reads
+   best on it: wine on the light green (6.9:1) and on the cream (9.8:1), dark
+   green as the quieter second colour on them (5.7:1; 8.0:1 on the cream),
+   and pale pink or white on the dark-green bands (5.4:1 and 8.3:1). Pink
+   never carries text: it is 3.3:1 at best. It is used for shadows and the
+   fireflies' glow. */
 .shell-forest {
   --bg: #cfdd9d;
-  --surface: #f8cae4;
+  --surface: #fcffe1;
   --surface-alt: #cfdd9d;
   --text: #752445;
   --muted: #2f582c;
@@ -160,7 +162,7 @@
   position: absolute;
   width: 4px;
   height: 4px;
-  background: #f8cae4;
+  background: #fcffe1;
   box-shadow: 0 0 7px 3px rgba(234, 105, 147, 0.65);
   opacity: 0;
   animation-name: drift;
@@ -292,29 +294,49 @@
 
 /* ------------------------------------------------------------- the frog */
 
-/* The frog at his computer, 1x (his native 96x68 canvas), at the right end
-   of the label row. The desk's bottom row is six art pixels above the
-   bottom of his canvas; the row sits four pixels above the writing area, so
-   pulling him down twelve pixels lands the desk's feet two pixels into the
-   writing area's top border. He is drawn by TypingFrog.tsx and animated by
-   TypingFrog.css. */
+/* The frog at his computer at the right end of the label row: 3x on a box
+   of full width, 2x on a narrow one (Home.tsx; the writing on his monitor
+   has to be readable, which sets the size). The desk's bottom row is six art
+   pixels above the bottom of his canvas; the row sits four pixels above the
+   writing area, so pulling him down six art pixels and six more lands the
+   desk's feet two pixels into the writing area's top border. He is drawn by
+   TypingFrog.tsx and animated by TypingFrog.css. */
 .hero-card .pad-head {
   align-items: flex-end;
 }
 
 .hero-frog {
-  margin-bottom: -12px;
+  margin-bottom: calc(var(--px) * -6 - 6px);
   position: relative;
   z-index: 1;
   pointer-events: none;
 }
 
+/* On a phone there is no room beside the line for him, so the line takes the
+   full width and he sits under it, right-aligned, on the writing area's top
+   edge. */
+@media (max-width: 480px) {
+  .hero-card .pad-head {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  .hero-card .field-label {
+    flex: 1 0 100%;
+    max-width: none;
+  }
+
+  .hero-frog {
+    margin-left: auto;
+  }
+}
+
 /* ---------------------------------------------------------- Chiron's card */
 
 /* The bunny's name card: his portrait (the logo's artwork, 1x) over his name,
-   centred, hanging off the box's bottom edge. Pale pink on the light-green
-   box, the same wine border and hard shadow as everything else. It comes
-   after the line about a real person replying, so it can never cover it. */
+   centred, hanging off the box's bottom edge. Cream on the light-green box,
+   the same wine border and hard shadow as everything else. It comes after
+   the line about a real person replying, so it can never cover it. */
 .chiron {
   align-self: center;
   display: flex;
@@ -323,7 +345,7 @@
   gap: 2px;
   margin: 2px 0 calc(-24px - var(--chiron-hang));
   padding: 8px 14px 8px;
-  background: #f8cae4;
+  background: #fcffe1;
   border: var(--border-width) solid #752445;
   box-shadow: 4px 4px 0 #ea6993;
 }
@@ -367,7 +389,7 @@
 /* ------------------------------------------------- sections on the forest */
 
 .on-forest {
-  background: #f8cae4;
+  background: #fcffe1;
   border-top: var(--border-width) solid #752445;
 }
 

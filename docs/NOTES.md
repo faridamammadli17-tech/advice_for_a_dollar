@@ -1813,3 +1813,42 @@ Reported to Farida as a question rather than filled.
 horizontal scroll, the font loaded, no console errors; reduced motion leaves
 no visible element animating (fireflies hidden). 160 tests, typecheck, lint,
 the override build. README screenshots retaken; the preview page republished.
+
+---
+
+## No more pink fills, and a bigger frog (2026-10-06, later)
+
+Farida's fifth brief, three items. Two are done; the third waits on a file.
+
+**Pale pink is no longer a background anywhere.** Every pale-pink (#f8cae4)
+fill on the home page is cream (#fcffe1) now: the sections below the hero,
+Chiron's card, the surface token the example panel uses, and the fireflies'
+dots. Wine (9.8:1) and dark green (8.0:1) read clearly on it. What stays, as
+she asked: wine borders, the wine button, and pale pink as the text colour
+on the dark-green bands and the button. The hot-pink shadows and the
+fireflies' glow were not named and stay; flagged to her.
+
+**The frog is bigger.** 3x (288x204 on screen) where the box has its full
+width, 2x (192x136) below 700px. At 3x each line of writing on his monitor
+is a three-pixel stroke and reads clearly as writing appearing; at 2x it is
+visible but small, and there is no room beside the line for 3x on a phone.
+On a phone (480px and under) the line takes the full width and he sits
+under it, right-aligned, on the writing area's top edge. His desk is pulled
+down by six art pixels plus six so its feet land two pixels into the border
+at either size. The box is taller now (708px at full width), so on a
+1440x900 screen the bottom of Chiron's card sits just below the first
+screen.
+
+**The new sprite sheet did not arrive.** Farida's brief describes
+`frog-writing-spritesheet.png`, 2048x128, sixteen 128x128 frames in which
+only the monitor changes (lines of writing, a blinking caret, a pause, a
+clear), with her tested CSS for 2x and the numbers for 3x, and asks for the
+built animation to be replaced by it, with no body movement added, no
+cutting into layers, and pixel (never percentage) end positions. The file
+was not attached to the message, so the current layered frog stays for now.
+When it arrives: put it in `src/pixel/assets/`, replace `TypingFrog.tsx`
+and `.css` with a single element using her CSS at 3x/2x as above (the
+hundredths of her frame step: 16 frames in 2.286s), delete the typist layers
+and `scripts/make-typist-layers.py` from the build, keep the reduced-motion
+rule, and check the transparent margins of her frames so the desk still
+sits on the writing area's edge.

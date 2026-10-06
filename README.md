@@ -26,7 +26,7 @@ It is at the bottom of this page.
     <td width="34%"><img src="docs/screenshots/home-mobile.png" alt="The home page on a phone"></td>
   </tr>
   <tr>
-    <td>The home page, in Farida's colours and her pixel font. The forest is her artist's file exactly as delivered, with nothing between it and the screen. The writing box sits in the middle of it: one line, the frog who writes typing at his computer beside it on the edge of the cream writing area, the button, and Chiron the bunny's name card hanging off the bottom edge. The frog breathes, taps at the keys, glances from the screen to the keyboard and back, and lines of text appear on his monitor; Chiron blinks. In the forest, the little black creatures bob, shuffle and blink, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
+    <td>The home page, in Farida's colours and her pixel font. The forest is her artist's file exactly as delivered, with nothing between it and the screen. The writing box sits in the middle of it: one line, the frog who writes typing at his computer beside it on the edge of the cream writing area, the button, and Chiron the bunny's name card hanging off the bottom edge. Nothing on the page is pale pink any more; the writing area, the card and the sections below are cream. The frog breathes, taps at the keys, glances from the screen to the keyboard and back, and lines of text appear on his monitor; Chiron blinks. In the forest, the little black creatures bob, shuffle and blink, and fireflies drift across the meadow. All of it stops for visitors who prefer reduced motion.</td>
     <td>The same page on a phone: the box first, the frog beside the line.</td>
   </tr>
 </table>
