@@ -49,7 +49,9 @@ export function Problem() {
       <PageShell>
         <section className="problem-page">
           <div className="wrap wrap-narrow">
-            <p className="prose">Loading…</p>
+            <div className="page-panel">
+              <p className="prose">Loading…</p>
+            </div>
           </div>
         </section>
       </PageShell>
@@ -60,15 +62,17 @@ export function Problem() {
     return (
       <PageShell>
         <section className="problem-page">
-          <div className="wrap wrap-narrow stack" style={{ gap: '16px' }}>
-            <h1 className="h1">This one isn&rsquo;t here.</h1>
-            <p className="prose">
-              It may never have been shared publicly, or it may have been taken down. Either way
-              there is nothing to see at this address.
-            </p>
-            <p>
-              <Link to="/archive">Back to the other problems</Link>
-            </p>
+          <div className="wrap wrap-narrow">
+            <div className="page-panel stack" style={{ gap: '16px' }}>
+              <h1 className="h1">This one isn&rsquo;t here.</h1>
+              <p className="prose">
+                It may never have been shared publicly, or it may have been taken down. Either way
+                there is nothing to see at this address.
+              </p>
+              <p>
+                <Link to="/archive">Back to the other problems</Link>
+              </p>
+            </div>
           </div>
         </section>
       </PageShell>
@@ -78,39 +82,41 @@ export function Problem() {
   return (
     <PageShell>
       <section className="problem-page">
-        <article className="wrap wrap-narrow stack" style={{ gap: '26px' }}>
-          <header className="stack" style={{ gap: '6px' }}>
-            <p className="problem-byline">
-              Anonymous · {new Date(problem.created_at).toLocaleDateString()} ·{' '}
-              {categoryLabel(problem.category)}
-            </p>
-          </header>
+        <div className="wrap wrap-narrow">
+          <article className="page-panel stack" style={{ gap: '26px' }}>
+            <header className="stack" style={{ gap: '6px' }}>
+              <p className="problem-byline">
+                Anonymous · {new Date(problem.created_at).toLocaleDateString()} ·{' '}
+                {categoryLabel(problem.category)}
+              </p>
+            </header>
 
-          <section className="stack" style={{ gap: '10px' }}>
-            <h1 className="h3">Problem</h1>
-            <hr className="problem-rule" />
-            <p className="problem-text">{problem.body}</p>
-          </section>
+            <section className="stack" style={{ gap: '10px' }}>
+              <h1 className="h3">Problem</h1>
+              <hr className="problem-rule" />
+              <p className="problem-text">{problem.body}</p>
+            </section>
 
-          <section className="stack" style={{ gap: '10px' }}>
-            <h2 className="h3">Advice</h2>
-            <hr className="problem-rule" />
-            <p className="problem-text">{problem.answer}</p>
-            <p className="problem-from">From: Farida</p>
-          </section>
+            <section className="stack" style={{ gap: '10px' }}>
+              <h2 className="h3">Advice</h2>
+              <hr className="problem-rule" />
+              <p className="problem-text">{problem.answer}</p>
+              <p className="problem-from">From: Farida</p>
+            </section>
 
-          <footer className="problem-foot stack" style={{ gap: '14px' }}>
-            <p className="one-human">{copy.trust.oneHuman}</p>
-            <div className="row">
-              <Link to="/ask" className="btn btn-primary">
-                Write your own
-              </Link>
-              <Link to="/archive" className="btn btn-quiet">
-                Read another
-              </Link>
-            </div>
-          </footer>
-        </article>
+            <footer className="problem-foot stack" style={{ gap: '14px' }}>
+              <p className="one-human">{copy.trust.oneHuman}</p>
+              <div className="row">
+                <Link to="/ask" className="btn btn-primary">
+                  Write your own
+                </Link>
+                <Link to="/archive" className="btn btn-quiet">
+                  Read another
+                </Link>
+              </div>
+            </footer>
+          </article>
+        </div>
       </section>
     </PageShell>
   );

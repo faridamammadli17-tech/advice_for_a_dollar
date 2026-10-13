@@ -3,8 +3,10 @@
    Page-specific styling lives with its page; this is what every page uses.
 
    Everything here obeys the art direction: hard edges, no rounded corners,
-   no soft shadows, nothing but the six palette colours. The interface should
-   not contradict the artwork sitting inside it.
+   no soft shadows, nothing but Farida's colours (theme.css). The interface
+   should not contradict the artwork sitting inside it. The header, the
+   footer, the buttons and the panels are styled here once and look the same
+   on every page; the home page only swaps the page background for the forest.
    =========================================================================== */
 
 .shell {
@@ -78,6 +80,29 @@
   margin: 0;
 }
 
+/* ------------------------------------------------------------- page panel */
+
+/* The cream sheet every inner page's content sits on, over the light-green
+   page: the same treatment as the home page's box (wine border, hard
+   shadow). Panels inside it turn light green so they stand off the sheet,
+   and the fields inside those are cream again, as the writing area is. */
+.page-panel {
+  background: var(--surface);
+  border: var(--border-width) solid var(--border-strong);
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding: 32px 34px 36px;
+}
+
+.page-panel .panel {
+  background: var(--surface-alt);
+  border-color: var(--border-strong);
+  box-shadow: 4px 4px 0 var(--shadow);
+}
+
+.page-panel .panel-flat {
+  box-shadow: none;
+}
+
 /* ----------------------------------------------------------------- buttons */
 
 .btn {
@@ -111,18 +136,20 @@
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-color: var(--accent-strong);
-  box-shadow: 4px 4px 0 var(--accent-strong);
+  /* Pink on wine is only 3.3:1, so the button is wine with pale-pink text
+     (6.9:1) and pink lives in its shadow. */
+  background: #752445;
+  color: #f8cae4;
+  border-color: #752445;
+  box-shadow: 4px 4px 0 #ea6993;
 }
 
 .btn-primary:hover {
-  box-shadow: 5px 5px 0 var(--accent-strong);
+  box-shadow: 5px 5px 0 #ea6993;
 }
 
 .btn-primary:active {
-  box-shadow: 1px 1px 0 var(--accent-strong);
+  box-shadow: 1px 1px 0 #ea6993;
 }
 
 .btn:disabled,
@@ -221,13 +248,16 @@
 .input::placeholder,
 .textarea::placeholder {
   color: var(--faint);
+  opacity: 0.85;
 }
 
 /* --------------------------------------------------------------- site head */
 
+/* The band across the top is dark green on every page; on it, the name and
+   the menu are pale pink (5.4:1), and the page you are on is white (8.3:1). */
 .site-head {
-  border-bottom: var(--border-width) solid var(--border-strong);
-  background: var(--surface);
+  border-bottom: var(--border-width) solid #cfdd9d;
+  background: #2f582c;
 }
 
 .site-head-inner {
@@ -244,7 +274,7 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  color: var(--text);
+  color: #f8cae4;
 }
 
 .brand-logo {
@@ -276,19 +306,19 @@
   font-size: 14px;
   letter-spacing: 0.04em;
   text-decoration: none;
-  color: var(--muted);
+  color: #f8cae4;
   padding: 7px 10px;
   border: 2px solid transparent;
 }
 
-.site-nav a:hover {
-  color: var(--text);
-  border-color: var(--border);
+.site-nav a:hover,
+.site-nav a[aria-current='page'] {
+  color: #ffffff;
+  border-color: #cfdd9d;
 }
 
-.site-nav a[aria-current='page'] {
-  color: var(--text);
-  border-color: var(--border-strong);
+.site-nav a:focus-visible {
+  outline-color: #ffffff;
 }
 
 /* -------------------------------------------------------------- theme keys */
@@ -322,9 +352,11 @@
 
 /* --------------------------------------------------------------- site foot */
 
+/* The footer is the same dark green band as the header. */
 .site-foot {
-  border-top: var(--border-width) solid var(--border-strong);
-  background: var(--surface);
+  border-top: var(--border-width) solid #cfdd9d;
+  background: #2f582c;
+  color: #f8cae4;
   margin-top: 72px;
 }
 
@@ -348,32 +380,32 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--faint);
+  color: #cfdd9d;
 }
 
 .foot-col a {
   font-size: 14px;
-  color: var(--muted);
+  color: #f8cae4;
   text-decoration: none;
 }
 
 .foot-col a:hover {
-  color: var(--text);
+  color: #ffffff;
   text-decoration: underline;
 }
 
 .foot-note {
   font-size: 13px;
-  color: var(--faint);
+  color: #f8cae4;
   margin: 0;
   max-width: 40ch;
 }
 
 .foot-bottom {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(207, 221, 157, 0.5);
   padding: 16px 0 28px;
   font-size: 13px;
-  color: var(--faint);
+  color: #f8cae4;
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
@@ -449,6 +481,10 @@
   .site-nav {
     width: 100%;
     margin-left: 0;
+  }
+
+  .page-panel {
+    padding: 22px 18px 24px;
   }
 }
 

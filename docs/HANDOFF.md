@@ -188,6 +188,20 @@ production build while the crisis numbers are placeholders or copy contains
 `*_PLACEHOLDER`. Override for local testing only:
 `ALLOW_PLACEHOLDER_CONTENT=1 npm run build`.
 
+**Farida's colours are the site's theme, and two screens are pinned out of
+it.** The day block of `theme.css` is her palette; `site.css` styles the
+header, footer, buttons, fields and the `.page-panel` once for every page,
+and the home page only swaps the page background for the forest. The
+safety screen and the admin dashboard keep the neutral paper set through
+the `.safety, .admin-shell` block in `theme.css`; nothing else may use it.
+
+**One function guards the way out of the writing box.** `checkWriting` in
+`src/lib/submissions/writeStep.ts` does the length check and calls the
+server's safety screen. Step 1 of /ask and "Get advice" on the home page
+both call it; the home page then opens /ask on step 2 by passing
+`screened` in the router state, which /ask consumes on arrival. Never add a
+second route to step 2.
+
 **The home page draws its sprites with `<img>`, not `SpriteCanvas`.** Chiron's
 portrait, the frog at his computer, the forest and its creatures are plain
 images with `image-rendering: pixelated`, sized by a CSS variable `--px` that

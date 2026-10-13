@@ -21,8 +21,9 @@ is the most recent round), `README.md` (plain-language tour).
   they go onto the first branch or get their own pull request.
 - Preview page (front end only, no server, private, shows the latest
   version): https://claude.ai/artifact/8bXKMWZKcVxfBJrUYx4a6D
-- Latest commit at the time of writing: `178bf1b` ("Hold the frog still;
-  only his screen moves"), on `claude/sharp-cray-8x10z0`.
+- Latest work at the time of writing: the seventh round (2026-10-13, every
+  page restyled and the flow change), on `claude/sharp-cray-8x10z0`; see
+  the last entry of `docs/NOTES.md`.
 
 ## Who you are working with
 
@@ -50,19 +51,26 @@ code. The project owner is Farida, also not an engineer. What they want:
    back. The em dashes elsewhere are part of how the owner writes; do not
    rewrite text to avoid a missing glyph.
 3. **Leave the safety / crisis screen alone**: no forest, no bunny, no
-   animation, system fonts. Its phone numbers are placeholders on purpose and
-   the release build refuses until Farida supplies real ones
-   (`ALLOW_PLACEHOLDER_CONTENT=1 npm run build` for local testing only; that
-   bundle must never go online).
-4. **Colours on the home page**: wine `#752445`, light green `#CFDD9D`, dark
-   green `#2F582C`, cream `#fcffe1`, and two leftovers: pink `#EA6993` only
-   as the hard shadow under the button and Chiron's card and as the
-   fireflies' glow, and pale pink `#F8CAE4` only as text on the dark-green
-   header and footer and on the button. **Pale pink is never a fill** (owner,
-   2026-10-06). Pick the background first, then the text colour that reads
-   best. Body text at 4.5:1 or better; pink never carries text (3.3:1 at
-   best). Measured pairs are in `docs/NOTES.md`: wine on cream 9.8:1, dark
-   green on cream 8.0:1, wine on light green 6.9:1.
+   animation, system fonts, the neutral paper colours pinned on `.safety`
+   in theme.css (Farida's dashboard, `.admin-shell`, shares that block).
+   Its phone numbers are placeholders on purpose and the release build
+   refuses until Farida supplies real ones (`ALLOW_PLACEHOLDER_CONTENT=1
+   npm run build` for local testing only; that bundle must never go online).
+   **The safety screen runs before anyone reaches the secret word**, from
+   the home page and from step 1 alike, through the one function
+   `checkWriting` in `src/lib/submissions/writeStep.ts`. Never add a second
+   path around it.
+4. **Colours, site-wide** (the day block of `src/styles/theme.css` since
+   2026-10-13): wine `#752445`, light green `#CFDD9D`, dark green `#2F582C`,
+   cream `#fcffe1`, and two leftovers: pink `#EA6993` only as the hard
+   shadow under buttons and Chiron's card and as the fireflies' glow, and
+   pale pink `#F8CAE4` only as text on the dark-green header and footer and
+   on buttons. **Pale pink is never a fill** (owner, 2026-10-06). Inner pages
+   are a light-green page with a cream `.page-panel`; the home page is the
+   forest with the same furniture. Pick the background first, then the text
+   colour that reads best. Body text at 4.5:1 or better; pink never carries
+   text (3.3:1 at best). Measured pairs are in `docs/NOTES.md`: wine on
+   cream 9.8:1, dark green on cream 8.0:1, wine on light green 6.9:1.
 5. **Font**: VCR OSD Mono via `@font-face` (`src/fonts/`), fallback
    `'Courier New', monospace` for the glyphs it lacks (em dash, en dash,
    middle dot, manat sign; also ə ş ğ ı İ).
@@ -84,7 +92,15 @@ code. The project owner is Farida, also not an engineer. What they want:
 9. The owner never edits submissions; secret words are hashed; recovery never
    confirms existence; the publication rule is enforced in SQL. See HANDOFF.
 
-## What the home page is now (six design rounds, all done)
+## What the site is now (seven design rounds, all done)
+
+Every page shares the header (dark-green band, logo, pale-pink menu, white
+for the page you are on), the footer (the same band), wine buttons and
+wine-bordered panels. Inner pages sit in a cream panel on a light-green
+page; the home page sits on the forest. "Get advice" on the home page runs
+the length check and the safety screen, then lands on step 2 of /ask with
+step 1 shown as done and a "Change what I wrote" button to go back; a direct
+visit to /ask starts at step 1. The home page itself:
 
 - Forest scene full-bleed behind the page: the delivered JPEG, unchanged.
   `src/components/ForestScene.tsx` draws it at a whole-number scale (anchored
@@ -131,8 +147,13 @@ pixel), so the stump with its creatures at the right is off screen there.
 
 ## Decisions still waiting on the owner
 
-- Whether rounds four to six go onto the pull request's branch or into a
+- Whether rounds four to seven go onto the pull request's branch or into a
   second pull request; then merge when happy.
+- Copy on step 1 of /ask that still uses the lines deleted from the home
+  page ("What is going on?", "What is on your mind?", "Start anywhere. It
+  does not have to be tidy."); the standing bunny still pictured on the
+  confirmation, reply, unknown-link, empty-archive and recover pages; the
+  1x still frog on step 1 of /ask. Hers to decide, nothing reworded.
 - Whether the remaining pink (the hard shadows and the fireflies' glow) and
   the pale-pink text on the dark-green bands should go too.
 - Whether anything is wanted on the right of the page at laptop widths now

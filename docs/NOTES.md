@@ -1867,3 +1867,72 @@ still appear on the monitor one at a time, pause, clear and start again, by
 whole pixels, and stop under reduced motion with the page fully written.
 Checked in Chromium: with motion allowed the only animations on the page are
 the seven screen lines, the creatures, Chiron's blink and the fireflies.
+
+---
+
+## Every page in the same clothes, and "Get advice" skips to the secret word (2026-10-13)
+
+Farida's seventh brief: the redesign had stopped at the home page, and
+clicking "Get advice" landed on a white page. Two jobs.
+
+**One site.** Farida's colours are now the site's base theme (theme.css,
+the day block), so the header, the footer, the buttons, the fields and the
+panels are styled once in site.css and look identical on every page: the
+dark-green band with the logo and pale-pink menu top and bottom, wine
+buttons with pale-pink text and a pink shadow, wine borders and hard
+shadows. The home page keeps the forest and otherwise uses exactly the same
+rules; its own copy of the tokens is gone. Every inner page (/ask and its
+confirmation, /how-it-works, /about, /faq, /archive, /problem/:id,
+/a/:token in all its states, /recover, /privacy, /terms,
+/community-guidelines, the 404) sits on a **light-green page (#cfdd9d)** in
+a **cream panel (#fcffe1)** with a wine border: the same pair as the home
+box and its writing area, chosen because it is the calmest of her colours
+for long reading (wine on cream 9.8:1, dark green on cream 8.0:1), and
+because dark green behind a page of text would be heavy. Panels inside the
+sheet turn light green and the fields inside those are cream again. The
+404 page now uses the shared frame too. Step indicator: still to come is
+dark green lightly drawn, done is filled light green, where you are is wine
+and lifted.
+
+**Two screens stay plain.** The safety screen and Farida's dashboard keep
+the neutral paper colours in a block of their own in theme.css (`.safety,
+.admin-shell`), so the palette change cannot reach them; the safety screen
+also sets the system font on its body text, which had been inheriting the
+pixel font. Checked: no forest, no images or canvases, no animation,
+neutral background, system type.
+
+**The flow.** The Write step's checks now live in one function,
+`checkWriting` (lib/submissions/writeStep.ts): at least 20 characters and
+under the maximum, then the server's safety screen. Both "Continue" on
+step 1 and "Get advice" on the home page call it and nothing else. On the
+home page: too short keeps you there with the same message under the box;
+flagged shows the crisis screen in place of the home page, creating and
+charging nothing, and "Go back to what I wrote" returns with the text
+intact; passing goes to /ask with `screened` in the router state, which
+opens on step 2 with step 1 shown as done. The flag is consumed on
+arrival, so a reload, a direct visit or a typed address starts at step 1.
+Step 2's "Back" became "Change what I wrote", which returns to step 1 with
+the text in the box; going forward from there runs the check again. The
+server screens again on submit regardless. Walked in Chromium at 1440 and
+390: too short, flagged (crisis screen, back), passing (step 2, trail
+1 done / 2 now), change what I wrote (step 1, text present), continue
+(step 2), reload (step 1), direct visit (step 1), flagged from step 1 of
+/ask (crisis screen), then the whole flow to the confirmation with the
+mock payment.
+
+**Copy that now looks inconsistent, left for Farida:** step 1 of /ask
+still says "What is going on?" as its heading, "What is on your mind?" as
+the box's label and "Start anywhere. It does not have to be tidy." inside
+it, the three lines she deleted from the home page. The standing bunny
+with the lantern still appears as a still picture on the confirmation,
+the reply page while waiting, the unknown-link page, the empty archive and
+the recover page, though she took him off the home page; and the still
+frog on step 1 of /ask is 1x while the home page's is 3x. Nothing
+reworded.
+
+**Checked.** Every listed page at 1440 and 390: dark-green header and
+footer, light-green page, cream panel, the pixel font loaded, no sideways
+scroll, no console errors beyond the expected 404s for a missing problem or
+link. 160 tests, typecheck, lint, the override build. README screenshots of
+the inner pages retaken; the preview page republished (it has no server, so
+its flow stops at the screening call).

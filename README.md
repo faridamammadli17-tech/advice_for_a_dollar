@@ -37,7 +37,7 @@ It is at the bottom of this page.
     <td width="50%"><img src="docs/screenshots/home-mobile-chiron.png" alt="On a phone, Chiron's name card hangs off the bottom edge of the box"></td>
   </tr>
   <tr>
-    <td>While someone writes, the box lifts and the pink comes forward.</td>
+    <td>While someone writes, the box lifts. Pressing Get advice checks the length and runs the safety screen before anything else, then opens the flow on the secret word.</td>
     <td>On a phone, Chiron's card hangs off the bottom edge of the box, the same as on a wide screen.</td>
   </tr>
 </table>

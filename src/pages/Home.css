@@ -1,111 +1,15 @@
 /* Homepage: the forest, the writing box, the frog on its edge, Chiron's card at its foot. */
 
-/* ------------------------------------------------- the palette on the forest */
+/* ------------------------------------------------- the page on the forest */
 
-/* Farida's colours (2026-10-04), with the cream she chose on 2026-10-06
-   (#fcffe1) in place of every pale-pink fill: pale pink is no longer a
-   background anywhere, only the text colour on the dark-green bands and the
-   button. The rule is background first, then whichever text colour reads
-   best on it: wine on the light green (6.9:1) and on the cream (9.8:1), dark
-   green as the quieter second colour on them (5.7:1; 8.0:1 on the cream),
-   and pale pink or white on the dark-green bands (5.4:1 and 8.3:1). Pink
-   never carries text: it is 3.3:1 at best. It is used for shadows and the
-   fireflies' glow. */
+/* The colours, the header, the footer, the buttons and the fields are the
+   site's own (theme.css, site.css); the home page only makes the page
+   transparent so the fixed forest shows through everything, and is the
+   stacking context the scene sits at the bottom of. */
 .shell-forest {
-  --bg: #cfdd9d;
-  --surface: #fcffe1;
-  --surface-alt: #cfdd9d;
-  --text: #752445;
-  --muted: #2f582c;
-  --faint: #2f582c;
-  --border: #752445;
-  --border-strong: #752445;
-  --shadow: rgba(117, 36, 69, 0.35);
-  --accent: #ea6993;
-  --accent-strong: #752445;
-  --accent-text: #752445;
-  --accent-cool: #2f582c;
-  --highlight: #cfdd9d;
-  --on-accent: #f8cae4;
-  --focus-ring: #752445;
-
-  /* Transparent, so the fixed scene shows through everything, and the
-     stacking context the scene sits at the bottom of. */
   background: transparent;
   position: relative;
   z-index: 0;
-}
-
-/* The band across the top is dark green; on it, the name and the menu are
-   pale pink, and the page you are on is white. */
-.shell-forest .site-head {
-  background: #2f582c;
-  border-color: #cfdd9d;
-}
-
-.shell-forest .brand {
-  color: #f8cae4;
-}
-
-.shell-forest .site-nav a {
-  color: #f8cae4;
-}
-
-.shell-forest .site-nav a:hover,
-.shell-forest .site-nav a[aria-current='page'] {
-  color: #ffffff;
-  border-color: #cfdd9d;
-}
-
-.shell-forest .site-nav a:focus-visible {
-  outline-color: #ffffff;
-}
-
-/* The footer is the same dark green band. */
-.shell-forest .site-foot {
-  background: #2f582c;
-  border-color: #cfdd9d;
-  color: #f8cae4;
-}
-
-.shell-forest .foot-title {
-  color: #cfdd9d;
-}
-
-.shell-forest .foot-col a,
-.shell-forest .foot-note,
-.shell-forest .foot-bottom {
-  color: #f8cae4;
-}
-
-.shell-forest .foot-col a:hover {
-  color: #ffffff;
-}
-
-.shell-forest .foot-bottom {
-  border-color: rgba(207, 221, 157, 0.5);
-}
-
-/* Pink on wine is only 3.3:1, so the button is wine with pale-pink text
-   (6.9:1) and pink lives in its shadow. */
-.shell-forest .btn-primary {
-  background: #752445;
-  color: #f8cae4;
-  border-color: #752445;
-  box-shadow: 4px 4px 0 #ea6993;
-}
-
-.shell-forest .btn-primary:hover {
-  box-shadow: 5px 5px 0 #ea6993;
-}
-
-.shell-forest .btn-primary:active {
-  box-shadow: 1px 1px 0 #ea6993;
-}
-
-.shell-forest .textarea::placeholder {
-  color: #2f582c;
-  opacity: 0.85;
 }
 
 /* ------------------------------------------------------------- the forest */

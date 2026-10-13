@@ -15,6 +15,9 @@
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
+  /* Plain system type throughout: the body text was inheriting the pixel
+     font from the page, which this screen must never use. */
+  font-family: var(--font-system);
   display: flex;
   align-items: flex-start;
   justify-content: center;

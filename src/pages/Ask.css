@@ -47,19 +47,24 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 6px 10px;
-  border: 2px solid var(--border);
-  color: var(--faint);
+  /* Still to come: dark green, lightly drawn. */
+  border: 2px solid rgba(47, 88, 44, 0.45);
+  color: var(--accent-cool);
 }
 
+/* Where you are: wine, lifted. */
 .trail-step[data-state='now'] {
   border-color: var(--accent-strong);
   color: var(--text);
   background: var(--surface);
+  box-shadow: 3px 3px 0 var(--shadow);
 }
 
+/* Done: dark green, filled light green. */
 .trail-step[data-state='done'] {
   border-color: var(--accent-cool);
   color: var(--accent-cool);
+  background: var(--surface-alt);
 }
 
 .trail-num {
@@ -121,7 +126,7 @@
   font-size: 15px;
   font-weight: 700;
   padding: 12px 20px;
-  background: var(--surface-alt);
+  background: var(--surface);
   color: var(--text);
   border: var(--border-width) solid var(--border-strong);
   cursor: pointer;
@@ -167,7 +172,7 @@
   font-size: 14px;
   line-height: 1.5;
   padding: 12px 14px;
-  background: var(--surface-alt);
+  background: var(--surface);
   border: 2px solid var(--border);
   word-break: break-all;
 }

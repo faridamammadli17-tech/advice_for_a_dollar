@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
+import { SafetyInterstitial } from '../components/SafetyInterstitial';
 import { WritingPad } from '../components/WritingPad';
 import { ForestScene } from '../components/ForestScene';
 import { BunnyPortrait } from '../components/Bunny';
@@ -8,6 +9,8 @@ import { TypingFrog } from '../components/TypingFrog';
 import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
 import { readDraft, writeDraft } from '../lib/submissions/draft';
+import { asSafetyCategory } from '../lib/safety/screen';
+import { checkWriting, SCREENED_STATE } from '../lib/submissions/writeStep';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { formatMinorUnits, MINIMUM_MINOR_UNITS } from '../lib/money';
 
@@ -30,6 +33,9 @@ import './Home.css';
 export function Home() {
   const navigate = useNavigate();
   const [text, setText] = useState(readDraft);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [safety, setSafety] = useState<{ category: string | null } | null>(null);
   // The frog is 3x where the box has its full width and 2x below that; the
   // writing on his monitor is the thing that has to stay readable (Farida,
   // 2026-10-06), and Home.css wraps him under the line on a phone.
@@ -41,10 +47,39 @@ export function Home() {
     writeDraft(value);
   };
 
-  const startAsking = () => {
+  /**
+   * "Get advice" does exactly what step 1's Continue button does, through the
+   * same function: too short and you stay here with the same message; the
+   * safety screen runs; flagged means the crisis screen and nothing else;
+   * only text that passes goes on, and lands on the secret word.
+   */
+  const startAsking = async () => {
     writeDraft(text);
-    navigate('/ask');
+    setError(null);
+    setBusy(true);
+    const outcome = await checkWriting(text);
+    setBusy(false);
+
+    if (outcome.kind === 'problem') {
+      setError(outcome.message);
+      return;
+    }
+    if (outcome.kind === 'flagged') {
+      setSafety({ category: outcome.category });
+      return;
+    }
+    navigate('/ask', { state: SCREENED_STATE });
   };
+
+  if (safety !== null) {
+    // Their words stay in the box (and in the draft) for when they come back.
+    return (
+      <SafetyInterstitial
+        category={asSafetyCategory(safety.category)}
+        onBack={() => setSafety(null)}
+      />
+    );
+  }
 
   return (
     <PageShell backdrop="forest">
@@ -68,9 +103,16 @@ export function Home() {
                 typist={<TypingFrog scale={wideBox ? 3 : 2} className="hero-frog" />}
               />
 
+              {error !== null && <p className="field-error">{error}</p>}
+
               <div className="row hero-actions">
-                <button type="button" className="btn btn-primary" onClick={startAsking}>
-                  {copy.hero.primaryCta}
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => void startAsking()}
+                  disabled={busy}
+                >
+                  {busy ? 'Just a moment…' : copy.hero.primaryCta}
                 </button>
                 <span className="hero-price">
                   {formatMinorUnits(MINIMUM_MINOR_UNITS)} minimum · pay what you want

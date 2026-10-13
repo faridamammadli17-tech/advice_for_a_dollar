@@ -36,6 +36,7 @@ export function TypingFrog({ scale = 3, className = '' }: Props) {
 
   const layer = (src: string, kind: string, extra?: CSSProperties) => (
     <img
+      key={kind}
       className={`typist-layer ${kind}`}
       src={src}
       alt=""

@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { WritingPad } from '../components/WritingPad';
 import { SafetyInterstitial } from '../components/SafetyInterstitial';
@@ -11,8 +11,9 @@ import { clearDraft, readDraft, writeDraft } from '../lib/submissions/draft';
 import { visitorApi } from '../lib/api/client';
 import { asSafetyCategory } from '../lib/safety/screen';
 import { checkSecretWord } from '../lib/submissions/secretWord';
+import { cameScreened, checkWriting, MIN_BODY_CHARS } from '../lib/submissions/writeStep';
 import { mockPaymentProvider } from '../lib/payments/MockPaymentProvider';
-import { MAX_BODY_CHARS, type Visibility } from '../lib/submissions/types';
+import { type Visibility } from '../lib/submissions/types';
 import {
   checkAmount,
   formatMinorUnits,
@@ -41,11 +42,29 @@ const STEP_LABELS: readonly { step: Step; label: string }[] = [
  *
  * The safety screen runs at the end of the writing step — before the secret
  * word, before the visibility choice, and before anything resembling a card.
- * `api.createSubmission` screens again regardless, so skipping the UI does not
- * skip the check.
+ * It lives in `checkWriting` (lib/submissions/writeStep.ts), which the home
+ * page's "Get advice" button calls too: text that passed there arrives here
+ * with `screened` in the router state and opens on the secret word, with
+ * step 1 shown as done. A direct visit, a typed address or a reload starts at
+ * step 1. `api.createSubmission` screens again regardless, so skipping the
+ * UI does not skip the check.
  */
 export function Ask() {
-  const [step, setStep] = useState<Step>('write');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [step, setStep] = useState<Step>(() =>
+    cameScreened(location.state) && readDraft().trim().length >= MIN_BODY_CHARS
+      ? 'secret'
+      : 'write',
+  );
+
+  // The flag is good for one arrival. Clearing it means a reload of this
+  // page starts at step 1, with the text still in the box.
+  useEffect(() => {
+    if (cameScreened(location.state)) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +75,11 @@ export function Ask() {
   const [customAmount, setCustomAmount] = useState('');
 
   const [safety, setSafety] = useState<{ category: string | null } | null>(null);
-  const [created, setCreated] = useState<{ token: string; body: string; visibility: Visibility } | null>(null);
+  const [created, setCreated] = useState<{
+    token: string;
+    body: string;
+    visibility: Visibility;
+  } | null>(null);
 
   // The ceremony and the request race; whichever finishes last reveals the
   // confirmation. The request is never gated on the animation.
@@ -72,28 +95,17 @@ export function Ask() {
 
   const submitWriting = async () => {
     setError(null);
-    if (text.trim().length < 20) {
-      setError('A little more to go on would help. Even a few sentences.');
-      return;
-    }
-    if (text.length > MAX_BODY_CHARS) {
-      setError(
-        `That is longer than can be read in one sitting. Please keep it under ${MAX_BODY_CHARS.toLocaleString('en')} characters.`,
-      );
-      return;
-    }
-
     setBusy(true);
-    const result = await visitorApi.screen(text);
+    const outcome = await checkWriting(text);
     setBusy(false);
 
-    if (!result.ok) {
-      setError('Could not reach the server. Your words are saved — try again in a moment.');
+    if (outcome.kind === 'problem') {
+      setError(outcome.message);
       return;
     }
-    if (result.data.flagged) {
+    if (outcome.kind === 'flagged') {
       // Stop here. Nothing created, nothing charged, text untouched.
-      setSafety({ category: result.data.category });
+      setSafety({ category: outcome.category });
       return;
     }
     setStep('secret');
@@ -168,7 +180,9 @@ export function Ask() {
       });
 
       if (!result.ok) {
-        setError('The server could not take it just now. Nothing was charged, and your words are safe.');
+        setError(
+          'The server could not take it just now. Nothing was charged, and your words are safe.',
+        );
         setStep('pay');
         return;
       }
@@ -218,175 +232,186 @@ export function Ask() {
   return (
     <PageShell>
       <section className="ask">
-        <div className="wrap wrap-narrow ask-inner">
-          {step !== 'sending' && <StepTrail current={step} />}
+        <div className="wrap wrap-narrow">
+          <div className="page-panel ask-inner">
+            {step !== 'sending' && <StepTrail current={step} />}
 
-          {step === 'write' && (
-            <div className="stack" style={{ gap: '18px' }}>
-              <h1 className="h1">What is going on?</h1>
-              <p className="field-help">{copy.ask.privacyNudge}</p>
+            {step === 'write' && (
+              <div className="stack" style={{ gap: '18px' }}>
+                <h1 className="h1">What is going on?</h1>
+                <p className="field-help">{copy.ask.privacyNudge}</p>
 
-              <div className="panel">
-                <WritingPad
-                  id="ask-write"
-                  label={copy.hero.writePrompt}
-                  placeholder={copy.hero.writePlaceholder}
-                  value={text}
-                  onChange={handleText}
-                  autoFocus
-                />
-              </div>
-
-              {error !== null && <p className="field-error">{error}</p>}
-
-              <div className="row">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={submitWriting}
-                  disabled={busy}
-                >
-                  {busy ? 'Just a moment…' : 'Continue'}
-                </button>
-                <span className="ask-next">Next: choose a secret word.</span>
-              </div>
-            </div>
-          )}
-
-          {step === 'secret' && (
-            <div className="stack" style={{ gap: '18px' }}>
-              <h1 className="h1">{copy.ask.secretWordHeading}</h1>
-              <p className="prose">{copy.ask.secretWordWhy}</p>
-
-              <div className="panel field">
-                <label className="field-label" htmlFor="secret-word">
-                  Your secret word
-                </label>
-                <input
-                  id="secret-word"
-                  className="input"
-                  type="text"
-                  value={secretWord}
-                  onChange={(event) => setSecretWord(event.target.value)}
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                <p className="field-help">
-                  It is stored scrambled, never in plain text, and never shown to anyone else.
-                </p>
-              </div>
-
-              {error !== null && <p className="field-error">{error}</p>}
-
-              <div className="row">
-                <button type="button" className="btn btn-primary" onClick={submitSecret}>
-                  Continue
-                </button>
-                <button type="button" className="btn btn-quiet" onClick={() => setStep('write')}>
-                  Back
-                </button>
-                <span className="ask-next">Next: private or public.</span>
-              </div>
-            </div>
-          )}
-
-          {step === 'visibility' && (
-            <div className="stack" style={{ gap: '18px' }}>
-              <h1 className="h1">{copy.ask.visibilityHeading}</h1>
-              <p className="prose">{copy.ask.visibilityWhy}</p>
-
-              <div className="choices">
-                <ChoiceCard
-                  selected={visibility === 'private'}
-                  onSelect={() => setVisibility('private')}
-                  title="Keep it private"
-                  body="Only you and Farida ever see it. It never appears anywhere else."
-                />
-                <ChoiceCard
-                  selected={visibility === 'public'}
-                  onSelect={() => setVisibility('public')}
-                  title="Let it be published"
-                  body="Farida reads it first and decides. If she publishes it, it appears without your name — and you can still delete it."
-                />
-              </div>
-
-              <div className="row">
-                <button type="button" className="btn btn-primary" onClick={() => setStep('pay')}>
-                  Continue
-                </button>
-                <button type="button" className="btn btn-quiet" onClick={() => setStep('secret')}>
-                  Back
-                </button>
-                <span className="ask-next">Next: pay what you want.</span>
-              </div>
-            </div>
-          )}
-
-          {step === 'pay' && (
-            <div className="stack" style={{ gap: '18px' }}>
-              <h1 className="h1">{copy.ask.paymentHeading}</h1>
-              <p className="prose">{copy.ask.paymentWhy}</p>
-
-              <div className="panel stack" style={{ gap: '16px' }}>
-                <div className="amounts">
-                  {SUGGESTED_MINOR_UNITS.map((suggested) => (
-                    <button
-                      key={suggested}
-                      type="button"
-                      className="amount"
-                      aria-pressed={customAmount.trim() === '' && amountMinorUnits === suggested}
-                      onClick={() => {
-                        setAmountMinorUnits(suggested);
-                        setCustomAmount('');
-                      }}
-                    >
-                      {formatMinorUnits(suggested)}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="field">
-                  <label className="field-label" htmlFor="custom-amount">
-                    Or another amount
-                  </label>
-                  <input
-                    id="custom-amount"
-                    className="input"
-                    type="text"
-                    inputMode="decimal"
-                    placeholder={`e.g. 2.50 — minimum ${formatMinorUnits(MINIMUM_MINOR_UNITS)}`}
-                    value={customAmount}
-                    onChange={(event) => setCustomAmount(event.target.value)}
+                <div className="panel">
+                  <WritingPad
+                    id="ask-write"
+                    label={copy.hero.writePrompt}
+                    placeholder={copy.hero.writePlaceholder}
+                    value={text}
+                    onChange={handleText}
+                    autoFocus
                   />
                 </div>
 
-                {import.meta.env.DEV && (
-                  <p className="ask-devnote">
-                    Mock provider — no real money. Any amount ending in .13 simulates a declined
-                    card, so the failure path can be walked.
+                {error !== null && <p className="field-error">{error}</p>}
+
+                <div className="row">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={submitWriting}
+                    disabled={busy}
+                  >
+                    {busy ? 'Just a moment…' : 'Continue'}
+                  </button>
+                  <span className="ask-next">Next: choose a secret word.</span>
+                </div>
+              </div>
+            )}
+
+            {step === 'secret' && (
+              <div className="stack" style={{ gap: '18px' }}>
+                <h1 className="h1">{copy.ask.secretWordHeading}</h1>
+                <p className="prose">{copy.ask.secretWordWhy}</p>
+
+                <div className="panel field">
+                  <label className="field-label" htmlFor="secret-word">
+                    Your secret word
+                  </label>
+                  <input
+                    id="secret-word"
+                    className="input"
+                    type="text"
+                    value={secretWord}
+                    onChange={(event) => setSecretWord(event.target.value)}
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  <p className="field-help">
+                    It is stored scrambled, never in plain text, and never shown to anyone else.
                   </p>
-                )}
+                </div>
+
+                {error !== null && <p className="field-error">{error}</p>}
+
+                <div className="row">
+                  <button type="button" className="btn btn-primary" onClick={submitSecret}>
+                    Continue
+                  </button>
+                  {/* Someone who came from the home page skipped step 1, so this
+                    is their way back to a typo. Their text is still in the box. */}
+                  <button
+                    type="button"
+                    className="btn btn-quiet"
+                    onClick={() => {
+                      setError(null);
+                      setStep('write');
+                    }}
+                  >
+                    Change what I wrote
+                  </button>
+                  <span className="ask-next">Next: private or public.</span>
+                </div>
               </div>
+            )}
 
-              {error !== null && <p className="field-error">{error}</p>}
+            {step === 'visibility' && (
+              <div className="stack" style={{ gap: '18px' }}>
+                <h1 className="h1">{copy.ask.visibilityHeading}</h1>
+                <p className="prose">{copy.ask.visibilityWhy}</p>
 
-              <div className="row">
-                <button type="button" className="btn btn-primary" onClick={pay}>
-                  Send it
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-quiet"
-                  onClick={() => setStep('visibility')}
-                >
-                  Back
-                </button>
-                <span className="ask-next">Next: your private link.</span>
+                <div className="choices">
+                  <ChoiceCard
+                    selected={visibility === 'private'}
+                    onSelect={() => setVisibility('private')}
+                    title="Keep it private"
+                    body="Only you and Farida ever see it. It never appears anywhere else."
+                  />
+                  <ChoiceCard
+                    selected={visibility === 'public'}
+                    onSelect={() => setVisibility('public')}
+                    title="Let it be published"
+                    body="Farida reads it first and decides. If she publishes it, it appears without your name — and you can still delete it."
+                  />
+                </div>
+
+                <div className="row">
+                  <button type="button" className="btn btn-primary" onClick={() => setStep('pay')}>
+                    Continue
+                  </button>
+                  <button type="button" className="btn btn-quiet" onClick={() => setStep('secret')}>
+                    Back
+                  </button>
+                  <span className="ask-next">Next: pay what you want.</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {step === 'sending' && <EnvelopeCeremony onDone={handleCeremonyDone} />}
+            {step === 'pay' && (
+              <div className="stack" style={{ gap: '18px' }}>
+                <h1 className="h1">{copy.ask.paymentHeading}</h1>
+                <p className="prose">{copy.ask.paymentWhy}</p>
+
+                <div className="panel stack" style={{ gap: '16px' }}>
+                  <div className="amounts">
+                    {SUGGESTED_MINOR_UNITS.map((suggested) => (
+                      <button
+                        key={suggested}
+                        type="button"
+                        className="amount"
+                        aria-pressed={customAmount.trim() === '' && amountMinorUnits === suggested}
+                        onClick={() => {
+                          setAmountMinorUnits(suggested);
+                          setCustomAmount('');
+                        }}
+                      >
+                        {formatMinorUnits(suggested)}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="field">
+                    <label className="field-label" htmlFor="custom-amount">
+                      Or another amount
+                    </label>
+                    <input
+                      id="custom-amount"
+                      className="input"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder={`e.g. 2.50 — minimum ${formatMinorUnits(MINIMUM_MINOR_UNITS)}`}
+                      value={customAmount}
+                      onChange={(event) => setCustomAmount(event.target.value)}
+                    />
+                  </div>
+
+                  {import.meta.env.DEV && (
+                    <p className="ask-devnote">
+                      Mock provider — no real money. Any amount ending in .13 simulates a declined
+                      card, so the failure path can be walked.
+                    </p>
+                  )}
+                </div>
+
+                {error !== null && <p className="field-error">{error}</p>}
+
+                <div className="row">
+                  <button type="button" className="btn btn-primary" onClick={pay}>
+                    Send it
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-quiet"
+                    onClick={() => setStep('visibility')}
+                  >
+                    Back
+                  </button>
+                  <span className="ask-next">Next: your private link.</span>
+                </div>
+              </div>
+            )}
+
+            {step === 'sending' && <EnvelopeCeremony onDone={handleCeremonyDone} />}
+          </div>
         </div>
       </section>
     </PageShell>
@@ -458,65 +483,67 @@ function Confirmation({
   return (
     <PageShell>
       <section className="ask">
-        <div className="wrap wrap-narrow ask-inner stack" style={{ gap: '22px' }}>
-          <div className="confirm-head">
-            <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
-            <h1 className="h1">Here&rsquo;s your magic link.</h1>
-          </div>
+        <div className="wrap wrap-narrow">
+          <div className="page-panel ask-inner stack" style={{ gap: '22px' }}>
+            <div className="confirm-head">
+              <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+              <h1 className="h1">Here&rsquo;s your magic link.</h1>
+            </div>
 
-          <div className="panel stack" style={{ gap: '10px' }}>
-            <span className="field-label">Your private link</span>
-            <code className="magic-link">{magicLink}</code>
+            <div className="panel stack" style={{ gap: '10px' }}>
+              <span className="field-label">Your private link</span>
+              <code className="magic-link">{magicLink}</code>
+              <div className="row">
+                <button type="button" className="btn" onClick={copyLink}>
+                  {copied ? 'Copied' : 'Copy link'}
+                </button>
+                <Link to={`/a/${view.token}`} className="btn btn-quiet">
+                  Open it
+                </Link>
+              </div>
+              <p className="field-help">
+                Save this somewhere. It is the only way back to your submission, and it is not sent
+                to you anywhere else.
+              </p>
+            </div>
+
+            <div className="panel stack" style={{ gap: '10px' }}>
+              <span className="field-label">Your secret word</span>
+              <code className="secret-shown">{secretWord}</code>
+              <p className="field-help">
+                Shown once, here. If you lose the link, this is how you prove the submission is
+                yours. If you ever write again, choose a different word.
+              </p>
+            </div>
+
+            <div className="panel panel-flat stack" style={{ gap: '10px' }}>
+              <span className="field-label">What you sent</span>
+              <p className="prose confirm-body">{view.body}</p>
+            </div>
+
+            <div className="stack" style={{ gap: '8px' }}>
+              <h2 className="h3">What happens now</h2>
+              <ul className="next-list">
+                <li>Farida reads it and writes back. {copy.responseTime}</li>
+                {view.visibility === 'public' && (
+                  <li>
+                    You asked for this to be published. She reads it first and decides — it is not
+                    public yet.
+                  </li>
+                )}
+                <li>Come back through your link to read the reply.</li>
+                <li>You can delete it at any time through that link.</li>
+              </ul>
+            </div>
+
             <div className="row">
-              <button type="button" className="btn" onClick={copyLink}>
-                {copied ? 'Copied' : 'Copy link'}
-              </button>
-              <Link to={`/a/${view.token}`} className="btn btn-quiet">
-                Open it
+              <Link to="/ask" className="btn">
+                Submit another
+              </Link>
+              <Link to="/" className="btn btn-quiet">
+                Back to the start
               </Link>
             </div>
-            <p className="field-help">
-              Save this somewhere. It is the only way back to your submission, and it is not sent to
-              you anywhere else.
-            </p>
-          </div>
-
-          <div className="panel stack" style={{ gap: '10px' }}>
-            <span className="field-label">Your secret word</span>
-            <code className="secret-shown">{secretWord}</code>
-            <p className="field-help">
-              Shown once, here. If you lose the link, this is how you prove the submission is yours.
-              If you ever write again, choose a different word.
-            </p>
-          </div>
-
-          <div className="panel panel-flat stack" style={{ gap: '10px' }}>
-            <span className="field-label">What you sent</span>
-            <p className="prose confirm-body">{view.body}</p>
-          </div>
-
-          <div className="stack" style={{ gap: '8px' }}>
-            <h2 className="h3">What happens now</h2>
-            <ul className="next-list">
-              <li>Farida reads it and writes back. {copy.responseTime}</li>
-              {view.visibility === 'public' && (
-                <li>
-                  You asked for this to be published. She reads it first and decides — it is not
-                  public yet.
-                </li>
-              )}
-              <li>Come back through your link to read the reply.</li>
-              <li>You can delete it at any time through that link.</li>
-            </ul>
-          </div>
-
-          <div className="row">
-            <Link to="/ask" className="btn">
-              Submit another
-            </Link>
-            <Link to="/" className="btn btn-quiet">
-              Back to the start
-            </Link>
           </div>
         </div>
       </section>
