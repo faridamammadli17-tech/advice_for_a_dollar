@@ -1,4 +1,5 @@
 import { visitorApi } from '../api/client';
+import { screen } from '../safety/screen';
 import { MAX_BODY_CHARS } from './types';
 
 /**
@@ -42,17 +43,37 @@ export async function checkWriting(text: string): Promise<WriteOutcome> {
     };
   }
 
-  const result = await visitorApi.screen(text);
-  if (!result.ok) {
+  const verdict = await screenOnServer(text);
+  if (verdict === null) {
     return {
       kind: 'problem',
       message: 'Could not reach the server. Your words are saved — try again in a moment.',
     };
   }
-  if (result.data.flagged) {
-    return { kind: 'flagged', category: result.data.category };
+  if (verdict.flagged) {
+    return { kind: 'flagged', category: verdict.category };
   }
   return { kind: 'ok' };
+}
+
+/**
+ * The server's verdict, or null when it cannot be reached.
+ *
+ * The design preview (a static page built with VITE_PREVIEW_ROUTER=hash, see
+ * App.tsx) has no server at all, so there the same rules run in the browser:
+ * `screen` is the very function the server's /api/screen route calls, on
+ * the same cleaned text. That flag is never set for a real build, and on
+ * the real site nothing can be created without the server screening it
+ * again on submit regardless.
+ */
+async function screenOnServer(
+  text: string,
+): Promise<{ flagged: boolean; category: string | null } | null> {
+  if (import.meta.env.VITE_PREVIEW_ROUTER === 'hash') {
+    return screen(text.replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim());
+  }
+  const result = await visitorApi.screen(text);
+  return result.ok ? result.data : null;
 }
 
 /**

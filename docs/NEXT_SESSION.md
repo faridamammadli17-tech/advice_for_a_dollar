@@ -20,7 +20,10 @@ is the most recent round), `README.md` (plain-language tour).
   Rounds four to six are not in that pull request: the owner decides whether
   they go onto the first branch or get their own pull request.
 - Preview page (front end only, no server, private, shows the latest
-  version): https://claude.ai/artifact/8bXKMWZKcVxfBJrUYx4a6D
+  version): https://claude.ai/artifact/8bXKMWZKcVxfBJrUYx4a6D. In that
+  build the safety screening runs in the browser with the same rules
+  (`screenOnServer` in `writeStep.ts`, preview build only), so the flow
+  works up to the sending step, which needs the server.
 - Latest work at the time of writing: the seventh round (2026-10-13, every
   page restyled and the flow change), on `claude/sharp-cray-8x10z0`; see
   the last entry of `docs/NOTES.md`.

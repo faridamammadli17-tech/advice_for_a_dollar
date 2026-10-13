@@ -1936,3 +1936,11 @@ scroll, no console errors beyond the expected 404s for a missing problem or
 link. 160 tests, typecheck, lint, the override build. README screenshots of
 the inner pages retaken; the preview page republished (it has no server, so
 its flow stops at the screening call).
+
+**Addendum (2026-10-13, later).** The preview page has no server, so after
+the flow change "Get advice" there stopped at "Could not reach the server".
+In the preview build only (the `VITE_PREVIEW_ROUTER=hash` build, which is
+never a real build), the screening now runs in the browser through the same
+`screen` function the server's route calls, on the same cleaned text, so
+the flow can be seen there up to the sending step. The real site still asks
+the server, and the server still screens again on submit.
