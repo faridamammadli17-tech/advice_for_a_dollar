@@ -1944,3 +1944,16 @@ never a real build), the screening now runs in the browser through the same
 `screen` function the server's route calls, on the same cleaned text, so
 the flow can be seen there up to the sending step. The real site still asks
 the server, and the server still screens again on submit.
+
+**Addendum 2 (2026-10-13, later still).** Farida asked for the preview to
+go on past the payment step. In the preview build only
+(`src/lib/preview/fakeSubmissions.ts`, gated on the same flag as the hash
+router and so never in a real build), the sending step keeps a pretend
+submission in the browser's storage instead of calling the server, the
+magic-link page reads it back, and a button marked "Preview only" on the
+waiting page shows the page as it looks once an answer is ready. The
+stand-in reply is labelled PREVIEW ONLY in its first line and is not
+advice. Follow-up and delete work on it too. On the real site nothing
+changed in the flow. One real change on the reply page, at her request:
+the standing bunny now stands beside the reply once it has arrived, as he
+does while it is awaited (above it on a phone).

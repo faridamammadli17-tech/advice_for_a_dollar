@@ -6,6 +6,13 @@ import { bunnySprite } from '../pixel/sprites';
 import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
 import { visitorApi, type VisitorSubmission } from '../lib/api/client';
+import {
+  IS_PREVIEW,
+  previewDelete,
+  previewFollowUp,
+  previewGet,
+  previewMarkAnswered,
+} from '../lib/preview/fakeSubmissions';
 
 import './Answer.css';
 
@@ -30,6 +37,14 @@ export function Answer() {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const refresh = useCallback(async () => {
+    if (IS_PREVIEW) {
+      // The static design preview keeps a pretend submission in the browser.
+      const stored = previewGet(token);
+      if (stored === null) setLoad({ state: 'not-found' });
+      else if (stored === 'deleted') setLoad({ state: 'deleted' });
+      else setLoad({ state: 'found', view: stored });
+      return;
+    }
     const result = await visitorApi.getByToken(token);
     if (result.ok) {
       setLoad({ state: 'found', view: result.data.submission });
@@ -52,17 +67,22 @@ export function Answer() {
       setFollowUpError('There is nothing written yet.');
       return;
     }
-    const result = await visitorApi.sendFollowUp(token, followUpText);
-    if (!result.ok || result.data.ok === false) {
-      setFollowUpError('That did not send. Your words are still here — try again.');
-      return;
+    if (IS_PREVIEW) {
+      previewFollowUp(token, followUpText);
+    } else {
+      const result = await visitorApi.sendFollowUp(token, followUpText);
+      if (!result.ok || result.data.ok === false) {
+        setFollowUpError('That did not send. Your words are still here — try again.');
+        return;
+      }
     }
     setFollowUpText('');
     await refresh();
   };
 
   const confirmDelete = async () => {
-    await visitorApi.deleteSubmission(token);
+    if (IS_PREVIEW) previewDelete(token);
+    else await visitorApi.deleteSubmission(token);
     await refresh();
   };
 
@@ -177,15 +197,34 @@ export function Answer() {
                     Farida has it. {copy.responseTime} Nothing more is needed from you — come back
                     through this link.
                   </p>
+                  {IS_PREVIEW && (
+                    <button
+                      type="button"
+                      className="btn btn-quiet"
+                      onClick={() => {
+                        previewMarkAnswered(token);
+                        void refresh();
+                      }}
+                    >
+                      Preview only: show this page with the answer ready
+                    </button>
+                  )}
                 </div>
               </div>
             )}
 
             {answered && (
               <article className="letter-block letter-reply">
-                <h2 className="h3">A response</h2>
-                <p className="letter-body">{view.answer}</p>
-                <p className="letter-from">From: Farida</p>
+                {/* The bunny stands beside the reply, as he does while it is
+                    being written (Farida, 2026-10-13). */}
+                <div className="letter-reply-inner">
+                  <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+                  <div className="stack" style={{ gap: '10px' }}>
+                    <h2 className="h3">A response</h2>
+                    <p className="letter-body">{view.answer}</p>
+                    <p className="letter-from">From: Farida</p>
+                  </div>
+                </div>
               </article>
             )}
 

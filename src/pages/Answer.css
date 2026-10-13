@@ -23,6 +23,19 @@
   border-left-color: var(--accent);
 }
 
+/* The bunny beside the reply; on a narrow screen he stands above it. */
+.letter-reply-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.letter-reply-inner > .stack {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
 .letter-body {
   font-size: 1.06rem;
   line-height: 1.75;

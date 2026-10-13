@@ -12,6 +12,7 @@ import { visitorApi } from '../lib/api/client';
 import { asSafetyCategory } from '../lib/safety/screen';
 import { checkSecretWord } from '../lib/submissions/secretWord';
 import { cameScreened, checkWriting, MIN_BODY_CHARS } from '../lib/submissions/writeStep';
+import { IS_PREVIEW, previewCreate } from '../lib/preview/fakeSubmissions';
 import { mockPaymentProvider } from '../lib/payments/MockPaymentProvider';
 import { type Visibility } from '../lib/submissions/types';
 import {
@@ -169,6 +170,16 @@ export function Ask() {
         currency: 'AZN',
         submissionId: 'pending',
       });
+
+      if (IS_PREVIEW) {
+        // The static design preview has no server: keep a pretend submission
+        // in the browser so the magic-link page can be seen. Never a real build.
+        const token = previewCreate({ body: text, visibility, amountMinorUnits: amount });
+        setCreated({ token, body: text, visibility });
+        clearDraft();
+        setRequestDone(true);
+        return;
+      }
 
       const result = await visitorApi.submit({
         body: text,
@@ -468,7 +479,9 @@ function Confirmation({
   secretWord: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const magicLink = `${window.location.origin}/a/${view.token}`;
+  const magicLink = IS_PREVIEW
+    ? `${window.location.origin}${window.location.pathname}#/a/${view.token}`
+    : `${window.location.origin}/a/${view.token}`;
 
   const copyLink = async () => {
     try {
