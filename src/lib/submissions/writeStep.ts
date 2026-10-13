@@ -5,10 +5,10 @@ import { MAX_BODY_CHARS } from './types';
 /**
  * What the Write step checks before anyone may move on.
  *
- * ONE function, called from both places that let someone leave the writing
- * box: the "Continue" button on step 1 of /ask and "Get advice" on the home
- * page (which skips step 1 and lands on the secret word). The two paths can
- * never drift apart because there is only one path.
+ * ONE function, the only way out of the writing box: "Get advice" on the
+ * home page calls it, and the box with the rest of the flow (secret word,
+ * private or public, pay) cannot open unless it says ok. A reload with the
+ * box open calls it again before the box may reopen.
  *
  * In order:
  *   1. length: at least 20 characters of real text, and under the maximum;
@@ -74,19 +74,4 @@ async function screenOnServer(
   }
   const result = await visitorApi.screen(text);
   return result.ok ? result.data : null;
-}
-
-/**
- * The router state the home page sends along when its text has already
- * passed `checkWriting`, so /ask may open on the secret word. Anything else
- * (a direct visit, a typed address, a reload) starts at step 1.
- */
-export const SCREENED_STATE = { screened: true } as const;
-
-export function cameScreened(state: unknown): boolean {
-  return (
-    typeof state === 'object' &&
-    state !== null &&
-    (state as { screened?: unknown }).screened === true
-  );
 }

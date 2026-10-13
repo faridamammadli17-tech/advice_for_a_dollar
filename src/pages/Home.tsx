@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { SafetyInterstitial } from '../components/SafetyInterstitial';
+import { FlowDialog } from '../components/FlowDialog';
+import { SubmissionFlow } from '../components/SubmissionFlow';
 import { WritingPad } from '../components/WritingPad';
 import { ForestScene } from '../components/ForestScene';
 import { BunnyPortrait } from '../components/Bunny';
@@ -10,7 +12,7 @@ import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
 import { readDraft, writeDraft } from '../lib/submissions/draft';
 import { asSafetyCategory } from '../lib/safety/screen';
-import { checkWriting, SCREENED_STATE } from '../lib/submissions/writeStep';
+import { checkWriting } from '../lib/submissions/writeStep';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { formatMinorUnits, MINIMUM_MINOR_UNITS } from '../lib/money';
 
@@ -29,13 +31,83 @@ import './Home.css';
  * mid-crisis should not have to read a landing page before they find out
  * where to put the sentence they came here to write. Farida cut the headline
  * and the paragraph above the writing area on 2026-10-06 for that reason.
+ *
+ * The rest of the flow (secret word, private or public, pay, the magic link)
+ * opens in a box over this page (FlowDialog + SubmissionFlow) once the text
+ * has passed `checkWriting`, so nobody is bounced to another page after
+ * writing the hard part. Every "Get advice" link on the site leads here, to
+ * the writing area; the old /ask address redirects here too.
  */
 export function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [text, setText] = useState(readDraft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [safety, setSafety] = useState<{ category: string | null } | null>(null);
+  const [flowOpen, setFlowOpen] = useState(false);
+  const [flowLocked, setFlowLocked] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  const focusWriting = useCallback(() => {
+    const area = document.getElementById('home-write');
+    stageRef.current?.scrollIntoView({ block: 'center' });
+    area?.focus({ preventScroll: true });
+  }, []);
+
+  /* A link to "Get advice" from anywhere on the site lands on the writing
+     area; the back button or a reload closes the box (its flag is in the
+     history entry, see openFlow). On a reload with the flag still set, the
+     text is checked again before the box may reopen. */
+  const state = location.state as { focusWriting?: boolean; flow?: boolean } | null;
+  useEffect(() => {
+    if (state?.focusWriting === true) {
+      navigate('/', { replace: true, state: null });
+      focusWriting();
+    }
+  }, [state, navigate, focusWriting]);
+
+  useEffect(() => {
+    if (state?.flow !== true) {
+      setFlowOpen(false);
+      return;
+    }
+    if (flowOpen) return;
+    let cancelled = false;
+    void checkWriting(readDraft()).then((outcome) => {
+      if (cancelled) return;
+      if (outcome.kind === 'ok') setFlowOpen(true);
+      else navigate('/', { replace: true, state: null });
+    });
+    return () => {
+      cancelled = true;
+    };
+    // Only when the flag changes: the box must not re-check while open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.flow]);
+
+  const openFlow = () => {
+    setFlowOpen(true);
+    navigate('/', { state: { flow: true } });
+  };
+
+  const closeFlow = useCallback(() => {
+    setFlowOpen(false);
+    if (window.history.state?.usr?.flow === true) navigate('/', { replace: true, state: null });
+  }, [navigate]);
+
+  // "Change what I wrote": the cursor goes back into the writing area once
+  // the box has closed (closing a dialog moves focus itself, so not before).
+  const focusAfterClose = useRef(false);
+  const changeWriting = () => {
+    focusAfterClose.current = true;
+    closeFlow();
+  };
+  const handleClosed = useCallback(() => {
+    if (!focusAfterClose.current) return;
+    focusAfterClose.current = false;
+    focusWriting();
+  }, [focusWriting]);
   // The frog is 3x where the box has its full width and 2x below that; the
   // writing on his monitor is the thing that has to stay readable (Farida,
   // 2026-10-06), and Home.css wraps him under the line on a phone.
@@ -48,10 +120,10 @@ export function Home() {
   };
 
   /**
-   * "Get advice" does exactly what step 1's Continue button does, through the
-   * same function: too short and you stay here with the same message; the
-   * safety screen runs; flagged means the crisis screen and nothing else;
-   * only text that passes goes on, and lands on the secret word.
+   * "Get advice" runs the one check there is (`checkWriting`): too short and
+   * you stay here with the same message; the safety screen runs; flagged
+   * means the crisis screen and nothing else; only text that passes opens
+   * the box, on the secret word.
    */
   const startAsking = async () => {
     writeDraft(text);
@@ -68,7 +140,7 @@ export function Home() {
       setSafety({ category: outcome.category });
       return;
     }
-    navigate('/ask', { state: SCREENED_STATE });
+    openFlow();
   };
 
   if (safety !== null) {
@@ -88,7 +160,7 @@ export function Home() {
       {/* ------------------------------------------------------------ hero */}
       <section className="hero">
         <div className="wrap hero-inner">
-          <div className="hero-stage">
+          <div className="hero-stage" ref={stageRef}>
             <div className="hero-card">
               {/* The one line above the writing area is the textarea's label,
                   so it is also its accessible name. The frog at his computer
@@ -212,11 +284,31 @@ export function Home() {
         <div className="wrap wrap-narrow stack" style={{ gap: '16px', alignItems: 'flex-start' }}>
           <h2 className="h2">{copy.finalCta.heading}</h2>
           <p className="lede">{copy.finalCta.body}</p>
-          <Link to="/ask" className="btn btn-primary">
+          <button type="button" className="btn btn-primary" onClick={focusWriting}>
             {copy.finalCta.button}
-          </Link>
+          </button>
         </div>
       </section>
+
+      <FlowDialog
+        open={flowOpen}
+        locked={flowLocked}
+        label="Sending your problem"
+        onClose={closeFlow}
+        onClosed={handleClosed}
+      >
+        <SubmissionFlow
+          text={text}
+          onChangeWriting={changeWriting}
+          onClose={closeFlow}
+          onLocked={setFlowLocked}
+          onSafety={(category) => {
+            closeFlow();
+            setSafety({ category });
+          }}
+          onCreated={() => setText('')}
+        />
+      </FlowDialog>
     </PageShell>
   );
 }

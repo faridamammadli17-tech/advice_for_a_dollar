@@ -1957,3 +1957,45 @@ advice. Follow-up and delete work on it too. On the real site nothing
 changed in the flow. One real change on the reply page, at her request:
 the standing bunny now stands beside the reply once it has arrived, as he
 does while it is awaited (above it on a phone).
+
+---
+
+## The flow in a box over the home page (2026-10-13, evening)
+
+Farida asked whether the secret word, the payment and the magic link could
+appear on the main page instead of opening another page, and said to build
+it. They do now.
+
+**How it works.** "Get advice" runs `checkWriting` as before (length, then
+the safety screen; flagged still takes over the whole screen with the plain
+crisis screen). If the text passes, a box opens over the home page
+(`FlowDialog`, a native modal dialog, so the browser traps focus inside it
+and Escape closes it) holding the rest of the flow (`SubmissionFlow`: the
+step indicator with step 1 done, the secret word, private or public, pay,
+the envelope, then the magic link, the secret word reminder and what was
+sent). The box is the writing box's own treatment: light green, wine
+border, hard shadow, cream panels inside; its backdrop is transparent so
+nothing sits over the forest. "Change what I wrote" closes it and puts the
+cursor back in the writing area with the text intact; Escape and the back
+button close it too, nothing lost; while something is being sent it cannot
+be closed. Opening pushes a history entry with a flag, so a reload with the
+box open checks the text again (`checkWriting`) before it may reopen. The
+old step-by-step page is gone: /ask redirects to the home page's writing
+area, and so every "Get advice" and "write your problem" link on the site
+lands there; the final call to action on the home page does the same. The
+reply page at /a/... stays a real page, because people come back to it.
+The pretend payment lives in the box; with a real provider the box would
+either hold the provider's embedded form or close for the trip to the
+provider's page and reopen on the magic link, which is a decision for when
+the documentation arrives.
+
+**Checked** on the real site and on the preview, at 1440 and 390: the box
+opens on the secret word with focus in the field and the trail showing 1
+done; Change what I wrote closes it with the text kept and the cursor back
+in the box; Escape closes it; the back button closes it; a reload reopens
+it after the check; the whole flow to the magic link; the writing area is
+empty afterwards; Open it reaches the reply page; the menu's Get advice
+from /about and a direct /ask both land on the writing area with the cursor
+in it; no horizontal scroll; no errors. README screenshots of the three
+steps retaken from the box. The "What is going on?" copy question is moot:
+that page no longer exists.

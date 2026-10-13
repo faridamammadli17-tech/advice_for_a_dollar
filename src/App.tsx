@@ -1,9 +1,8 @@
 import { lazy, Suspense, type ComponentType } from 'react';
-import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Admin } from './pages/Admin';
 import { Answer } from './pages/Answer';
 import { Archive } from './pages/Archive';
-import { Ask } from './pages/Ask';
 import { FoundationHome } from './pages/FoundationHome';
 import { Home } from './pages/Home';
 import { NotFound } from './pages/NotFound';
@@ -48,7 +47,9 @@ export function App() {
     >
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/ask" element={<Ask />} />
+        {/* The flow lives in a box over the home page now; every link to
+            /ask (menu, footer, the other pages) lands on the writing area. */}
+        <Route path="/ask" element={<Navigate to="/" replace state={{ focusWriting: true }} />} />
         <Route path="/a/:token" element={<Answer />} />
         {FEATURES.recovery && <Route path="/recover" element={<Recover />} />}
 

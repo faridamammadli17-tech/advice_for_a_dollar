@@ -1,23 +1,56 @@
-/* The submission flow, and the confirmation that ends it. */
+/* The rest of the flow, in a box over the home page, and the confirmation
+   that ends it. */
 
-.ask {
-  padding: 48px 0 96px;
+/* The box: the same treatment as the writing box behind it (light green,
+   wine border, hard shadow), centred, scrolling inside itself when it is
+   taller than the screen. The backdrop is transparent on purpose: nothing
+   sits between the forest and the screen. */
+.flow-dialog {
+  width: min(100% - 32px, 640px);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 28px 30px 30px;
+  background: #cfdd9d;
+  color: var(--text);
+  border: var(--border-width) solid #752445;
+  box-shadow: 9px 9px 0 #752445;
+  overflow: auto;
 }
 
-.ask-inner {
+.flow-dialog::backdrop {
+  background: transparent;
+}
+
+.flow {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 22px;
 }
 
-.ask-next {
+/* Inside the light-green box, panels are cream, and the fields in them too. */
+.flow .panel {
+  background: #fcffe1;
+  border-color: #752445;
+  box-shadow: 4px 4px 0 var(--shadow);
+}
+
+.flow .panel-flat {
+  box-shadow: none;
+}
+
+.flow .h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.flow-next {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--faint);
   letter-spacing: 0.02em;
 }
 
-.ask-devnote {
+.flow-devnote {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -56,7 +89,7 @@
 .trail-step[data-state='now'] {
   border-color: var(--accent-strong);
   color: var(--text);
-  background: var(--surface);
+  background: #fcffe1;
   box-shadow: 3px 3px 0 var(--shadow);
 }
 
@@ -64,7 +97,7 @@
 .trail-step[data-state='done'] {
   border-color: var(--accent-cool);
   color: var(--accent-cool);
-  background: var(--surface-alt);
+  background: #cfdd9d;
 }
 
 .trail-num {
@@ -203,7 +236,10 @@
 }
 
 @media (max-width: 640px) {
-  .ask {
-    padding: 28px 0 64px;
+  .flow-dialog {
+    width: calc(100% - 16px);
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    padding: 20px 16px 22px;
   }
 }

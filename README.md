@@ -44,11 +44,11 @@ It is at the bottom of this page.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/ask-write.png" alt="Step 1 of 4: writing the problem"></td>
-    <td width="50%"><img src="docs/screenshots/ask-pay.png" alt="Step 4 of 4: pay what you want, one manat minimum"></td>
+    <td width="50%"><img src="docs/screenshots/ask-write.png" alt="After Get advice, the rest of the flow opens in a box over the home page, starting with the secret word"></td>
+    <td width="50%"><img src="docs/screenshots/ask-pay.png" alt="Step 4 of 4 in the box: pay what you want, one manat minimum"></td>
   </tr>
   <tr>
-    <td>Four steps: write, choose a secret word, private or public, pay.</td>
+    <td>Four steps: write on the home page, then a box opens over it for the secret word, private or public, and pay.</td>
     <td>Pay what you want, from one manat.</td>
   </tr>
   <tr>

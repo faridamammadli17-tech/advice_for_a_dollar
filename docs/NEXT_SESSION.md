@@ -61,10 +61,10 @@ code. The project owner is Farida, also not an engineer. What they want:
    Its phone numbers are placeholders on purpose and the release build
    refuses until Farida supplies real ones (`ALLOW_PLACEHOLDER_CONTENT=1
    npm run build` for local testing only; that bundle must never go online).
-   **The safety screen runs before anyone reaches the secret word**, from
-   the home page and from step 1 alike, through the one function
-   `checkWriting` in `src/lib/submissions/writeStep.ts`. Never add a second
-   path around it.
+   **The safety screen runs before anyone reaches the secret word**,
+   through the one function `checkWriting` in
+   `src/lib/submissions/writeStep.ts`; the box with the rest of the flow
+   cannot open without it. Never add a second path around it.
 4. **Colours, site-wide** (the day block of `src/styles/theme.css` since
    2026-10-13): wine `#752445`, light green `#CFDD9D`, dark green `#2F582C`,
    cream `#fcffe1`, and two leftovers: pink `#EA6993` only as the hard
@@ -103,9 +103,13 @@ Every page shares the header (dark-green band, logo, pale-pink menu, white
 for the page you are on), the footer (the same band), wine buttons and
 wine-bordered panels. Inner pages sit in a cream panel on a light-green
 page; the home page sits on the forest. "Get advice" on the home page runs
-the length check and the safety screen, then lands on step 2 of /ask with
-step 1 shown as done and a "Change what I wrote" button to go back; a direct
-visit to /ask starts at step 1. The home page itself:
+the length check and the safety screen, then opens a box over the home page
+(`src/components/FlowDialog.tsx` + `SubmissionFlow.tsx`) with the rest of
+the flow: step indicator with step 1 done, secret word, private or public,
+pay, the magic link. "Change what I wrote" closes it. There is no separate
+/ask page any more: /ask redirects to the home page's writing area, as do
+all "Get advice" links. The reply page /a/:token stays a page. The home
+page itself:
 
 - Forest scene full-bleed behind the page: the delivered JPEG, unchanged.
   `src/components/ForestScene.tsx` draws it at a whole-number scale (anchored
@@ -154,11 +158,12 @@ pixel), so the stump with its creatures at the right is off screen there.
 
 - Whether rounds four to seven go onto the pull request's branch or into a
   second pull request; then merge when happy.
-- Copy on step 1 of /ask that still uses the lines deleted from the home
-  page ("What is going on?", "What is on your mind?", "Start anywhere. It
-  does not have to be tidy."); the standing bunny still pictured on the
-  confirmation, reply, unknown-link, empty-archive and recover pages; the
-  1x still frog on step 1 of /ask. Hers to decide, nothing reworded.
+- The standing bunny still pictured on the magic-link step, the reply
+  page, the unknown-link page, the empty archive and the recover page,
+  though he left the home page. Hers to decide.
+- With a real payment provider: does the box hold the provider's embedded
+  form, or close for the trip to the provider's page and reopen on the
+  magic link? Depends on the provider's documentation.
 - Whether the remaining pink (the hard shadows and the fireflies' glow) and
   the pale-pink text on the dark-green bands should go too.
 - Whether anything is wanted on the right of the page at laptop widths now

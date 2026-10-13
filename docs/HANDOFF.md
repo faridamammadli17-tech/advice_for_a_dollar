@@ -197,10 +197,13 @@ the `.safety, .admin-shell` block in `theme.css`; nothing else may use it.
 
 **One function guards the way out of the writing box.** `checkWriting` in
 `src/lib/submissions/writeStep.ts` does the length check and calls the
-server's safety screen. Step 1 of /ask and "Get advice" on the home page
-both call it; the home page then opens /ask on step 2 by passing
-`screened` in the router state, which /ask consumes on arrival. Never add a
-second route to step 2.
+server's safety screen. "Get advice" on the home page calls it, and only
+an ok opens the box with the rest of the flow (`FlowDialog` holding
+`SubmissionFlow`: secret word, private or public, pay, magic link). The
+box's open state rides in the history entry (`state.flow`), so the back
+button closes it and a reload calls `checkWriting` again before it may
+reopen. There is no /ask page: the route redirects to the home page's
+writing area. Never add a second route into the box.
 
 **The home page draws its sprites with `<img>`, not `SpriteCanvas`.** Chiron's
 portrait, the frog at his computer, the forest and its creatures are plain
