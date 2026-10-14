@@ -81,13 +81,15 @@ code. The project owner is Farida, also not an engineer. What they want:
    colour that reads best. Body text at 4.5:1 or better; pink never carries
    text (3.3:1 at best). Measured pairs are in `docs/NOTES.md`: wine on
    cream 9.8:1, dark green on cream 8.0:1, wine on light green 6.9:1.
-5. **Font**: VT323 via `@font-face` (`src/fonts/VT323-Regular.ttf`, SIL
-   Open Font Licence), chosen by the owner on 2026-10-14 because it has
-   every Azerbaijani letter, the dashes, the middle dot and the manat sign.
-   Sizes are kept through `font-size-adjust: var(--font-aspect)` on the
-   body (theme.css / global.css); form controls set it again. Do not change
-   sizes to "fix" the font looking small somewhere: check the adjustment
-   reached that element instead.
+5. **Font**: VCR OSD Mono in English (`src/fonts/`, fallback
+   `'Courier New', monospace` for the em dash, en dash, middle dot and manat
+   sign it lacks); VT323 (`src/fonts/VT323-Regular.ttf`, SIL Open Font
+   Licence) when Azerbaijani is selected, via `:root[lang='az']` in
+   theme.css, because VCR has none of ə Ə ş Ş ğ Ğ ı İ. The owner chose this
+   split on 2026-10-14. Sizes are shared through `font-size-adjust:
+   var(--font-aspect)` on the body (a no-op on VCR, a 1.46x scale on
+   VT323); form controls set it again. Do not change sizes to "fix" VT323
+   looking small somewhere: check the adjustment reached that element.
 6. **Pixel art**: whole-number scale only, `image-rendering: pixelated`, no
    stretching. Animation moves by whole art pixels with `steps()`; no
    fractional translate, rotation or non-integer scale. Everything stops under

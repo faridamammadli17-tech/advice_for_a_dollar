@@ -2091,3 +2091,12 @@ history). The missing-glyph question is closed.
 font, the box, the content pages, the safety screen still in the system
 font, no sideways scroll, no errors. README screenshots retaken; the
 preview republished.
+
+**Correction (2026-10-14, later).** Farida's choice was VT323 for the
+Azerbaijani version only; English keeps VCR OSD Mono. So both fonts are
+served: `--font-pixel` is VCR OSD Mono on `:root` and VT323 on
+`:root[lang='az']` (the language provider sets `<html lang>`). The
+`font-size-adjust` of 0.586 stays on the body: on VCR it is a no-op (the
+value is VCR's own x-height), on VT323 it is the scaling described above,
+so the two languages share every size and line break. English again falls
+back to Courier New for the em dash, en dash, middle dot and manat sign.
