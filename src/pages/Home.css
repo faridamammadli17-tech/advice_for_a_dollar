@@ -158,7 +158,10 @@
   letter-spacing: 0;
   text-transform: none;
   color: #752445;
-  padding-bottom: 6px;
+  padding-bottom: 0;
+  /* Centred on the frog beside it, so the line and the figure sit evenly
+     (Farida, 2026-10-14); the frog himself stays on the writing area's edge. */
+  align-self: center;
   /* Two lines beside the frog on a wide box ("Write down the thing you /
      have been carrying"); three on a phone, where the row is narrower. */
   max-width: 25ch;
