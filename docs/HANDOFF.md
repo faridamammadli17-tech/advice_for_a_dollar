@@ -134,7 +134,7 @@ two factors verify (secret word + date window, or secret word + email).
 | Characters | **Two** — frog (the one writing) and bunny (the one writing back). **There is no owl**, despite `PROMPT.md` §10. |
 | Night mode | **Off for launch.** Disabled behind `FEATURES.nightMode`, not deleted. Comes back after launch. |
 | Palette | Five brand colours. On the **home page, only those five and nothing white** (Farida, 2026-10-04): pale pink card, light green writing box, wine and dark green text (6.9:1 and 5.7:1 on both). Cream `#F2E6C9` stays on the inner pages. A wood/brown neutral was proposed and **rejected**. |
-| Font | **VCR OSD Mono** everywhere except the safety screen and the dashboard, which keep system fonts on purpose. It lacks the em dash, en dash, middle dot and manat sign; those fall back to Courier New. The copy is never rewritten to avoid them. |
+| Font | **VT323** (SIL Open Font Licence) everywhere except the safety screen and the dashboard, which keep system fonts on purpose. It has every letter both languages need, the dashes, the middle dot and the manat sign. Sized through `font-size-adjust` (`--font-aspect`, theme.css) so the stylesheet's sizes still mean what they did under the earlier VCR OSD Mono. |
 | Logo | The bunny's **portrait**, at its native 128px, in the header of every page and as the favicon. It is also the Instagram picture. |
 | Archive at launch | On, but shows an empty state until something is approved. |
 | Deletion | Destroys body, answer and email; keeps a payment tombstone for refunds. |

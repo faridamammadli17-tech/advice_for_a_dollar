@@ -16,6 +16,7 @@
   flex-direction: column;
   gap: 20px;
   font-family: var(--font-system);
+  font-size-adjust: none;
 }
 
 .admin-centre {

@@ -2054,3 +2054,40 @@ page, the menu, the flow box (steps and headings), the content pages, the
 archive, the reply page, recovery and the safety screen; the choice
 survives a reload; switching back restores English; no English left on the
 Azerbaijani pages by a word search; no errors.
+
+---
+
+## VT323 replaces VCR OSD Mono (2026-10-14, later)
+
+Farida chose VT323 from the comparison sheet (docs/screenshots/
+font-candidates.png), for the whole site in both languages.
+
+**Why this one.** Of fourteen free pixel-style fonts checked by reading
+their character tables, only VT323 and Handjet carry every Azerbaijani
+letter (ə Ə ş Ş ğ Ğ ı İ); VT323 also carries the em dash, en dash, middle
+dot and manat sign that VCR OSD Mono lacked, so nothing falls back to
+another font any more, in either language. It is a monospaced terminal
+pixel font under the SIL Open Font Licence (`src/fonts/VT323-OFL.txt`),
+from Google Fonts. Ruled out for lacking ə: Press Start 2P, Pixelify Sans,
+Silkscreen, Jersey 10/15/25, Micro 5, Workbench, Sixtyfour, Doto,
+DotGothic16. Not testable from this environment: Departure Mono, Fixedsys
+Excelsior, Terminus, Unifont.
+
+**How the sizes were kept.** VT323's letters are smaller on the em than
+VCR's (x-height 0.40 of the size against 0.586), so `font-size-adjust:
+0.586` on the body (`--font-aspect` in theme.css) scales VT323 to the
+x-height every size in the stylesheets was designed for. Both fonts'
+letter width equals their x-height, so lines break where they did: the
+home box, the label, the header and the panels measure the same as before
+in Chromium. Browsers reset a form control's font shorthand, which drops
+the adjustment, so `.input`, `.textarea` and `.lang-select` set it again.
+The safety screen and the dashboard switch it off with their system fonts.
+Capitals come out about a tenth taller than before; nothing else moved.
+
+**Removed.** `src/fonts/VCR_OSD_MONO_1.001.ttf` (it stays in the git
+history). The missing-glyph question is closed.
+
+**Checked** at 1440 and 390 in both languages: every letter in the pixel
+font, the box, the content pages, the safety screen still in the system
+font, no sideways scroll, no errors. README screenshots retaken; the
+preview republished.

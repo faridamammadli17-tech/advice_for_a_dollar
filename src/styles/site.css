@@ -232,6 +232,9 @@
 .textarea {
   font-family: var(--font-body);
   font-size: 17px;
+  /* Browsers reset a form control's font shorthand, which drops the pixel
+     font's size adjustment; put it back (see --font-aspect in theme.css). */
+  font-size-adjust: var(--font-aspect);
   line-height: 1.55;
   color: var(--text);
   background: var(--surface);
@@ -335,6 +338,7 @@
 .lang-select {
   font-family: var(--font-mono);
   font-size: 13px;
+  font-size-adjust: var(--font-aspect);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;

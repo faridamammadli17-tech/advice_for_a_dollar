@@ -81,10 +81,13 @@ code. The project owner is Farida, also not an engineer. What they want:
    colour that reads best. Body text at 4.5:1 or better; pink never carries
    text (3.3:1 at best). Measured pairs are in `docs/NOTES.md`: wine on
    cream 9.8:1, dark green on cream 8.0:1, wine on light green 6.9:1.
-5. **Font**: VCR OSD Mono via `@font-face` (`src/fonts/`), fallback
-   `'Courier New', monospace` for the glyphs it lacks (em dash, en dash,
-   middle dot, manat sign, and ə Ə ş Ş ğ Ğ ı İ, which the Azerbaijani
-   version needs in most words).
+5. **Font**: VT323 via `@font-face` (`src/fonts/VT323-Regular.ttf`, SIL
+   Open Font Licence), chosen by the owner on 2026-10-14 because it has
+   every Azerbaijani letter, the dashes, the middle dot and the manat sign.
+   Sizes are kept through `font-size-adjust: var(--font-aspect)` on the
+   body (theme.css / global.css); form controls set it again. Do not change
+   sizes to "fix" the font looking small somewhere: check the adjustment
+   reached that element instead.
 6. **Pixel art**: whole-number scale only, `image-rendering: pixelated`, no
    stretching. Animation moves by whole art pixels with `steps()`; no
    fractional translate, rotation or non-integer scale. Everything stops under
@@ -176,10 +179,6 @@ pixel), so the stump with its creatures at the right is off screen there.
   that the standing bunny is gone (open meadow and the dark bush today).
 - Ask the artist for a 1x export of the forest (480x279 PNG): it would be
   pixel-exact too and allow a 3x step on laptops.
-- Draw the missing glyphs as a tiny companion pixel font, or live with the
-  fallback: the em dash, en dash, middle dot and manat sign, and, for the
-  Azerbaijani version, ə Ə ş Ş ğ Ğ ı İ (the font's table lacks them; the
-  browser substitutes a plain monospace letter inside pixel-font words).
 - Whether to hide the written name beside the logo at laptop widths in
   Azerbaijani, where the longer menu wraps under the logo.
 - Have a native speaker read the Azerbaijani translation; it was written by
