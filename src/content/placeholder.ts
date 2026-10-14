@@ -33,42 +33,6 @@ export type ExampleProblem = {
   readonly awaitingOwnerContent: boolean;
 };
 
-/** The shape of the copy, so the Azerbaijani version (placeholder.az.ts) cannot miss a line. */
-export type Copy = {
-  readonly siteName: string;
-  readonly hero: {
-    readonly writeLine: string;
-    readonly writeHint: string;
-    readonly writePrompt: string;
-    readonly writePlaceholder: string;
-    readonly primaryCta: string;
-    readonly secondaryCta: string;
-  };
-  readonly whyADollar: {
-    readonly heading: string;
-    readonly body: readonly string[];
-    readonly notTherapy: string;
-  };
-  readonly example: ExampleProblem;
-  readonly trust: {
-    readonly heading: string;
-    readonly oneHuman: string;
-    readonly points: readonly { readonly title: string; readonly body: string }[];
-  };
-  readonly finalCta: { readonly heading: string; readonly body: string; readonly button: string };
-  readonly ask: {
-    readonly privacyNudge: string;
-    readonly secretWordHeading: string;
-    readonly secretWordWhy: string;
-    readonly visibilityHeading: string;
-    readonly visibilityWhy: string;
-    readonly paymentHeading: string;
-    readonly paymentWhy: string;
-  };
-  readonly responseTime: string;
-  readonly footer: { readonly tagline: string; readonly cookieNote: string };
-};
-
 export const copy = {
   siteName: 'Advice for a Dollar',
 
@@ -197,4 +161,4 @@ export const copy = {
     // Honest: the site sets no tracking cookies, so the cookie policy says so.
     cookieNote: 'This site sets no tracking cookies.',
   },
-} as const satisfies Copy;
+} as const;

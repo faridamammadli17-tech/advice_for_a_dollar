@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
-import { useT } from '../i18n';
+import { copy } from '../content/placeholder';
 import { FEATURES } from '../config/features';
 import { visitorApi, type VisitorSubmission } from '../lib/api/client';
 import {
@@ -31,7 +31,6 @@ type Load =
  */
 export function Answer() {
   const { token = '' } = useParams();
-  const t = useT();
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [followUpText, setFollowUpText] = useState('');
   const [followUpError, setFollowUpError] = useState<string | null>(null);
@@ -65,7 +64,7 @@ export function Answer() {
   const submitFollowUp = async () => {
     setFollowUpError(null);
     if (followUpText.trim().length < 2) {
-      setFollowUpError(t.ui.answer.followUpEmpty);
+      setFollowUpError('There is nothing written yet.');
       return;
     }
     if (IS_PREVIEW) {
@@ -73,7 +72,7 @@ export function Answer() {
     } else {
       const result = await visitorApi.sendFollowUp(token, followUpText);
       if (!result.ok || result.data.ok === false) {
-        setFollowUpError(t.ui.answer.followUpFailed);
+        setFollowUpError('That did not send. Your words are still here — try again.');
         return;
       }
     }
@@ -95,7 +94,7 @@ export function Answer() {
         <section className="letter">
           <div className="wrap wrap-narrow">
             <div className="page-panel">
-              <p className="letter-quiet">{t.ui.answer.finding}</p>
+              <p className="letter-quiet">Finding your submission…</p>
             </div>
           </div>
         </section>
@@ -112,17 +111,24 @@ export function Answer() {
           <div className="wrap wrap-narrow">
             <div className="page-panel stack" style={{ gap: '16px' }}>
               <SpriteCanvas sprite={bunnySprite} scale={2} alt={null} />
-              <h1 className="h1">{t.ui.answer.unknownTitle}</h1>
-              <p className="prose">{t.ui.answer.unknownBody}</p>
-              {FEATURES.recovery && <p className="prose">{t.ui.answer.unknownRecover}</p>}
+              <h1 className="h1">This link doesn&rsquo;t lead anywhere.</h1>
+              <p className="prose">
+                It may have been mistyped, or it may belong to a submission that has since been
+                deleted. Nothing is wrong on your end.
+              </p>
+              {FEATURES.recovery && (
+                <p className="prose">
+                  If you still have your secret word, you can recover a submission instead.
+                </p>
+              )}
               <div className="row">
                 {FEATURES.recovery && (
                   <Link to="/recover" className="btn">
-                    {t.ui.answer.recoverButton}
+                    Recover with my secret word
                   </Link>
                 )}
                 <Link to="/" className="btn btn-quiet">
-                  {t.ui.answer.backToStart}
+                  Back to the start
                 </Link>
               </div>
             </div>
@@ -140,11 +146,14 @@ export function Answer() {
         <section className="letter">
           <div className="wrap wrap-narrow">
             <div className="page-panel stack" style={{ gap: '16px' }}>
-              <h1 className="h1">{t.ui.answer.goneTitle}</h1>
-              <p className="prose">{t.ui.answer.goneBody}</p>
+              <h1 className="h1">This one is gone.</h1>
+              <p className="prose">
+                You deleted it. The text, the reply and this link are all finished with — there is
+                no copy to bring back, which is the point.
+              </p>
               <div className="row">
                 <Link to="/ask" className="btn btn-primary">
-                  {t.ui.answer.writeNew}
+                  Write something new
                 </Link>
               </div>
             </div>
@@ -167,15 +176,15 @@ export function Answer() {
         <div className="wrap wrap-narrow">
           <div className="page-panel stack" style={{ gap: '28px' }}>
             <header className="stack" style={{ gap: '8px' }}>
-              <span className="eyebrow">{t.ui.answer.eyebrow}</span>
+              <span className="eyebrow">Your submission</span>
               <p className="letter-date">
-                {t.ui.answer.sent} {t.formatDate(view.createdAt)} ·{' '}
-                {view.visibility === 'public' ? t.ui.answer.askedPublic : t.ui.answer.private}
+                Sent {new Date(view.createdAt).toLocaleDateString()} ·{' '}
+                {view.visibility === 'public' ? 'Asked to be published' : 'Private'}
               </p>
             </header>
 
             <article className="letter-block">
-              <h2 className="h3">{t.ui.answer.yourProblem}</h2>
+              <h2 className="h3">Your problem</h2>
               <p className="letter-body">{view.body}</p>
             </article>
 
@@ -183,20 +192,21 @@ export function Answer() {
               <div className="letter-waiting">
                 <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
                 <div className="stack" style={{ gap: '6px' }}>
-                  <h2 className="h3">{t.ui.answer.notYet}</h2>
+                  <h2 className="h3">Not answered yet</h2>
                   <p className="prose">
-                    {t.ui.answer.faridaHasIt} {t.copy.responseTime} {t.ui.answer.nothingNeeded}
+                    Farida has it. {copy.responseTime} Nothing more is needed from you — come back
+                    through this link.
                   </p>
                   {IS_PREVIEW && (
                     <button
                       type="button"
                       className="btn btn-quiet"
                       onClick={() => {
-                        previewMarkAnswered(token, t.ui.preview.standInReply);
+                        previewMarkAnswered(token);
                         void refresh();
                       }}
                     >
-                      {t.ui.answer.previewReady}
+                      Preview only: show this page with the answer ready
                     </button>
                   )}
                 </div>
@@ -210,9 +220,9 @@ export function Answer() {
                 <div className="letter-reply-inner">
                   <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
                   <div className="stack" style={{ gap: '10px' }}>
-                    <h2 className="h3">{t.ui.answer.response}</h2>
+                    <h2 className="h3">A response</h2>
                     <p className="letter-body">{view.answer}</p>
-                    <p className="letter-from">{t.ui.answer.from}</p>
+                    <p className="letter-from">From: Farida</p>
                   </div>
                 </div>
               </article>
@@ -220,35 +230,40 @@ export function Answer() {
 
             {answered && followUpSent && view.followUp !== null && (
               <article className="letter-block">
-                <h2 className="h3">{t.ui.answer.yourFollowUp}</h2>
+                <h2 className="h3">Your follow-up</h2>
                 <p className="letter-body">{view.followUp.body}</p>
                 {finalReplyIn ? (
                   <>
                     <hr className="letter-rule" />
-                    <h2 className="h3">{t.ui.answer.faridaReply}</h2>
+                    <h2 className="h3">Farida&rsquo;s reply</h2>
                     <p className="letter-body">{view.followUp.reply}</p>
-                    <p className="letter-from">{t.ui.answer.from}</p>
+                    <p className="letter-from">From: Farida</p>
                   </>
                 ) : (
-                  <p className="letter-quiet">{t.ui.answer.followUpSent}</p>
+                  <p className="letter-quiet">
+                    Sent. Farida will reply once more, and that closes the conversation.
+                  </p>
                 )}
               </article>
             )}
 
             {answered && !followUpSent && (
               <div className="letter-block stack" style={{ gap: '12px' }}>
-                <h2 className="h3">{t.ui.answer.oneFollowUp}</h2>
-                <p className="field-help">{t.ui.answer.followUpHelp}</p>
+                <h2 className="h3">One follow-up, if you need it</h2>
+                <p className="field-help">
+                  You can send one message back, and Farida replies once more. That is the whole
+                  exchange — it is not a chat.
+                </p>
                 <textarea
                   className="textarea"
                   value={followUpText}
                   onChange={(event) => setFollowUpText(event.target.value)}
-                  aria-label={t.ui.answer.followUpAria}
+                  aria-label="Your follow-up"
                 />
                 {followUpError !== null && <p className="field-error">{followUpError}</p>}
                 <div className="row">
                   <button type="button" className="btn btn-primary" onClick={submitFollowUp}>
-                    {t.ui.answer.sendFollowUp}
+                    Send follow-up
                   </button>
                 </div>
               </div>
@@ -257,7 +272,7 @@ export function Answer() {
             <footer className="letter-foot stack" style={{ gap: '12px' }}>
               <div className="row">
                 <Link to="/ask" className="btn">
-                  {t.ui.answer.submitAnother}
+                  Submit another problem
                 </Link>
                 {!confirmingDelete ? (
                   <button
@@ -265,24 +280,29 @@ export function Answer() {
                     className="btn btn-quiet"
                     onClick={() => setConfirmingDelete(true)}
                   >
-                    {t.ui.answer.delete}
+                    Delete this
                   </button>
                 ) : (
                   <>
                     <button type="button" className="btn btn-danger" onClick={confirmDelete}>
-                      {t.ui.answer.deleteConfirm}
+                      Yes, delete it permanently
                     </button>
                     <button
                       type="button"
                       className="btn btn-quiet"
                       onClick={() => setConfirmingDelete(false)}
                     >
-                      {t.ui.answer.keep}
+                      Keep it
                     </button>
                   </>
                 )}
               </div>
-              {confirmingDelete && <p className="field-help">{t.ui.answer.deleteWarning}</p>}
+              {confirmingDelete && (
+                <p className="field-help">
+                  This cannot be undone. The text and any reply are destroyed, and this link stops
+                  working.
+                </p>
+              )}
             </footer>
           </div>
         </div>

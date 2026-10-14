@@ -19,10 +19,6 @@ body {
   font-family: var(--font-body);
   font-size: 17px;
   line-height: 1.6;
-  /* Scales the pixel font to the x-height the sizes were designed for; see
-     --font-aspect in theme.css. Inherited by everything, switched off where
-     the system fonts are used. */
-  font-size-adjust: var(--font-aspect);
   -webkit-font-smoothing: antialiased;
 }
 

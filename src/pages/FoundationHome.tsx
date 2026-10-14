@@ -40,9 +40,7 @@ export function FoundationHome() {
         >
           Advice for a Dollar · Phase 1
         </span>
-        <h1
-          style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', margin: 0, lineHeight: 1.1 }}
-        >
+        <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', margin: 0, lineHeight: 1.1 }}>
           Foundation &amp; visual system
         </h1>
         <p style={{ color: 'var(--muted)', margin: 0 }}>
@@ -63,15 +61,7 @@ export function FoundationHome() {
           gap: '12px',
         }}
       >
-        <h2
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.9rem',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            margin: 0,
-          }}
-        >
+        <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
           What is working
         </h2>
         <dl

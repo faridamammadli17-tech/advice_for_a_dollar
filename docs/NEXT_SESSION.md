@@ -46,12 +46,7 @@ code. The project owner is Farida, also not an engineer. What they want:
 
 1. **No AI-written advice anywhere**: not in replies, examples or the archive.
    The home page example slot stays empty until Farida writes a real one.
-2. **Never change the copy.** Design rounds are design only. Since 2026-10-14
-   every visitor-facing sentence lives in dictionaries, English and
-   Azerbaijani side by side (`src/i18n/ui.*.ts`, `src/content/placeholder*.ts`,
-   `src/content/pages*.ts`); a new sentence goes into both or the type check
-   fails. The ENG / AZE switch is `src/components/LanguageSwitch.tsx`. The
-   dashboard stays English. On the home page
+2. **Never change the copy.** Design rounds are design only. On the home page
    the one line "Write down the thing you have been carrying", the
    placeholder "Try giving as much detail as possible", the button "Get
    advice", "1 AZN minimum · pay what you want", the reply line ("A real
@@ -81,15 +76,9 @@ code. The project owner is Farida, also not an engineer. What they want:
    colour that reads best. Body text at 4.5:1 or better; pink never carries
    text (3.3:1 at best). Measured pairs are in `docs/NOTES.md`: wine on
    cream 9.8:1, dark green on cream 8.0:1, wine on light green 6.9:1.
-5. **Font**: VCR OSD Mono in English (`src/fonts/`, fallback
-   `'Courier New', monospace` for the em dash, en dash, middle dot and manat
-   sign it lacks); VT323 (`src/fonts/VT323-Regular.ttf`, SIL Open Font
-   Licence) when Azerbaijani is selected, via `:root[lang='az']` in
-   theme.css, because VCR has none of ə Ə ş Ş ğ Ğ ı İ. The owner chose this
-   split on 2026-10-14. Sizes are shared through `font-size-adjust:
-   var(--font-aspect)` on the body (a no-op on VCR, a 1.46x scale on
-   VT323); form controls set it again. Do not change sizes to "fix" VT323
-   looking small somewhere: check the adjustment reached that element.
+5. **Font**: VCR OSD Mono via `@font-face` (`src/fonts/`), fallback
+   `'Courier New', monospace` for the glyphs it lacks (em dash, en dash,
+   middle dot, manat sign; also ə ş ğ ı İ).
 6. **Pixel art**: whole-number scale only, `image-rendering: pixelated`, no
    stretching. Animation moves by whole art pixels with `steps()`; no
    fractional translate, rotation or non-integer scale. Everything stops under
@@ -169,6 +158,10 @@ pixel), so the stump with its creatures at the right is off screen there.
 
 - Whether rounds four to seven go onto the pull request's branch or into a
   second pull request; then merge when happy.
+- Azerbaijani: built and removed on 2026-10-14 at the owner's request
+  (English only for now). The complete translation, the language switch
+  and the font findings are in git history, commits 9545b85 to 47b5eac,
+  reverted by the commit after them. Do not rebuild it unless she asks.
 - The standing bunny still pictured on the magic-link step, the reply
   page, the unknown-link page, the empty archive and the recover page,
   though he left the home page. Hers to decide.
@@ -181,10 +174,8 @@ pixel), so the stump with its creatures at the right is off screen there.
   that the standing bunny is gone (open meadow and the dark bush today).
 - Ask the artist for a 1x export of the forest (480x279 PNG): it would be
   pixel-exact too and allow a 3x step on laptops.
-- Whether to hide the written name beside the logo at laptop widths in
-  Azerbaijani, where the longer menu wraps under the logo.
-- Have a native speaker read the Azerbaijani translation; it was written by
-  the assistant, not by Farida.
+- Draw the four missing glyphs (em dash, en dash, middle dot, manat) as a
+  tiny companion font, or live with the Courier New fallback.
 - Widen the cloud environment's network policy if a real tunnel link is
   wanted (api.trycloudflare.com and localtunnel.me are refused there); the
   artifact preview is the workaround.

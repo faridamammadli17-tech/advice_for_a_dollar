@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { visitorApi, type PublicProblem } from '../lib/api/client';
-import { useT } from '../i18n';
+import { categoryLabel } from '../lib/archive/categories';
+import { copy } from '../content/placeholder';
 
 import './Problem.css';
 
@@ -30,7 +31,6 @@ export function Problem() {
 
   const [problem, setProblem] = useState<PublicProblem | null>(null);
   const [loading, setLoading] = useState(true);
-  const t = useT();
 
   useEffect(() => {
     let cancelled = false;
@@ -50,7 +50,7 @@ export function Problem() {
         <section className="problem-page">
           <div className="wrap wrap-narrow">
             <div className="page-panel">
-              <p className="prose">{t.ui.problem.loading}</p>
+              <p className="prose">Loading…</p>
             </div>
           </div>
         </section>
@@ -64,10 +64,13 @@ export function Problem() {
         <section className="problem-page">
           <div className="wrap wrap-narrow">
             <div className="page-panel stack" style={{ gap: '16px' }}>
-              <h1 className="h1">{t.ui.problem.missingTitle}</h1>
-              <p className="prose">{t.ui.problem.missingBody}</p>
+              <h1 className="h1">This one isn&rsquo;t here.</h1>
+              <p className="prose">
+                It may never have been shared publicly, or it may have been taken down. Either way
+                there is nothing to see at this address.
+              </p>
               <p>
-                <Link to="/archive">{t.ui.problem.backToOthers}</Link>
+                <Link to="/archive">Back to the other problems</Link>
               </p>
             </div>
           </div>
@@ -83,32 +86,32 @@ export function Problem() {
           <article className="page-panel stack" style={{ gap: '26px' }}>
             <header className="stack" style={{ gap: '6px' }}>
               <p className="problem-byline">
-                {t.ui.archive.anonymous} · {t.formatDate(problem.created_at)} ·{' '}
-                {t.categoryLabel(problem.category)}
+                Anonymous · {new Date(problem.created_at).toLocaleDateString()} ·{' '}
+                {categoryLabel(problem.category)}
               </p>
             </header>
 
             <section className="stack" style={{ gap: '10px' }}>
-              <h1 className="h3">{t.ui.problem.problem}</h1>
+              <h1 className="h3">Problem</h1>
               <hr className="problem-rule" />
               <p className="problem-text">{problem.body}</p>
             </section>
 
             <section className="stack" style={{ gap: '10px' }}>
-              <h2 className="h3">{t.ui.problem.advice}</h2>
+              <h2 className="h3">Advice</h2>
               <hr className="problem-rule" />
               <p className="problem-text">{problem.answer}</p>
-              <p className="problem-from">{t.ui.problem.from}</p>
+              <p className="problem-from">From: Farida</p>
             </section>
 
             <footer className="problem-foot stack" style={{ gap: '14px' }}>
-              <p className="one-human">{t.copy.trust.oneHuman}</p>
+              <p className="one-human">{copy.trust.oneHuman}</p>
               <div className="row">
                 <Link to="/ask" className="btn btn-primary">
-                  {t.ui.problem.writeYourOwn}
+                  Write your own
                 </Link>
                 <Link to="/archive" className="btn btn-quiet">
-                  {t.ui.problem.readAnother}
+                  Read another
                 </Link>
               </div>
             </footer>

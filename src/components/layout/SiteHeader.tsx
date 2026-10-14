@@ -1,9 +1,8 @@
 import { NavLink, Link } from 'react-router-dom';
 import portrait from '../../pixel/assets/bunny_portrait_01.png';
 import { ThemeToggle } from '../ThemeToggle';
-import { LanguageSwitch } from '../LanguageSwitch';
 import { FEATURES } from '../../config/features';
-import { useT } from '../../i18n';
+import { copy } from '../../content/placeholder';
 
 /**
  * The header.
@@ -14,28 +13,25 @@ import { useT } from '../../i18n';
  *
  * The logo is the bunny's portrait, at its native 128 pixels: it is the site's
  * profile picture everywhere (Farida, 2026-10-04). Whole-number scaling only,
- * so a smaller header would need a 64-pixel version from the artist. The
- * language switch (ENG / AZE) sits at the right end of the menu.
+ * so a smaller header would need a 64-pixel version from the artist.
  */
 export function SiteHeader() {
-  const t = useT();
   return (
     <header className="site-head">
       <div className="wrap site-head-inner">
-        <Link to="/" className="brand" aria-label={t.ui.nav.brandHome(t.copy.siteName)}>
+        <Link to="/" className="brand" aria-label={`${copy.siteName} — home`}>
           <img className="brand-logo" src={portrait} alt="" width={128} height={128} />
-          <span className="brand-name">{t.copy.siteName}</span>
+          <span className="brand-name">{copy.siteName}</span>
         </Link>
 
-        <nav className="site-nav" aria-label={t.ui.nav.main}>
-          <NavLink to="/">{t.ui.nav.home}</NavLink>
-          {FEATURES.staticPages && <NavLink to="/how-it-works">{t.ui.nav.howItWorks}</NavLink>}
-          <NavLink to="/ask">{t.ui.nav.getAdvice}</NavLink>
-          {FEATURES.archive && <NavLink to="/archive">{t.ui.nav.browse}</NavLink>}
-          {FEATURES.staticPages && <NavLink to="/about">{t.ui.nav.about}</NavLink>}
-          {FEATURES.staticPages && <NavLink to="/faq">{t.ui.nav.faq}</NavLink>}
+        <nav className="site-nav" aria-label="Main">
+          <NavLink to="/">Home</NavLink>
+          {FEATURES.staticPages && <NavLink to="/how-it-works">How it works</NavLink>}
+          <NavLink to="/ask">Get advice</NavLink>
+          {FEATURES.archive && <NavLink to="/archive">Browse problems</NavLink>}
+          {FEATURES.staticPages && <NavLink to="/about">About</NavLink>}
+          {FEATURES.staticPages && <NavLink to="/faq">FAQ</NavLink>}
           {FEATURES.nightMode && <ThemeToggle />}
-          <LanguageSwitch />
         </nav>
       </div>
     </header>

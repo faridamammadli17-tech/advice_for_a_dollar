@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { EnvelopeCeremony } from './EnvelopeCeremony';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
-import { useT } from '../i18n';
+import { copy } from '../content/placeholder';
 import { clearDraft } from '../lib/submissions/draft';
 import { visitorApi } from '../lib/api/client';
 import { checkSecretWord } from '../lib/submissions/secretWord';
@@ -22,11 +22,11 @@ import './SubmissionFlow.css';
 
 type Step = 'secret' | 'visibility' | 'pay' | 'sending' | 'done';
 
-const STEP_LABELS: readonly { step: 'write' | 'secret' | 'visibility' | 'pay' }[] = [
-  { step: 'write' },
-  { step: 'secret' },
-  { step: 'visibility' },
-  { step: 'pay' },
+const STEP_LABELS: readonly { step: 'write' | Step; label: string }[] = [
+  { step: 'write', label: 'Write' },
+  { step: 'secret', label: 'Secret word' },
+  { step: 'visibility', label: 'Private or public' },
+  { step: 'pay', label: 'Pay' },
 ];
 
 export type SubmissionFlowProps = {
@@ -63,8 +63,6 @@ export function SubmissionFlow({
   onSafety,
   onCreated,
 }: SubmissionFlowProps) {
-  const t = useT();
-  const copy = t.copy;
   const [step, setStep] = useState<Step>('secret');
   const [error, setError] = useState<string | null>(null);
 
@@ -95,15 +93,15 @@ export function SubmissionFlow({
   const submitSecret = () => {
     const problem = checkSecretWord(secretWord);
     if (problem === 'empty') {
-      setError(t.ui.flow.secretEmpty);
+      setError('Please choose a word.');
       return;
     }
     if (problem === 'too-short') {
-      setError(t.ui.flow.secretShort);
+      setError('A little longer — at least four characters.');
       return;
     }
     if (problem === 'too-long') {
-      setError(t.ui.flow.secretLong);
+      setError('That is longer than it needs to be.');
       return;
     }
     setError(null);
@@ -125,15 +123,15 @@ export function SubmissionFlow({
     const problem = checkAmount(amount);
 
     if (problem === 'not-a-number') {
-      setError(t.ui.flow.amountNaN);
+      setError('That does not look like an amount.');
       return;
     }
     if (problem === 'below-minimum') {
-      setError(t.ui.flow.amountBelow(formatMinorUnits(MINIMUM_MINOR_UNITS)));
+      setError(`The minimum is ${formatMinorUnits(MINIMUM_MINOR_UNITS)}.`);
       return;
     }
     if (problem === 'above-maximum') {
-      setError(t.ui.flow.amountAbove);
+      setError('That is a very large amount — please check it.');
       return;
     }
     if (amount === null) return;
@@ -170,7 +168,9 @@ export function SubmissionFlow({
       });
 
       if (!result.ok) {
-        setError(t.ui.flow.serverRefused);
+        setError(
+          'The server could not take it just now. Nothing was charged, and your words are safe.',
+        );
         setStep('pay');
         return;
       }
@@ -187,7 +187,7 @@ export function SubmissionFlow({
     } catch {
       // The text is untouched, and the draft is still in storage. Nothing the
       // visitor wrote is lost because a card failed.
-      setError(t.ui.flow.paymentFailed);
+      setError('The payment did not go through. Nothing was charged, and your words are safe.');
       setStep('pay');
     }
   };
@@ -202,9 +202,7 @@ export function SubmissionFlow({
 
   return (
     <div className="flow">
-      {step !== 'sending' && (
-        <StepTrail current={step} labels={t.ui.flow.steps} ariaLabel={t.ui.flow.whereYouAre} />
-      )}
+      {step !== 'sending' && <StepTrail current={step} />}
 
       {step === 'secret' && (
         <div className="stack" style={{ gap: '18px' }}>
@@ -213,7 +211,7 @@ export function SubmissionFlow({
 
           <div className="panel field">
             <label className="field-label" htmlFor="secret-word">
-              {t.ui.flow.secretLabel}
+              Your secret word
             </label>
             <input
               ref={firstField}
@@ -225,21 +223,23 @@ export function SubmissionFlow({
               autoComplete="off"
               spellCheck={false}
             />
-            <p className="field-help">{t.ui.flow.secretHelp}</p>
+            <p className="field-help">
+              It is stored scrambled, never in plain text, and never shown to anyone else.
+            </p>
           </div>
 
           {error !== null && <p className="field-error">{error}</p>}
 
           <div className="row">
             <button type="button" className="btn btn-primary" onClick={submitSecret}>
-              {t.ui.flow.continue}
+              Continue
             </button>
             {/* The writing step was done in the box behind, so this is the
                 way back to a typo. The text is still there. */}
             <button type="button" className="btn btn-quiet" onClick={onChangeWriting}>
-              {t.ui.flow.changeWriting}
+              Change what I wrote
             </button>
-            <span className="flow-next">{t.ui.flow.nextVisibility}</span>
+            <span className="flow-next">Next: private or public.</span>
           </div>
         </div>
       )}
@@ -253,25 +253,25 @@ export function SubmissionFlow({
             <ChoiceCard
               selected={visibility === 'private'}
               onSelect={() => setVisibility('private')}
-              title={t.ui.flow.privateTitle}
-              body={t.ui.flow.privateBody}
+              title="Keep it private"
+              body="Only you and Farida ever see it. It never appears anywhere else."
             />
             <ChoiceCard
               selected={visibility === 'public'}
               onSelect={() => setVisibility('public')}
-              title={t.ui.flow.publicTitle}
-              body={t.ui.flow.publicBody}
+              title="Let it be published"
+              body="Farida reads it first and decides. If she publishes it, it appears without your name — and you can still delete it."
             />
           </div>
 
           <div className="row">
             <button type="button" className="btn btn-primary" onClick={() => setStep('pay')}>
-              {t.ui.flow.continue}
+              Continue
             </button>
             <button type="button" className="btn btn-quiet" onClick={() => setStep('secret')}>
-              {t.ui.flow.back}
+              Back
             </button>
-            <span className="flow-next">{t.ui.flow.nextPay}</span>
+            <span className="flow-next">Next: pay what you want.</span>
           </div>
         </div>
       )}
@@ -301,14 +301,14 @@ export function SubmissionFlow({
 
             <div className="field">
               <label className="field-label" htmlFor="custom-amount">
-                {t.ui.flow.otherAmount}
+                Or another amount
               </label>
               <input
                 id="custom-amount"
                 className="input"
                 type="text"
                 inputMode="decimal"
-                placeholder={t.ui.flow.amountPlaceholder(formatMinorUnits(MINIMUM_MINOR_UNITS))}
+                placeholder={`e.g. 2.50 — minimum ${formatMinorUnits(MINIMUM_MINOR_UNITS)}`}
                 value={customAmount}
                 onChange={(event) => setCustomAmount(event.target.value)}
               />
@@ -326,12 +326,12 @@ export function SubmissionFlow({
 
           <div className="row">
             <button type="button" className="btn btn-primary" onClick={() => void pay()}>
-              {t.ui.flow.sendIt}
+              Send it
             </button>
             <button type="button" className="btn btn-quiet" onClick={() => setStep('visibility')}>
-              {t.ui.flow.back}
+              Back
             </button>
-            <span className="flow-next">{t.ui.flow.nextLink}</span>
+            <span className="flow-next">Next: your private link.</span>
           </div>
         </div>
       )}
@@ -343,18 +343,10 @@ export function SubmissionFlow({
 
 /* ---------------------------------------------------------------- fragments */
 
-function StepTrail({
-  current,
-  labels,
-  ariaLabel,
-}: {
-  current: Step;
-  labels: Readonly<Record<'write' | 'secret' | 'visibility' | 'pay', string>>;
-  ariaLabel: string;
-}) {
+function StepTrail({ current }: { current: Step }) {
   const currentIndex = STEP_LABELS.findIndex((entry) => entry.step === current);
   return (
-    <ol className="trail" aria-label={ariaLabel}>
+    <ol className="trail" aria-label="Where you are">
       {STEP_LABELS.map((entry, index) => (
         <li
           key={entry.step}
@@ -363,7 +355,7 @@ function StepTrail({
           data-state={index < currentIndex ? 'done' : index === currentIndex ? 'now' : 'todo'}
         >
           <span className="trail-num">{index + 1}</span>
-          {labels[entry.step]}
+          {entry.label}
         </li>
       ))}
     </ol>
@@ -400,7 +392,6 @@ function Confirmation({
   secretWord: string;
   onClose: () => void;
 }) {
-  const t = useT();
   const [copied, setCopied] = useState(false);
   const magicLink = IS_PREVIEW
     ? `${window.location.origin}${window.location.pathname}#/a/${view.token}`
@@ -420,52 +411,61 @@ function Confirmation({
     <div className="flow stack" style={{ gap: '22px' }}>
       <div className="confirm-head">
         <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
-        <h2 className="h1">{t.ui.flow.linkHeading}</h2>
+        <h2 className="h1">Here&rsquo;s your magic link.</h2>
       </div>
 
       <div className="panel stack" style={{ gap: '10px' }}>
-        <span className="field-label">{t.ui.flow.yourLink}</span>
+        <span className="field-label">Your private link</span>
         <code className="magic-link">{magicLink}</code>
         <div className="row">
           <button type="button" className="btn" onClick={() => void copyLink()}>
-            {copied ? t.ui.flow.copied : t.ui.flow.copyLink}
+            {copied ? 'Copied' : 'Copy link'}
           </button>
           <Link to={`/a/${view.token}`} className="btn btn-quiet">
-            {t.ui.flow.openIt}
+            Open it
           </Link>
         </div>
-        <p className="field-help">{t.ui.flow.saveLink}</p>
+        <p className="field-help">
+          Save this somewhere. It is the only way back to your submission, and it is not sent to you
+          anywhere else.
+        </p>
       </div>
 
       <div className="panel stack" style={{ gap: '10px' }}>
-        <span className="field-label">{t.ui.flow.secretLabel}</span>
+        <span className="field-label">Your secret word</span>
         <code className="secret-shown">{secretWord}</code>
-        <p className="field-help">{t.ui.flow.secretShownHelp}</p>
+        <p className="field-help">
+          Shown once, here. If you lose the link, this is how you prove the submission is yours. If
+          you ever write again, choose a different word.
+        </p>
       </div>
 
       <div className="panel panel-flat stack" style={{ gap: '10px' }}>
-        <span className="field-label">{t.ui.flow.whatYouSent}</span>
+        <span className="field-label">What you sent</span>
         <p className="prose confirm-body">{view.body}</p>
       </div>
 
       <div className="stack" style={{ gap: '8px' }}>
-        <h3 className="h3">{t.ui.flow.whatNow}</h3>
+        <h3 className="h3">What happens now</h3>
         <ul className="next-list">
-          <li>
-            {t.ui.flow.nowReads} {t.copy.responseTime}
-          </li>
-          {view.visibility === 'public' && <li>{t.ui.flow.nowPublic}</li>}
-          <li>{t.ui.flow.nowReturn}</li>
-          <li>{t.ui.flow.nowDelete}</li>
+          <li>Farida reads it and writes back. {copy.responseTime}</li>
+          {view.visibility === 'public' && (
+            <li>
+              You asked for this to be published. She reads it first and decides — it is not public
+              yet.
+            </li>
+          )}
+          <li>Come back through your link to read the reply.</li>
+          <li>You can delete it at any time through that link.</li>
         </ul>
       </div>
 
       <div className="row">
         <button type="button" className="btn" onClick={onClose}>
-          {t.ui.flow.submitAnother}
+          Submit another
         </button>
         <button type="button" className="btn btn-quiet" onClick={onClose}>
-          {t.ui.flow.backToStart}
+          Back to the start
         </button>
       </div>
     </div>

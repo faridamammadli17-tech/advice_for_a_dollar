@@ -23,6 +23,9 @@ const KEY = (token: string) => `afad:preview:${token}`;
 
 type Stored = VisitorSubmission & { deleted?: boolean };
 
+const STAND_IN_REPLY =
+  'PREVIEW ONLY. This is where Farida’s reply appears. Nothing is written here by anyone in the preview; these lines only show what the page looks like once an answer is ready.';
+
 function read(token: string): Stored | null {
   try {
     const raw = window.localStorage.getItem(KEY(token));
@@ -69,15 +72,14 @@ export function previewGet(token: string): VisitorSubmission | 'deleted' | null 
   return stored;
 }
 
-/** `reply` is the labelled stand-in from the language dictionary (ui.*.ts, `preview`). */
-export function previewMarkAnswered(token: string, reply: string): void {
+export function previewMarkAnswered(token: string): void {
   const stored = read(token);
   if (stored === null) return;
   write(token, {
     ...stored,
     status: 'answered',
     answeredAt: new Date().toISOString(),
-    answer: reply,
+    answer: STAND_IN_REPLY,
   });
 }
 

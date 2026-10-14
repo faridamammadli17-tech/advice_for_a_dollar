@@ -10,6 +10,7 @@ import { Problem } from './pages/Problem';
 import { Recover } from './pages/Recover';
 import { StaticPageView } from './pages/StaticPage';
 import { FEATURES } from './config/features';
+import { about, communityGuidelines, faq, howItWorks, privacy, terms } from './content/pages';
 
 /**
  * Routing.
@@ -64,20 +65,20 @@ export function App() {
         {FEATURES.archive && <Route path="/problem/:id" element={<Problem />} />}
 
         {FEATURES.staticPages && (
-          <Route path="/how-it-works" element={<StaticPageView slug="how-it-works" />} />
+          <Route path="/how-it-works" element={<StaticPageView page={howItWorks} />} />
         )}
-        {FEATURES.staticPages && <Route path="/about" element={<StaticPageView slug="about" />} />}
-        {FEATURES.staticPages && <Route path="/faq" element={<StaticPageView slug="faq" />} />}
+        {FEATURES.staticPages && <Route path="/about" element={<StaticPageView page={about} />} />}
+        {FEATURES.staticPages && <Route path="/faq" element={<StaticPageView page={faq} />} />}
         {FEATURES.staticPages && (
           <Route
             path="/community-guidelines"
-            element={<StaticPageView slug="community-guidelines" />}
+            element={<StaticPageView page={communityGuidelines} />}
           />
         )}
         {FEATURES.staticPages && (
-          <Route path="/privacy" element={<StaticPageView slug="privacy" />} />
+          <Route path="/privacy" element={<StaticPageView page={privacy} />} />
         )}
-        {FEATURES.staticPages && <Route path="/terms" element={<StaticPageView slug="terms" />} />}
+        {FEATURES.staticPages && <Route path="/terms" element={<StaticPageView page={terms} />} />}
 
         {/* Phase 1's status page, kept reachable in development only. */}
         {import.meta.env.DEV && <Route path="/foundation" element={<FoundationHome />} />}

@@ -2002,101 +2002,16 @@ that page no longer exists.
 
 ---
 
-## Two languages: English and Azerbaijani (2026-10-14)
+## Azerbaijani added, then removed (2026-10-14)
 
-Farida asked for everything translated into Azerbaijani with an ENG / AZE
-choice at the top right.
-
-**How it is built.** Every sentence a visitor can read now comes from a
-dictionary: `src/i18n/ui.en.ts` and `ui.az.ts` for the interface (menus,
-buttons, messages, the flow, the reply page, the archive, recovery, the
-safety screen, the 404), `src/content/placeholder.ts` and
-`placeholder.az.ts` for the owner's copy (home page, the flow's headings),
-and `src/content/pages.ts` and `pages.az.ts` for the six content pages. The
-Azerbaijani files are typed against the English ones, so a missing line is
-a type error. `src/i18n/index.tsx` holds the language provider: `useT()`
-gives a component the current dictionary, the category labels and a date
-formatter for the language; the choice is kept in the browser
-(`afad:lang`), a first visit follows the browser's language, and the
-`<html lang>` attribute follows it. The switch (`LanguageSwitch`, a native
-select styled like the menu) sits at the right end of the menu on every
-page. Messages that used to be built in code (the write step's three
-problems, the amount checks, the safety screen's leads, category and sort
-labels) are keys now and the components look them up. Farida's dashboard
-stays in English: it is hers alone. The site's name stays "Advice for a
-Dollar" in both languages, as a name; Farida is "Fəridə" in Azerbaijani.
-The preflight build check now scans the Azerbaijani copy for unfilled
-placeholders too (her age is a placeholder in both).
-
-**The translation** addresses the visitor politely (siz). The safety
-screen's words were translated with the most care; the crisis numbers and
-their placeholder warning are the same list. The example slot, the terms
-page and the age line carry the same PLACEHOLDER markers as the English.
-
-**The font.** VCR OSD Mono's own character table (read with fontTools) has
-ç, ö and ü but NOT ə, Ə, ş, Ş, ğ, Ğ, ı or İ, nor the em dash, en dash,
-middle dot or manat sign. So in Azerbaijani those eight letters come from
-the fallback monospace font, letter by letter, inside otherwise pixel-font
-words; ə is the commonest letter in the language, so it shows in most
-words. (The browser's `document.fonts.check` says true for them, but that
-only reports the font loaded, not that it has the glyph.) The honest fix
-is eight more glyphs in a companion pixel font, from the font's author or
-the artist; the alternative is a complete pixel font for the Azerbaijani
-version. Farida decides.
-
-**Known.** The Azerbaijani menu is longer, so at laptop widths the menu and
-the switch wrap onto a second row under the logo, right-aligned (the
-English menu fits on one row). It reads as deliberate; the alternative is
-hiding the written name beside the logo when the menu needs the room.
-
-**Checked** in Chromium at 1440 and 390: switching to AZE changes the home
-page, the menu, the flow box (steps and headings), the content pages, the
-archive, the reply page, recovery and the safety screen; the choice
-survives a reload; switching back restores English; no English left on the
-Azerbaijani pages by a word search; no errors.
-
----
-
-## VT323 replaces VCR OSD Mono (2026-10-14, later)
-
-Farida chose VT323 from the comparison sheet (docs/screenshots/
-font-candidates.png), for the whole site in both languages.
-
-**Why this one.** Of fourteen free pixel-style fonts checked by reading
-their character tables, only VT323 and Handjet carry every Azerbaijani
-letter (ə Ə ş Ş ğ Ğ ı İ); VT323 also carries the em dash, en dash, middle
-dot and manat sign that VCR OSD Mono lacked, so nothing falls back to
-another font any more, in either language. It is a monospaced terminal
-pixel font under the SIL Open Font Licence (`src/fonts/VT323-OFL.txt`),
-from Google Fonts. Ruled out for lacking ə: Press Start 2P, Pixelify Sans,
-Silkscreen, Jersey 10/15/25, Micro 5, Workbench, Sixtyfour, Doto,
-DotGothic16. Not testable from this environment: Departure Mono, Fixedsys
-Excelsior, Terminus, Unifont.
-
-**How the sizes were kept.** VT323's letters are smaller on the em than
-VCR's (x-height 0.40 of the size against 0.586), so `font-size-adjust:
-0.586` on the body (`--font-aspect` in theme.css) scales VT323 to the
-x-height every size in the stylesheets was designed for. Both fonts'
-letter width equals their x-height, so lines break where they did: the
-home box, the label, the header and the panels measure the same as before
-in Chromium. Browsers reset a form control's font shorthand, which drops
-the adjustment, so `.input`, `.textarea` and `.lang-select` set it again.
-The safety screen and the dashboard switch it off with their system fonts.
-Capitals come out about a tenth taller than before; nothing else moved.
-
-**Removed.** `src/fonts/VCR_OSD_MONO_1.001.ttf` (it stays in the git
-history). The missing-glyph question is closed.
-
-**Checked** at 1440 and 390 in both languages: every letter in the pixel
-font, the box, the content pages, the safety screen still in the system
-font, no sideways scroll, no errors. README screenshots retaken; the
-preview republished.
-
-**Correction (2026-10-14, later).** Farida's choice was VT323 for the
-Azerbaijani version only; English keeps VCR OSD Mono. So both fonts are
-served: `--font-pixel` is VCR OSD Mono on `:root` and VT323 on
-`:root[lang='az']` (the language provider sets `<html lang>`). The
-`font-size-adjust` of 0.586 stays on the body: on VCR it is a no-op (the
-value is VCR's own x-height), on VT323 it is the scaling described above,
-so the two languages share every size and line break. English again falls
-back to Courier New for the em dash, en dash, middle dot and manat sign.
+Farida asked for the site in Azerbaijani with an ENG / AZE switch; it was
+built (every sentence in dictionaries, a language provider, the switch,
+the translation of every page including the safety screen), then the
+pixel font turned out to lack ə Ə ş Ş ğ Ğ ı İ; VT323 was chosen for the
+Azerbaijani version; and she then decided to continue in English only for
+now. The four commits (9545b85, c9344a7, 94c916b, 47b5eac) were reverted
+in one commit, so the site is exactly as it was before the language work:
+English only, VCR OSD Mono, strings where they were. If Azerbaijani is
+wanted again, that history holds a complete translation and the font
+findings (only VT323 and Handjet, among fourteen free pixel fonts, carry
+the Azerbaijani letters).

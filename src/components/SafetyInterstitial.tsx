@@ -1,6 +1,9 @@
 import { type SafetyCategory } from '../lib/safety/screen';
-import { CRISIS_NUMBERS, CRISIS_NUMBERS_ARE_PLACEHOLDERS } from '../content/crisis';
-import { useT, type Translation } from '../i18n';
+import {
+  CRISIS_HEADING,
+  CRISIS_NUMBERS,
+  CRISIS_NUMBERS_ARE_PLACEHOLDERS,
+} from '../content/crisis';
 
 import './SafetyInterstitial.css';
 
@@ -29,40 +32,47 @@ export type SafetyInterstitialProps = {
 };
 
 /** What to say first, by category. Plain statements, never instructions. */
-function leadFor(category: SafetyCategory | null, t: Translation): string {
+function leadFor(category: SafetyCategory | null): string {
   switch (category) {
     case 'medical_emergency':
-      return t.ui.safety.leadMedical;
+      return 'This sounds like it may need medical help right now.';
     case 'abuse_in_progress':
     case 'imminent_danger':
-      return t.ui.safety.leadDanger;
+      return 'This sounds like you may not be safe right now.';
     case 'minor_safety':
-      return t.ui.safety.leadMinor;
+      return 'This sounds like someone may not be safe right now.';
     case 'self_harm':
     default:
-      return t.ui.safety.leadDefault;
+      return 'It sounds like you are going through something serious.';
   }
 }
 
 export function SafetyInterstitial({ category, onBack }: SafetyInterstitialProps) {
-  const t = useT();
   return (
     <div className="safety">
       <div className="safety-inner">
-        <h1 className="safety-title">{leadFor(category, t)}</h1>
+        <h1 className="safety-title">{leadFor(category)}</h1>
 
-        <p className="safety-body">{t.ui.safety.body1}</p>
+        <p className="safety-body">
+          This service is one person writing back over a day or two. That is not the right kind of
+          help for something urgent, and waiting could matter here.
+        </p>
 
-        <p className="safety-body">{t.ui.safety.body2}</p>
+        <p className="safety-body">
+          Please contact emergency services. If you can, tell someone near you what is happening.
+        </p>
 
         <div className="safety-numbers">
-          <span className="safety-numbers-title">{t.ui.safety.numbersHeading}</span>
+          <span className="safety-numbers-title">{CRISIS_HEADING}</span>
 
           {/* Shown in every build, not only development. If placeholders ever
               reached a real visitor, being told plainly is far better than
               being handed a number that does not answer. */}
           {CRISIS_NUMBERS_ARE_PLACEHOLDERS && (
-            <p className="safety-placeholder-warning">{t.ui.safety.placeholderWarning}</p>
+            <p className="safety-placeholder-warning">
+              These numbers are placeholders and do not work. The real emergency numbers have not
+              been added to this site yet.
+            </p>
           )}
 
           <ul>
@@ -83,10 +93,12 @@ export function SafetyInterstitial({ category, onBack }: SafetyInterstitialProps
           </ul>
         </div>
 
-        <p className="safety-body safety-reassure">{t.ui.safety.reassure}</p>
+        <p className="safety-body safety-reassure">
+          Nothing has been charged, and nothing has been sent. What you wrote is still here.
+        </p>
 
         <button type="button" className="safety-back" onClick={onBack}>
-          {t.ui.safety.back}
+          Go back to what I wrote
         </button>
       </div>
     </div>
