@@ -59,7 +59,9 @@ export function Admin() {
     setBusy(false);
     if (!result.ok) {
       // Deliberately vague: the server does not say which part was wrong.
-      setLoginError('That did not work. After several wrong tries in a row, wait 15 minutes and try again.');
+      setLoginError(
+        'That did not work. After several wrong tries in a row, wait 15 minutes and try again.',
+      );
       return;
     }
     setPassword('');
@@ -147,7 +149,9 @@ export function Admin() {
     if (filter === 'all') return true;
     if (filter === 'flagged') return row.safety_flagged === 1;
     if (filter === 'review') return row.public_state === 'in_review';
-    return row.status === 'pending' || (row.follow_up_body !== null && row.follow_up_reply === null);
+    return (
+      row.status === 'pending' || (row.follow_up_body !== null && row.follow_up_reply === null)
+    );
   });
 
   const flaggedCount = rows.filter((row) => row.safety_flagged === 1).length;
@@ -165,14 +169,20 @@ export function Admin() {
 
       {flaggedCount > 0 && (
         <div className="admin-alarm">
-          <strong>{flaggedCount} submission{flaggedCount === 1 ? '' : 's'} flagged for safety.</strong>{' '}
+          <strong>
+            {flaggedCount} submission{flaggedCount === 1 ? '' : 's'} flagged for safety.
+          </strong>{' '}
           These can never be published. Nothing was charged for them.
         </div>
       )}
 
       {stats !== null && (
         <div className="admin-stats">
-          <Stat label="Waiting for a reply" value={String(stats.pending)} emphasis={stats.pending > 0} />
+          <Stat
+            label="Waiting for a reply"
+            value={String(stats.pending)}
+            emphasis={stats.pending > 0}
+          />
           <Stat label="Awaiting review" value={String(stats.awaiting_review)} />
           <Stat label="Answered" value={String(stats.answered)} />
           <Stat label="Flagged" value={String(stats.flagged)} emphasis={stats.flagged > 0} />
@@ -203,7 +213,9 @@ export function Admin() {
       </div>
 
       {visible.length === 0 ? (
-        <p className="admin-quiet">Nothing here. {filter === 'waiting' && 'You are all caught up.'}</p>
+        <p className="admin-quiet">
+          Nothing here. {filter === 'waiting' && 'You are all caught up.'}
+        </p>
       ) : (
         <ul className="admin-list">
           {visible.map((row) => {

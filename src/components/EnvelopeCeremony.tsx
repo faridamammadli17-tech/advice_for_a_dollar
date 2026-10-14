@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { envelopeSprite } from '../pixel/sprites';
 import { useReducedMotion } from '../theme/useReducedMotion';
+import { useT } from '../i18n';
 
 /** 26 frames at 12fps, plus a beat to let it settle. */
 const CEREMONY_MS = 2400;
@@ -28,6 +29,7 @@ export type EnvelopeCeremonyProps = {
  */
 export function EnvelopeCeremony({ onDone }: EnvelopeCeremonyProps) {
   const reducedMotion = useReducedMotion();
+  const t = useT();
 
   useEffect(() => {
     const duration = reducedMotion ? REDUCED_MS : CEREMONY_MS;
@@ -38,7 +40,7 @@ export function EnvelopeCeremony({ onDone }: EnvelopeCeremonyProps) {
   return (
     <div className="ceremony" role="status" aria-live="polite">
       <SpriteCanvas sprite={envelopeSprite} animation="ceremony" scale={3} alt={null} />
-      <p className="ceremony-caption">Sending it…</p>
+      <p className="ceremony-caption">{t.ui.flow.sending}</p>
     </div>
   );
 }

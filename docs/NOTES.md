@@ -1999,3 +1999,58 @@ from /about and a direct /ask both land on the writing area with the cursor
 in it; no horizontal scroll; no errors. README screenshots of the three
 steps retaken from the box. The "What is going on?" copy question is moot:
 that page no longer exists.
+
+---
+
+## Two languages: English and Azerbaijani (2026-10-14)
+
+Farida asked for everything translated into Azerbaijani with an ENG / AZE
+choice at the top right.
+
+**How it is built.** Every sentence a visitor can read now comes from a
+dictionary: `src/i18n/ui.en.ts` and `ui.az.ts` for the interface (menus,
+buttons, messages, the flow, the reply page, the archive, recovery, the
+safety screen, the 404), `src/content/placeholder.ts` and
+`placeholder.az.ts` for the owner's copy (home page, the flow's headings),
+and `src/content/pages.ts` and `pages.az.ts` for the six content pages. The
+Azerbaijani files are typed against the English ones, so a missing line is
+a type error. `src/i18n/index.tsx` holds the language provider: `useT()`
+gives a component the current dictionary, the category labels and a date
+formatter for the language; the choice is kept in the browser
+(`afad:lang`), a first visit follows the browser's language, and the
+`<html lang>` attribute follows it. The switch (`LanguageSwitch`, a native
+select styled like the menu) sits at the right end of the menu on every
+page. Messages that used to be built in code (the write step's three
+problems, the amount checks, the safety screen's leads, category and sort
+labels) are keys now and the components look them up. Farida's dashboard
+stays in English: it is hers alone. The site's name stays "Advice for a
+Dollar" in both languages, as a name; Farida is "Fəridə" in Azerbaijani.
+The preflight build check now scans the Azerbaijani copy for unfilled
+placeholders too (her age is a placeholder in both).
+
+**The translation** addresses the visitor politely (siz). The safety
+screen's words were translated with the most care; the crisis numbers and
+their placeholder warning are the same list. The example slot, the terms
+page and the age line carry the same PLACEHOLDER markers as the English.
+
+**The font.** VCR OSD Mono's own character table (read with fontTools) has
+ç, ö and ü but NOT ə, Ə, ş, Ş, ğ, Ğ, ı or İ, nor the em dash, en dash,
+middle dot or manat sign. So in Azerbaijani those eight letters come from
+the fallback monospace font, letter by letter, inside otherwise pixel-font
+words; ə is the commonest letter in the language, so it shows in most
+words. (The browser's `document.fonts.check` says true for them, but that
+only reports the font loaded, not that it has the glyph.) The honest fix
+is eight more glyphs in a companion pixel font, from the font's author or
+the artist; the alternative is a complete pixel font for the Azerbaijani
+version. Farida decides.
+
+**Known.** The Azerbaijani menu is longer, so at laptop widths the menu and
+the switch wrap onto a second row under the logo, right-aligned (the
+English menu fits on one row). It reads as deliberate; the alternative is
+hiding the written name beside the logo when the menu needs the room.
+
+**Checked** in Chromium at 1440 and 390: switching to AZE changes the home
+page, the menu, the flow box (steps and headings), the content pages, the
+archive, the reply page, recovery and the safety screen; the choice
+survives a reload; switching back restores English; no English left on the
+Azerbaijani pages by a word search; no errors.

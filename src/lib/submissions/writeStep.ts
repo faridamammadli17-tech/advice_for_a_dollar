@@ -17,13 +17,14 @@ import { MAX_BODY_CHARS } from './types';
  *      onwards. Nothing is created and nothing is charged on that path.
  *
  * `api.createSubmission` screens again regardless, so this is the first
- * gate, not the only one.
+ * gate, not the only one. The messages themselves live in the language
+ * dictionaries (ui.*.ts, `write`); this returns which one.
  */
 export type WriteOutcome =
   /** Fine to go on to the secret word. */
   | { readonly kind: 'ok' }
   /** Stay where you are and show this message by the box. */
-  | { readonly kind: 'problem'; readonly message: string }
+  | { readonly kind: 'problem'; readonly reason: 'too-short' | 'too-long' | 'unreachable' }
   /** Show the crisis screen. Create nothing, charge nothing. */
   | { readonly kind: 'flagged'; readonly category: string | null };
 
@@ -31,24 +32,15 @@ export const MIN_BODY_CHARS = 20;
 
 export async function checkWriting(text: string): Promise<WriteOutcome> {
   if (text.trim().length < MIN_BODY_CHARS) {
-    return {
-      kind: 'problem',
-      message: 'A little more to go on would help. Even a few sentences.',
-    };
+    return { kind: 'problem', reason: 'too-short' };
   }
   if (text.length > MAX_BODY_CHARS) {
-    return {
-      kind: 'problem',
-      message: `That is longer than can be read in one sitting. Please keep it under ${MAX_BODY_CHARS.toLocaleString('en')} characters.`,
-    };
+    return { kind: 'problem', reason: 'too-long' };
   }
 
   const verdict = await screenOnServer(text);
   if (verdict === null) {
-    return {
-      kind: 'problem',
-      message: 'Could not reach the server. Your words are saved — try again in a moment.',
-    };
+    return { kind: 'problem', reason: 'unreachable' };
   }
   if (verdict.flagged) {
     return { kind: 'flagged', category: verdict.category };

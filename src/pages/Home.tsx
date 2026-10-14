@@ -8,11 +8,12 @@ import { WritingPad } from '../components/WritingPad';
 import { ForestScene } from '../components/ForestScene';
 import { BunnyPortrait } from '../components/Bunny';
 import { TypingFrog } from '../components/TypingFrog';
-import { copy } from '../content/placeholder';
+import { useT } from '../i18n';
 import { FEATURES } from '../config/features';
 import { readDraft, writeDraft } from '../lib/submissions/draft';
 import { asSafetyCategory } from '../lib/safety/screen';
 import { checkWriting } from '../lib/submissions/writeStep';
+import { MAX_BODY_CHARS } from '../lib/submissions/types';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { formatMinorUnits, MINIMUM_MINOR_UNITS } from '../lib/money';
 
@@ -41,6 +42,8 @@ import './Home.css';
 export function Home() {
   const navigate = useNavigate();
   const location = useLocation();
+  const t = useT();
+  const copy = t.copy;
   const [text, setText] = useState(readDraft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,7 +136,13 @@ export function Home() {
     setBusy(false);
 
     if (outcome.kind === 'problem') {
-      setError(outcome.message);
+      setError(
+        outcome.reason === 'too-short'
+          ? t.ui.write.tooShort
+          : outcome.reason === 'too-long'
+            ? t.ui.write.tooLong(MAX_BODY_CHARS.toLocaleString(t.ui.locale))
+            : t.ui.write.unreachable,
+      );
       return;
     }
     if (outcome.kind === 'flagged') {
@@ -184,15 +193,15 @@ export function Home() {
                   onClick={() => void startAsking()}
                   disabled={busy}
                 >
-                  {busy ? 'Just a moment…' : copy.hero.primaryCta}
+                  {busy ? t.ui.home.busy : copy.hero.primaryCta}
                 </button>
                 <span className="hero-price">
-                  {formatMinorUnits(MINIMUM_MINOR_UNITS)} minimum · pay what you want
+                  {t.ui.home.price(formatMinorUnits(MINIMUM_MINOR_UNITS))}
                 </span>
               </div>
 
               <p className="hero-assurance">
-                A real person reads this and writes back. {copy.responseTime}
+                {t.ui.home.assurance} {copy.responseTime}
               </p>
 
               {/* Chiron's name card: the bunny's portrait (the same art as the
@@ -207,12 +216,11 @@ export function Home() {
 
           {FEATURES.archive ? (
             <p className="hero-alt">
-              Or <Link to="/archive">{copy.hero.secondaryCta.toLowerCase()}</Link> first.
+              {t.ui.home.orRead} <Link to="/archive">{copy.hero.secondaryCta.toLocaleLowerCase(t.ui.locale)}</Link>{' '}
+              {t.ui.home.first}
             </p>
           ) : (
-            <p className="hero-alt hero-alt-muted">
-              Reading other people’s problems is coming soon.
-            </p>
+            <p className="hero-alt hero-alt-muted">{t.ui.home.archiveSoon}</p>
           )}
         </div>
       </section>
@@ -253,27 +261,24 @@ export function Home() {
       {/* ---------------------------------------------------------- example */}
       <section className="section on-forest">
         <div className="wrap wrap-narrow stack" style={{ gap: '18px' }}>
-          <span className="eyebrow">A real example</span>
+          <span className="eyebrow">{t.ui.home.exampleEyebrow}</span>
 
           {copy.example.awaitingOwnerContent ? (
             /* No invented advice. An empty slot with a label on it is honest;
                a convincing fake is the one thing the spec forbids outright. */
             <div className="panel example example-awaiting">
-              <p className="example-awaiting-title">This is where a real exchange goes.</p>
-              <p className="prose">
-                Nothing is generated for this space. It stays empty until Farida chooses a real
-                problem and writes the reply herself.
-              </p>
+              <p className="example-awaiting-title">{t.ui.home.exampleAwaitingTitle}</p>
+              <p className="prose">{t.ui.home.exampleAwaitingBody}</p>
             </div>
           ) : (
             <article className="panel example">
               <span className="example-category">{copy.example.category}</span>
-              <h3 className="h3">The problem</h3>
+              <h3 className="h3">{t.ui.home.theProblem}</h3>
               <p className="prose">{copy.example.problem}</p>
               <hr className="example-rule" />
-              <h3 className="h3">The advice</h3>
+              <h3 className="h3">{t.ui.home.theAdvice}</h3>
               <p className="prose">{copy.example.advice}</p>
-              <p className="example-from">From: Farida</p>
+              <p className="example-from">{t.ui.home.from}</p>
             </article>
           )}
         </div>
@@ -293,7 +298,7 @@ export function Home() {
       <FlowDialog
         open={flowOpen}
         locked={flowLocked}
-        label="Sending your problem"
+        label={t.ui.flow.dialogLabel}
         onClose={closeFlow}
         onClosed={handleClosed}
       >

@@ -1,17 +1,19 @@
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
-import { type StaticPage as StaticPageContent } from '../content/pages';
+import { useT, type PageSlug } from '../i18n';
 
 import './StaticPage.css';
 
 /**
- * Renders a content page from data.
+ * Renders a content page from data, in the chosen language.
  *
  * One component rather than six near-identical ones, because these pages
  * differ only in words. A page still waiting on Farida carries a visible
  * notice — an unfinished page should look unfinished, not quietly ship.
  */
-export function StaticPageView({ page }: { page: StaticPageContent }) {
+export function StaticPageView({ slug }: { slug: PageSlug }) {
+  const t = useT();
+  const page = t.pages[slug];
   return (
     <PageShell>
       <section className="static">
@@ -21,10 +23,7 @@ export function StaticPageView({ page }: { page: StaticPageContent }) {
               <h1 className="h1">{page.title}</h1>
               {page.intro !== undefined && <p className="lede">{page.intro}</p>}
               {page.awaitingOwnerContent === true && (
-                <p className="awaiting">
-                  This page is unfinished. The words here are placeholders and are not
-                  Farida&rsquo;s.
-                </p>
+                <p className="awaiting">{t.ui.pages.unfinished}</p>
               )}
             </header>
 
@@ -48,7 +47,7 @@ export function StaticPageView({ page }: { page: StaticPageContent }) {
 
             <footer className="static-foot">
               <Link to="/ask" className="btn btn-primary">
-                Write your problem
+                {t.ui.pages.writeYourProblem}
               </Link>
             </footer>
           </article>

@@ -42,5 +42,4 @@ export const CRISIS_NUMBERS: readonly CrisisResource[] = [
   { number: '000 000 00 01', label: null },
 ];
 
-/** Heading above the list. */
-export const CRISIS_HEADING = 'Emergency numbers in Azerbaijan';
+/* The heading above the list lives in src/i18n/ui.*.ts (`safety.numbersHeading`). */

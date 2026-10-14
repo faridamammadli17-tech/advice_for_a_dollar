@@ -137,9 +137,7 @@ export const faq: StaticPage = {
     },
     {
       heading: 'How long does a reply take?',
-      paragraphs: [
-        'Normally within 24 hours, and up to about two days when it is busy.',
-      ],
+      paragraphs: ['Normally within 24 hours, and up to about two days when it is busy.'],
     },
     {
       heading: 'Can I keep talking after the reply?',

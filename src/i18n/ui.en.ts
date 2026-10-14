@@ -1,0 +1,236 @@
+/**
+ * Every sentence the interface says, in English. `ui.az.ts` carries the
+ * same keys in Azerbaijani and the type check refuses a missing one. The
+ * owner's own copy (the home page, the flow's headings) lives in
+ * src/content/placeholder*.ts, the content pages in src/content/pages*.ts.
+ */
+export const uiEn = {
+  locale: 'en-GB',
+  language: { label: 'Language', en: 'ENG', az: 'AZE' },
+  nav: {
+    home: 'Home',
+    howItWorks: 'How it works',
+    getAdvice: 'Get advice',
+    browse: 'Browse problems',
+    about: 'About',
+    faq: 'FAQ',
+    main: 'Main',
+    brandHome: (site: string) => `${site} — home`,
+    skip: 'Skip to the main content',
+  },
+  footer: {
+    pages: 'Pages',
+    lostLink: 'Lost your link?',
+    recover: 'Recover a submission',
+    smallPrint: 'The small print',
+    privacy: 'Privacy',
+    terms: 'Terms',
+    guidelines: 'Community guidelines',
+    notTherapy: 'Not therapy. Not professional psychological care.',
+  },
+  home: {
+    price: (minimum: string) => `${minimum} minimum · pay what you want`,
+    assurance: 'A real person reads this and writes back.',
+    orRead: 'Or',
+    first: 'first.',
+    archiveSoon: 'Reading other people’s problems is coming soon.',
+    busy: 'Just a moment…',
+    exampleEyebrow: 'A real example',
+    exampleAwaitingTitle: 'This is where a real exchange goes.',
+    exampleAwaitingBody:
+      'Nothing is generated for this space. It stays empty until Farida chooses a real problem and writes the reply herself.',
+    theProblem: 'The problem',
+    theAdvice: 'The advice',
+    from: 'From: Farida',
+  },
+  write: {
+    tooShort: 'A little more to go on would help. Even a few sentences.',
+    tooLong: (max: string) =>
+      `That is longer than can be read in one sitting. Please keep it under ${max} characters.`,
+    unreachable: 'Could not reach the server. Your words are saved — try again in a moment.',
+  },
+  flow: {
+    dialogLabel: 'Sending your problem',
+    whereYouAre: 'Where you are',
+    steps: { write: 'Write', secret: 'Secret word', visibility: 'Private or public', pay: 'Pay' },
+    secretLabel: 'Your secret word',
+    secretHelp: 'It is stored scrambled, never in plain text, and never shown to anyone else.',
+    secretEmpty: 'Please choose a word.',
+    secretShort: 'A little longer — at least four characters.',
+    secretLong: 'That is longer than it needs to be.',
+    continue: 'Continue',
+    back: 'Back',
+    changeWriting: 'Change what I wrote',
+    nextVisibility: 'Next: private or public.',
+    nextPay: 'Next: pay what you want.',
+    nextLink: 'Next: your private link.',
+    privateTitle: 'Keep it private',
+    privateBody: 'Only you and Farida ever see it. It never appears anywhere else.',
+    publicTitle: 'Let it be published',
+    publicBody:
+      'Farida reads it first and decides. If she publishes it, it appears without your name — and you can still delete it.',
+    otherAmount: 'Or another amount',
+    amountPlaceholder: (minimum: string) => `e.g. 2.50 — minimum ${minimum}`,
+    amountNaN: 'That does not look like an amount.',
+    amountBelow: (minimum: string) => `The minimum is ${minimum}.`,
+    amountAbove: 'That is a very large amount — please check it.',
+    sendIt: 'Send it',
+    serverRefused:
+      'The server could not take it just now. Nothing was charged, and your words are safe.',
+    paymentFailed: 'The payment did not go through. Nothing was charged, and your words are safe.',
+    sending: 'Sending it…',
+    linkHeading: 'Here’s your magic link.',
+    yourLink: 'Your private link',
+    copyLink: 'Copy link',
+    copied: 'Copied',
+    openIt: 'Open it',
+    saveLink:
+      'Save this somewhere. It is the only way back to your submission, and it is not sent to you anywhere else.',
+    secretShownHelp:
+      'Shown once, here. If you lose the link, this is how you prove the submission is yours. If you ever write again, choose a different word.',
+    whatYouSent: 'What you sent',
+    whatNow: 'What happens now',
+    nowReads: 'Farida reads it and writes back.',
+    nowPublic:
+      'You asked for this to be published. She reads it first and decides — it is not public yet.',
+    nowReturn: 'Come back through your link to read the reply.',
+    nowDelete: 'You can delete it at any time through that link.',
+    submitAnother: 'Submit another',
+    backToStart: 'Back to the start',
+  },
+  answer: {
+    finding: 'Finding your submission…',
+    unknownTitle: 'This link doesn’t lead anywhere.',
+    unknownBody:
+      'It may have been mistyped, or it may belong to a submission that has since been deleted. Nothing is wrong on your end.',
+    unknownRecover: 'If you still have your secret word, you can recover a submission instead.',
+    recoverButton: 'Recover with my secret word',
+    backToStart: 'Back to the start',
+    goneTitle: 'This one is gone.',
+    goneBody:
+      'You deleted it. The text, the reply and this link are all finished with — there is no copy to bring back, which is the point.',
+    writeNew: 'Write something new',
+    eyebrow: 'Your submission',
+    sent: 'Sent',
+    askedPublic: 'Asked to be published',
+    private: 'Private',
+    yourProblem: 'Your problem',
+    notYet: 'Not answered yet',
+    faridaHasIt: 'Farida has it.',
+    nothingNeeded: 'Nothing more is needed from you — come back through this link.',
+    previewReady: 'Preview only: show this page with the answer ready',
+    response: 'A response',
+    from: 'From: Farida',
+    yourFollowUp: 'Your follow-up',
+    faridaReply: 'Farida’s reply',
+    followUpSent: 'Sent. Farida will reply once more, and that closes the conversation.',
+    oneFollowUp: 'One follow-up, if you need it',
+    followUpHelp:
+      'You can send one message back, and Farida replies once more. That is the whole exchange — it is not a chat.',
+    followUpAria: 'Your follow-up',
+    followUpEmpty: 'There is nothing written yet.',
+    followUpFailed: 'That did not send. Your words are still here — try again.',
+    sendFollowUp: 'Send follow-up',
+    submitAnother: 'Submit another problem',
+    delete: 'Delete this',
+    deleteConfirm: 'Yes, delete it permanently',
+    keep: 'Keep it',
+    deleteWarning:
+      'This cannot be undone. The text and any reply are destroyed, and this link stops working.',
+  },
+  archive: {
+    eyebrow: 'Other people’s problems',
+    title: 'You are not the only one.',
+    lede: 'Every problem here was written by someone who chose to share it, and read and approved before it appeared. Names never appear — not theirs, not anyone’s.',
+    all: 'All',
+    categoryGroup: 'Category',
+    orderGroup: 'Order',
+    loading: 'Loading…',
+    emptyTitle: 'Nothing here yet',
+    emptyAll:
+      'No problems have been approved for sharing yet. Nothing is invented to fill this space — it stays empty until someone shares theirs and Farida publishes it.',
+    emptyIn: (category: string) => `Nothing in ${category} yet.`,
+    writeYours: 'Write yours',
+    anonymous: 'Anonymous',
+    readReply: 'Read the reply →',
+  },
+  categories: {
+    relationships: 'Relationships',
+    family: 'Family',
+    career: 'Career',
+    education: 'Education',
+    money: 'Money',
+    friendship: 'Friendship',
+    life: 'Life',
+    other: 'Other',
+    uncategorised: 'Uncategorised',
+  },
+  sort: { newest: 'Newest first', oldest: 'Oldest first' },
+  problem: {
+    loading: 'Loading…',
+    missingTitle: 'This one isn’t here.',
+    missingBody:
+      'It may never have been shared publicly, or it may have been taken down. Either way there is nothing to see at this address.',
+    backToOthers: 'Back to the other problems',
+    problem: 'Problem',
+    advice: 'Advice',
+    from: 'From: Farida',
+    writeYourOwn: 'Write your own',
+    readAnother: 'Read another',
+  },
+  recover: {
+    title: 'Lost your link?',
+    lede: 'It happens. If you remember your secret word and roughly when you wrote, we can look.',
+    secretLabel: 'Your secret word',
+    whenLabel: 'Roughly when did you write?',
+    whenHelp:
+      'Near enough is fine — we look a month either side. Leaving it blank searches the last three months.',
+    looking: 'Looking…',
+    look: 'Look for it',
+    unreachableTitle: 'Could not reach the server.',
+    unreachableBody: 'Nothing was searched. Please try again in a moment.',
+    foundTitle: 'Found it.',
+    foundBody: 'Here is your link. Save it somewhere this time.',
+    open: 'Open my submission',
+    nothingTitle: 'Nothing matched those details.',
+    nothingBody:
+      'The bunny had a look and came back empty-pawed. It might be a different word, or a different month — it is worth trying again with another guess at the date.',
+    nothingDeleted:
+      'If a submission was deleted, it is gone for good and cannot be found this way.',
+    sameAnswer:
+      'We never say whether a submission exists for a word that does not match. Every unsuccessful search gets this same answer.',
+    limited:
+      'Searches are limited to a handful every quarter of an hour. If you have tried several times already, wait a little and try again — after that many attempts the answer stops being meaningful.',
+    writeInstead: 'Write something new instead',
+  },
+  pages: {
+    unfinished: 'This page is unfinished. The words here are placeholders and are not Farida’s.',
+    writeYourProblem: 'Write your problem',
+  },
+  notFound: {
+    title: 'There’s nothing at this address.',
+    body: 'The link may have been mistyped, or it may have pointed somewhere that no longer exists.',
+    back: 'Back to the start',
+  },
+  safety: {
+    leadMedical: 'This sounds like it may need medical help right now.',
+    leadDanger: 'This sounds like you may not be safe right now.',
+    leadMinor: 'This sounds like someone may not be safe right now.',
+    leadDefault: 'It sounds like you are going through something serious.',
+    body1:
+      'This service is one person writing back over a day or two. That is not the right kind of help for something urgent, and waiting could matter here.',
+    body2:
+      'Please contact emergency services. If you can, tell someone near you what is happening.',
+    numbersHeading: 'Emergency numbers in Azerbaijan',
+    placeholderWarning:
+      'These numbers are placeholders and do not work. The real emergency numbers have not been added to this site yet.',
+    reassure: 'Nothing has been charged, and nothing has been sent. What you wrote is still here.',
+    back: 'Go back to what I wrote',
+  },
+  preview: {
+    standInReply:
+      'PREVIEW ONLY. This is where Farida’s reply appears. Nothing is written here by anyone in the preview; these lines only show what the page looks like once an answer is ready.',
+  },
+};
+
+export type Ui = typeof uiEn;

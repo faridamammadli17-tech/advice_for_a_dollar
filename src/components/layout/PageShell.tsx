@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { SiteHeader } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
 import { COPY_IS_PLACEHOLDER } from '../../content/placeholder';
+import { useT } from '../../i18n';
 
 /**
  * The frame every page sits in.
@@ -18,6 +19,7 @@ export function PageShell({
   /** `forest` lets a fixed scene show through; the home page uses it. */
   backdrop?: 'paper' | 'forest';
 }) {
+  const t = useT();
   return (
     <div className={backdrop === 'forest' ? 'shell shell-forest' : 'shell'}>
       {import.meta.env.DEV && COPY_IS_PLACEHOLDER && (
@@ -29,7 +31,7 @@ export function PageShell({
           not have to tab through the whole nav on every page to reach the
           writing box — which on this site is the entire point of arriving. */}
       <a className="skip-link" href="#main">
-        Skip to the main content
+        {t.ui.nav.skip}
       </a>
       <SiteHeader />
       <main className="shell-main" id="main" tabIndex={-1}>

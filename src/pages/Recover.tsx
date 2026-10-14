@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
+import { useT } from '../i18n';
 
 import './Recover.css';
 
@@ -23,6 +24,7 @@ import './Recover.css';
  * Anything that does not verify gets the same answer, after the same delay.
  */
 export function Recover() {
+  const t = useT();
   const [secretWord, setSecretWord] = useState('');
   const [month, setMonth] = useState('');
   const [busy, setBusy] = useState(false);
@@ -83,11 +85,8 @@ export function Recover() {
           <div className="page-panel stack" style={{ gap: '22px' }}>
             <header className="stack" style={{ gap: '10px' }}>
               <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
-              <h1 className="h1">Lost your link?</h1>
-              <p className="lede">
-                It happens. If you remember your secret word and roughly when you wrote, we can
-                look.
-              </p>
+              <h1 className="h1">{t.ui.recover.title}</h1>
+              <p className="lede">{t.ui.recover.lede}</p>
             </header>
 
             <form
@@ -100,7 +99,7 @@ export function Recover() {
             >
               <div className="field">
                 <label className="field-label" htmlFor="recover-word">
-                  Your secret word
+                  {t.ui.recover.secretLabel}
                 </label>
                 <input
                   id="recover-word"
@@ -115,7 +114,7 @@ export function Recover() {
 
               <div className="field">
                 <label className="field-label" htmlFor="recover-month">
-                  Roughly when did you write?
+                  {t.ui.recover.whenLabel}
                 </label>
                 <input
                   id="recover-month"
@@ -126,8 +125,7 @@ export function Recover() {
                   aria-describedby="recover-month-help"
                 />
                 <p className="field-help" id="recover-month-help">
-                  Near enough is fine — we look a month either side. Leaving it blank searches the
-                  last three months.
+                  {t.ui.recover.whenHelp}
                 </p>
               </div>
 
@@ -137,7 +135,7 @@ export function Recover() {
                   className="btn btn-primary"
                   disabled={busy || secretWord.trim() === ''}
                 >
-                  {busy ? 'Looking…' : 'Look for it'}
+                  {busy ? t.ui.recover.looking : t.ui.recover.look}
                 </button>
               </div>
             </form>
@@ -146,28 +144,22 @@ export function Recover() {
               <div className="panel recover-result" aria-live="polite">
                 {result.unreachable === true ? (
                   <>
-                    <h2 className="h3">Could not reach the server.</h2>
-                    <p className="prose">Nothing was searched. Please try again in a moment.</p>
+                    <h2 className="h3">{t.ui.recover.unreachableTitle}</h2>
+                    <p className="prose">{t.ui.recover.unreachableBody}</p>
                   </>
                 ) : result.link !== null ? (
                   <>
-                    <h2 className="h3">Found it.</h2>
-                    <p className="prose">Here is your link. Save it somewhere this time.</p>
+                    <h2 className="h3">{t.ui.recover.foundTitle}</h2>
+                    <p className="prose">{t.ui.recover.foundBody}</p>
                     <Link className="btn btn-primary" to={result.link}>
-                      Open my submission
+                      {t.ui.recover.open}
                     </Link>
                   </>
                 ) : (
                   <>
-                    <h2 className="h3">Nothing matched those details.</h2>
-                    <p className="prose">
-                      The bunny had a look and came back empty-pawed. It might be a different word,
-                      or a different month — it is worth trying again with another guess at the
-                      date.
-                    </p>
-                    <p className="field-help">
-                      If a submission was deleted, it is gone for good and cannot be found this way.
-                    </p>
+                    <h2 className="h3">{t.ui.recover.nothingTitle}</h2>
+                    <p className="prose">{t.ui.recover.nothingBody}</p>
+                    <p className="field-help">{t.ui.recover.nothingDeleted}</p>
                   </>
                 )}
               </div>
@@ -189,18 +181,11 @@ export function Recover() {
             knows to come back, and nothing is revealed, because the sentence
             is the same whether or not they matched.
           */}
-            <p className="field-help">
-              We never say whether a submission exists for a word that does not match. Every
-              unsuccessful search gets this same answer.
-            </p>
-            <p className="field-help">
-              Searches are limited to a handful every quarter of an hour. If you have tried several
-              times already, wait a little and try again — after that many attempts the answer stops
-              being meaningful.
-            </p>
+            <p className="field-help">{t.ui.recover.sameAnswer}</p>
+            <p className="field-help">{t.ui.recover.limited}</p>
 
             <p>
-              <Link to="/ask">Write something new instead</Link>
+              <Link to="/ask">{t.ui.recover.writeInstead}</Link>
             </p>
           </div>
         </div>

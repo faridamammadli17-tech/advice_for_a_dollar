@@ -7,10 +7,10 @@ import { visitorApi, type PublicProblem } from '../lib/api/client';
 import {
   ALL_CATEGORY_ID,
   CATEGORIES,
-  categoryLabel,
   SORT_OPTIONS,
   type SortOrder,
 } from '../lib/archive/categories';
+import { useT } from '../i18n';
 
 import './Archive.css';
 
@@ -32,6 +32,7 @@ export function Archive() {
   const [sort, setSort] = useState<SortOrder>('newest');
   const [problems, setProblems] = useState<PublicProblem[]>([]);
   const [loading, setLoading] = useState(true);
+  const t = useT();
 
   useEffect(() => {
     let cancelled = false;
@@ -52,23 +53,20 @@ export function Archive() {
         <div className="wrap">
           <div className="page-panel stack" style={{ gap: '26px' }}>
             <header className="stack" style={{ gap: '10px' }}>
-              <span className="eyebrow">Other people&rsquo;s problems</span>
-              <h1 className="h1">You are not the only one.</h1>
-              <p className="lede">
-                Every problem here was written by someone who chose to share it, and read and
-                approved before it appeared. Names never appear — not theirs, not anyone&rsquo;s.
-              </p>
+              <span className="eyebrow">{t.ui.archive.eyebrow}</span>
+              <h1 className="h1">{t.ui.archive.title}</h1>
+              <p className="lede">{t.ui.archive.lede}</p>
             </header>
 
             <div className="filters">
-              <div className="filter-group" role="group" aria-label="Category">
+              <div className="filter-group" role="group" aria-label={t.ui.archive.categoryGroup}>
                 <button
                   type="button"
                   className="chip"
                   aria-pressed={category === ALL_CATEGORY_ID}
                   onClick={() => setCategory(ALL_CATEGORY_ID)}
                 >
-                  All
+                  {t.ui.archive.all}
                 </button>
                 {CATEGORIES.map((entry) => (
                   <button
@@ -78,12 +76,12 @@ export function Archive() {
                     aria-pressed={category === entry.id}
                     onClick={() => setCategory(entry.id)}
                   >
-                    {entry.label}
+                    {t.categoryLabel(entry.id)}
                   </button>
                 ))}
               </div>
 
-              <div className="filter-group" role="group" aria-label="Order">
+              <div className="filter-group" role="group" aria-label={t.ui.archive.orderGroup}>
                 {SORT_OPTIONS.map((option) => (
                   <button
                     key={option.id}
@@ -92,26 +90,26 @@ export function Archive() {
                     aria-pressed={sort === option.id}
                     onClick={() => setSort(option.id)}
                   >
-                    {option.label}
+                    {t.ui.sort[option.id]}
                   </button>
                 ))}
               </div>
             </div>
 
             {loading ? (
-              <p className="prose">Loading…</p>
+              <p className="prose">{t.ui.archive.loading}</p>
             ) : problems.length === 0 ? (
               <div className="panel empty">
                 <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
                 <div className="stack" style={{ gap: '8px' }}>
-                  <h2 className="h3">Nothing here yet</h2>
+                  <h2 className="h3">{t.ui.archive.emptyTitle}</h2>
                   <p className="prose">
                     {category === ALL_CATEGORY_ID
-                      ? 'No problems have been approved for sharing yet. Nothing is invented to fill this space — it stays empty until someone shares theirs and Farida publishes it.'
-                      : `Nothing in ${categoryLabel(category)} yet.`}
+                      ? t.ui.archive.emptyAll
+                      : t.ui.archive.emptyIn(t.categoryLabel(category))}
                   </p>
                   <p>
-                    <Link to="/ask">Write yours</Link>
+                    <Link to="/ask">{t.ui.archive.writeYours}</Link>
                   </p>
                 </div>
               </div>
@@ -121,11 +119,11 @@ export function Archive() {
                   <li key={problem.id}>
                     <Link to={`/problem/${problem.id}`} className="problem-card">
                       <span className="problem-meta">
-                        Anonymous · {new Date(problem.created_at).toLocaleDateString()} ·{' '}
-                        {categoryLabel(problem.category)}
+                        {t.ui.archive.anonymous} · {t.formatDate(problem.created_at)} ·{' '}
+                        {t.categoryLabel(problem.category)}
                       </span>
                       <span className="problem-excerpt">{problem.body}</span>
-                      <span className="problem-more">Read the reply →</span>
+                      <span className="problem-more">{t.ui.archive.readReply}</span>
                     </Link>
                   </li>
                 ))}

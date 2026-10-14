@@ -188,6 +188,15 @@ production build while the crisis numbers are placeholders or copy contains
 `*_PLACEHOLDER`. Override for local testing only:
 `ALLOW_PLACEHOLDER_CONTENT=1 npm run build`.
 
+**Two languages, one source of words.** Every visitor-facing sentence comes
+from `useT()` (`src/i18n/index.tsx`): the interface strings in
+`src/i18n/ui.en.ts` / `ui.az.ts`, the owner's copy in
+`src/content/placeholder.ts` / `placeholder.az.ts`, the content pages in
+`src/content/pages.ts` / `pages.az.ts`. The Azerbaijani files are typed
+against the English, so adding a sentence to one without the other fails
+the type check. Never put a visitor-facing string in a component. The
+choice is stored as `afad:lang`; the dashboard is English only.
+
 **Farida's colours are the site's theme, and two screens are pinned out of
 it.** The day block of `theme.css` is her palette; `site.css` styles the
 header, footer, buttons, fields and the `.page-panel` once for every page,

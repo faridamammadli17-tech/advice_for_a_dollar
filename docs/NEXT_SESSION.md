@@ -46,7 +46,12 @@ code. The project owner is Farida, also not an engineer. What they want:
 
 1. **No AI-written advice anywhere**: not in replies, examples or the archive.
    The home page example slot stays empty until Farida writes a real one.
-2. **Never change the copy.** Design rounds are design only. On the home page
+2. **Never change the copy.** Design rounds are design only. Since 2026-10-14
+   every visitor-facing sentence lives in dictionaries, English and
+   Azerbaijani side by side (`src/i18n/ui.*.ts`, `src/content/placeholder*.ts`,
+   `src/content/pages*.ts`); a new sentence goes into both or the type check
+   fails. The ENG / AZE switch is `src/components/LanguageSwitch.tsx`. The
+   dashboard stays English. On the home page
    the one line "Write down the thing you have been carrying", the
    placeholder "Try giving as much detail as possible", the button "Get
    advice", "1 AZN minimum · pay what you want", the reply line ("A real
@@ -78,7 +83,8 @@ code. The project owner is Farida, also not an engineer. What they want:
    cream 9.8:1, dark green on cream 8.0:1, wine on light green 6.9:1.
 5. **Font**: VCR OSD Mono via `@font-face` (`src/fonts/`), fallback
    `'Courier New', monospace` for the glyphs it lacks (em dash, en dash,
-   middle dot, manat sign; also ə ş ğ ı İ).
+   middle dot, manat sign, and ə Ə ş Ş ğ Ğ ı İ, which the Azerbaijani
+   version needs in most words).
 6. **Pixel art**: whole-number scale only, `image-rendering: pixelated`, no
    stretching. Animation moves by whole art pixels with `steps()`; no
    fractional translate, rotation or non-integer scale. Everything stops under
@@ -170,8 +176,14 @@ pixel), so the stump with its creatures at the right is off screen there.
   that the standing bunny is gone (open meadow and the dark bush today).
 - Ask the artist for a 1x export of the forest (480x279 PNG): it would be
   pixel-exact too and allow a 3x step on laptops.
-- Draw the four missing glyphs (em dash, en dash, middle dot, manat) as a
-  tiny companion font, or live with the Courier New fallback.
+- Draw the missing glyphs as a tiny companion pixel font, or live with the
+  fallback: the em dash, en dash, middle dot and manat sign, and, for the
+  Azerbaijani version, ə Ə ş Ş ğ Ğ ı İ (the font's table lacks them; the
+  browser substitutes a plain monospace letter inside pixel-font words).
+- Whether to hide the written name beside the logo at laptop widths in
+  Azerbaijani, where the longer menu wraps under the logo.
+- Have a native speaker read the Azerbaijani translation; it was written by
+  the assistant, not by Farida.
 - Widen the cloud environment's network policy if a real tunnel link is
   wanted (api.trycloudflare.com and localtunnel.me are refused there); the
   artifact preview is the workaround.

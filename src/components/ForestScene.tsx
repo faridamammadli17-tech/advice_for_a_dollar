@@ -57,7 +57,12 @@ const RHYTHMS: readonly { seconds: number; delay: number; blink: number }[] = [
 
 type Layout = { readonly scale: number; readonly left: number; readonly top: number };
 
-function layoutFor(viewportWidth: number, viewportHeight: number, width: number, height: number): Layout {
+function layoutFor(
+  viewportWidth: number,
+  viewportHeight: number,
+  width: number,
+  height: number,
+): Layout {
   const scale = Math.max(
     1,
     Math.ceil(viewportWidth / SCENE_WIDTH),
@@ -171,7 +176,10 @@ export function ForestScene() {
                   src={frame(creature.id, '_blink')}
                   alt=""
                   {...size}
-                  style={{ animationDuration: `${rhythm?.blink ?? 5}s`, animationDelay: `${rhythm?.delay ?? 0}s` }}
+                  style={{
+                    animationDuration: `${rhythm?.blink ?? 5}s`,
+                    animationDelay: `${rhythm?.delay ?? 0}s`,
+                  }}
                 />
               </span>
             </span>

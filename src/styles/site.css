@@ -321,6 +321,43 @@
   outline-color: #ffffff;
 }
 
+/* ---------------------------------------------------------- language switch */
+
+/* ENG / AZE at the right end of the menu: the same pale-pink type on the
+   dark-green band as the links, with the pale-green frame the current page
+   gets. The open list is the browser's own; it is told the band's colours. */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+}
+
+.lang-select {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 6px 8px;
+  background: #2f582c;
+  color: #f8cae4;
+  border: 2px solid #cfdd9d;
+  cursor: pointer;
+}
+
+.lang-select:hover {
+  color: #ffffff;
+}
+
+.lang-select:focus-visible {
+  outline-color: #ffffff;
+}
+
+.lang-select option {
+  background: #2f582c;
+  color: #f8cae4;
+}
+
 /* -------------------------------------------------------------- theme keys */
 
 .theme-toggle {

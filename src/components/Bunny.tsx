@@ -31,7 +31,14 @@ export function BunnyPortrait({ scale = 1, className = '', label }: Props) {
   return (
     <div className={`bunny ${className}`.trim()} style={style} role="img" aria-label={label}>
       <div className="bunny-body">
-        <img className="bunny-frame" src={portraitOpen} alt="" width={size} height={size} draggable={false} />
+        <img
+          className="bunny-frame"
+          src={portraitOpen}
+          alt=""
+          width={size}
+          height={size}
+          draggable={false}
+        />
         <img
           className="bunny-frame bunny-blink"
           src={portraitBlink}

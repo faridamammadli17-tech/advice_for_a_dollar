@@ -46,7 +46,9 @@ if (/COPY_IS_PLACEHOLDER\s*=\s*true/.test(copy)) {
 
 /* ---- HARD BLOCKER: unfilled placeholder tokens in visible copy ---- */
 
-const visibleCopy = readFileSync('src/content/placeholder.ts', 'utf8');
+const visibleCopy =
+  readFileSync('src/content/placeholder.ts', 'utf8') +
+  readFileSync('src/content/placeholder.az.ts', 'utf8');
 
 // Only tokens inside quoted strings — those are the ones that reach a visitor.
 // `COPY_IS_PLACEHOLDER` is the flag that drives the dev banner, not copy.

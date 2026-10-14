@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FEATURES } from '../../config/features';
-import { copy } from '../../content/placeholder';
+import { useT } from '../../i18n';
 
 /**
  * The footer.
@@ -10,43 +10,44 @@ import { copy } from '../../content/placeholder';
  * is true it should be said honestly rather than dressed up as a policy page.
  */
 export function SiteFooter() {
+  const t = useT();
   return (
     <footer className="site-foot">
       <div className="wrap site-foot-inner">
         <div className="foot-col">
-          <span className="foot-title">{copy.siteName}</span>
-          <p className="foot-note">{copy.footer.tagline}</p>
-          <p className="foot-note">{copy.footer.cookieNote}</p>
+          <span className="foot-title">{t.copy.siteName}</span>
+          <p className="foot-note">{t.copy.footer.tagline}</p>
+          <p className="foot-note">{t.copy.footer.cookieNote}</p>
         </div>
 
         <div className="foot-col">
-          <span className="foot-title">Pages</span>
-          <Link to="/">Home</Link>
-          <Link to="/ask">Get advice</Link>
-          {FEATURES.staticPages && <Link to="/how-it-works">How it works</Link>}
-          {FEATURES.archive && <Link to="/archive">Browse problems</Link>}
-          {FEATURES.staticPages && <Link to="/about">About</Link>}
+          <span className="foot-title">{t.ui.footer.pages}</span>
+          <Link to="/">{t.ui.nav.home}</Link>
+          <Link to="/ask">{t.ui.nav.getAdvice}</Link>
+          {FEATURES.staticPages && <Link to="/how-it-works">{t.ui.nav.howItWorks}</Link>}
+          {FEATURES.archive && <Link to="/archive">{t.ui.nav.browse}</Link>}
+          {FEATURES.staticPages && <Link to="/about">{t.ui.nav.about}</Link>}
         </div>
 
         {FEATURES.recovery && (
           <div className="foot-col">
-            <span className="foot-title">Lost your link?</span>
-            <Link to="/recover">Recover a submission</Link>
+            <span className="foot-title">{t.ui.footer.lostLink}</span>
+            <Link to="/recover">{t.ui.footer.recover}</Link>
           </div>
         )}
 
         {FEATURES.staticPages && (
           <div className="foot-col">
-            <span className="foot-title">The small print</span>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
-            <Link to="/community-guidelines">Community guidelines</Link>
+            <span className="foot-title">{t.ui.footer.smallPrint}</span>
+            <Link to="/privacy">{t.ui.footer.privacy}</Link>
+            <Link to="/terms">{t.ui.footer.terms}</Link>
+            <Link to="/community-guidelines">{t.ui.footer.guidelines}</Link>
           </div>
         )}
       </div>
 
       <div className="wrap foot-bottom">
-        <span>Not therapy. Not professional psychological care.</span>
+        <span>{t.ui.footer.notTherapy}</span>
       </div>
     </footer>
   );
