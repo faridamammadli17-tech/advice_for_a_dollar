@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
+import { MagicEnvelopes } from '../components/MagicEnvelopes';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
 import { visitorApi, type PublicProblem } from '../lib/api/client';
@@ -102,7 +103,10 @@ export function Archive() {
               <p className="prose">Loading…</p>
             ) : problems.length === 0 ? (
               <div className="panel empty">
-                <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+                <div className="standing">
+                  <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+                  <MagicEnvelopes />
+                </div>
                 <div className="stack" style={{ gap: '8px' }}>
                   <h2 className="h3">Nothing here yet</h2>
                   <p className="prose">

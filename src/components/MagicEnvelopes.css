@@ -1,0 +1,168 @@
+/* The envelopes beside the standing bunny (MagicEnvelopes.tsx).
+
+   Everything is measured in art pixels through --px (the whole-number scale
+   set by the component), so the composition, the drift and the sparkles all
+   land on the pixel grid at any scale. The art is drawn with
+   image-rendering: pixelated and never a fractional size. */
+
+.envelopes {
+  --px: var(--envelopes-scale, 2px);
+  /* The composition, in art pixels: the open envelope at the back-left,
+     the sealed one in front, offset by --sealed-x/--sealed-y. A phone
+     stacks them more steeply (below) so they fit beside the bunny. */
+  --sealed-x: 37;
+  --sealed-y: 26;
+  --width: 92;
+  --height: 62;
+  position: relative;
+  flex: none;
+  width: calc(var(--px) * var(--width));
+  height: calc(var(--px) * var(--height));
+}
+
+.envelope {
+  position: absolute;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.envelope-open {
+  left: 0;
+  top: 0;
+  width: calc(var(--px) * 55);
+  height: calc(var(--px) * 55);
+}
+
+.envelope-sealed {
+  left: calc(var(--px) * var(--sealed-x));
+  top: calc(var(--px) * var(--sealed-y));
+  width: calc(var(--px) * 55);
+  height: calc(var(--px) * 36);
+}
+
+/* One-pixel sparkles: a cream centre with four cream arms, drawn with
+   box-shadow so each is exactly one art pixel. Off by default; the
+   animation switches them on for a moment. */
+.envelope-spark {
+  position: absolute;
+  width: var(--px);
+  height: var(--px);
+  background: #fcffe1;
+  box-shadow:
+    calc(var(--px) * -1) 0 0 #fcffe1,
+    var(--px) 0 0 #fcffe1,
+    0 calc(var(--px) * -1) 0 #fcffe1,
+    0 var(--px) 0 #fcffe1;
+  opacity: 0;
+}
+
+.envelope-spark-1 {
+  left: calc(var(--px) * 4);
+  top: calc(var(--px) * 6);
+}
+
+.envelope-spark-2 {
+  left: calc(var(--px) * (var(--width) - 6));
+  top: calc(var(--px) * 18);
+}
+
+.envelope-spark-3 {
+  left: calc(var(--px) * 30);
+  top: calc(var(--px) * (var(--height) - 4));
+}
+
+/* The stand-alone bunny's row: he stays where he was, on the left; the
+   envelopes fill the empty space to his right (confirmation, the waiting
+   reply, the unknown link, the empty archive, the recover page). */
+.standing {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  width: 100%;
+}
+
+.standing .envelopes {
+  margin-left: auto;
+}
+
+/* On a phone there is no room beside the 256px bunny for the envelopes at
+   2x. They go to 1x, stacked more steeply (69x76 art pixels), in the
+   bottom-right corner of his row: his lower half is the narrowest part of
+   the drawing (it ends 66px before his canvas does), so the envelopes sit
+   in the clear even inside the padded waiting box, never over him. */
+@media (max-width: 480px) {
+  .standing .envelopes {
+    --px: 1px;
+    --sealed-x: 14;
+    --sealed-y: 40;
+    --width: 69;
+    --height: 76;
+    position: absolute;
+    right: 0;
+    bottom: 22px;
+    margin-left: 0;
+  }
+}
+
+/* ------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: no-preference) {
+  .envelope-open {
+    animation: envelope-drift 7.2s steps(1, end) infinite;
+  }
+
+  .envelope-sealed {
+    animation: envelope-drift 5.6s steps(1, end) infinite;
+    animation-delay: -2.1s;
+  }
+
+  .envelope-spark {
+    animation: envelope-spark 6.4s steps(1, end) infinite;
+  }
+
+  .envelope-spark-2 {
+    animation-delay: -2.3s;
+  }
+
+  .envelope-spark-3 {
+    animation-delay: -4.4s;
+  }
+}
+
+/* Up one art pixel, up two, back: a slow bob by whole pixels, never a
+   fraction. */
+@keyframes envelope-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(calc(var(--px) * -1));
+  }
+  50% {
+    transform: translateY(calc(var(--px) * -2));
+  }
+  75% {
+    transform: translateY(calc(var(--px) * -1));
+  }
+}
+
+/* On for a moment, then gone for a while: a wink, not a glow. */
+@keyframes envelope-spark {
+  0%,
+  86% {
+    opacity: 0;
+  }
+  87%,
+  91% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}

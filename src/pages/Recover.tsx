@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
+import { MagicEnvelopes } from '../components/MagicEnvelopes';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
 
@@ -82,7 +83,10 @@ export function Recover() {
         <div className="wrap wrap-narrow">
           <div className="page-panel stack" style={{ gap: '22px' }}>
             <header className="stack" style={{ gap: '10px' }}>
-              <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+              <div className="standing">
+                <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+                <MagicEnvelopes />
+              </div>
               <h1 className="h1">Lost your link?</h1>
               <p className="lede">
                 It happens. If you remember your secret word and roughly when you wrote, we can

@@ -2126,3 +2126,46 @@ were code rather than words:
   safety screen and money), typecheck, lint and preflight all pass.
   README screenshots retaken. The inventory in `docs/site-text/content.cjs`
   is the 15 October text; her edited document is the record of this round.
+
+---
+
+## The owner's envelopes beside the standing bunny (2026-10-22, later)
+
+Farida sent two pieces of pixel art, a sealed envelope with a red wax seal
+and an open one with a letter inside, both as clean 15x enlargements of a
+128x128 canvas, and asked for them to float, gently, in the empty space to
+the right of the standing bunny on the magic-link screen and wherever else
+he stands alone like that.
+
+- **The art**: the originals are kept as
+  `src/pixel/assets/originals/envelope-{sealed,open}-15x.png`;
+  `scripts/downscale-art.py` recovered them losslessly (a clean 15x
+  upscale, 14 and 19 colours) and they are cropped to the drawing:
+  `envelope_sealed_01.png` (55x36) and `envelope_open_01.png` (55x55).
+  Nothing redrawn, nothing smoothed.
+- **The component**: `MagicEnvelopes` draws both with plain `<img>`
+  elements at a whole-number scale (`--px`), the open one at the back-left
+  and the sealed one in front, overlapping, plus three one-pixel sparkles
+  drawn with box-shadow in the cream. It is decorative (`aria-hidden`).
+- **Where**: a `.standing` row (bunny on the left, envelopes pushed to the
+  right) wraps the bunny on the magic-link screen, the waiting block of the
+  reply page, the unknown-link page, the empty archive and the recover
+  page. He stands alone on his row in all five (measured: the heading or
+  text was already below him at every width), so nothing moved; the reply
+  block, where he stands beside the reply, got nothing.
+- **Motion**: each envelope drifts up by one art pixel, then two, and back,
+  in `steps()` on its own rhythm (7.2s and 5.6s, offset) so the two never
+  move together; the sparkles wink on for a moment every 6.4s, each at a
+  different phase. No rotation, no scaling, no glow: the site's rules.
+  Under `prefers-reduced-motion` nothing animates and the sparkles stay
+  off (checked in the browser with the setting emulated). Positions
+  sampled over eight seconds moved in exact 2px steps at 2x.
+- **Phones** (480px and under): there is no room beside the 256px bunny at
+  2x, so the envelopes go to 1x, stacked more steeply (69x76), in the
+  bottom-right corner of his row, where his lower half leaves 66px of
+  clear canvas; measured against the drawing's edge at 390px, inside the
+  padded waiting box too. No horizontal scroll at 1440, 768 or 390.
+- **Checked**: copy link, open it, the link itself and the reply page all
+  unchanged; 171 tests, typecheck, lint pass. The sending ceremony still
+  uses its draft envelope frames: this art is two stills, not the 26-frame
+  sequence that ceremony was specified with.

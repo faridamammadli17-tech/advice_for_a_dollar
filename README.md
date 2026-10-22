@@ -52,7 +52,7 @@ It is at the bottom of this page.
     <td>Pay what you want, from one dollar.</td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/ask-confirmation.png" alt="The magic link, shown once after sending"></td>
+    <td width="50%"><img src="docs/screenshots/ask-confirmation.png" alt="The magic link, shown once after sending, with Chiron and two floating envelopes above it"></td>
     <td width="50%"><img src="docs/screenshots/answer-waiting.png" alt="The visitor's private page while the reply is being written"></td>
   </tr>
   <tr>

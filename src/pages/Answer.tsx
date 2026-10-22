@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
+import { MagicEnvelopes } from '../components/MagicEnvelopes';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
 import { copy } from '../content/placeholder';
@@ -110,7 +111,10 @@ export function Answer() {
         <section className="letter">
           <div className="wrap wrap-narrow">
             <div className="page-panel stack" style={{ gap: '16px' }}>
-              <SpriteCanvas sprite={bunnySprite} scale={2} alt={null} />
+              <div className="standing">
+                <SpriteCanvas sprite={bunnySprite} scale={2} alt={null} />
+                <MagicEnvelopes />
+              </div>
               <h1 className="h1">This link doesn&rsquo;t lead anywhere.</h1>
               <p className="prose">
                 It may have been mistyped, or it may belong to a submission that has since been
@@ -190,7 +194,10 @@ export function Answer() {
 
             {!answered && (
               <div className="letter-waiting">
-                <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+                <div className="standing">
+                  <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+                  <MagicEnvelopes />
+                </div>
                 <div className="stack" style={{ gap: '6px' }}>
                   <h2 className="h3">Not answered yet</h2>
                   <p className="prose">

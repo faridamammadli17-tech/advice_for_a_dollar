@@ -23,7 +23,9 @@ is the most recent round), `README.md` (plain-language tour).
   pretend submission in the browser (`src/lib/preview/fakeSubmissions.ts`),
   so the whole flow can be walked there, including the reply page with a
   labelled stand-in reply. Both are preview build only.
-- Latest work at the time of writing: the copy round of 2026-10-22, applied
+- Latest work at the time of writing: the owner's two envelopes floating
+  beside the standing bunny (`MagicEnvelopes`, 2026-10-22, later), and
+  before that the copy round of 2026-10-22, applied
   from the owner's edited Word document (`docs/site-text/`): her wording on
   every page, Chiron instead of Farida, dollars instead of manat, the
   safety screen's link instead of numbers, the Terms page and the "Get
@@ -166,7 +168,11 @@ pixel), so the stump with its creatures at the right is off screen there.
   reverted by the commit after them. Do not rebuild it unless she asks.
 - The standing bunny still pictured on the magic-link step, the reply
   page, the unknown-link page, the empty archive and the recover page,
-  though he left the home page. Hers to decide.
+  though he left the home page; since 2026-10-22 her two envelopes float
+  beside him there. Hers to decide.
+- Whether the sending ceremony should use her envelope art too: it is
+  two stills (sealed, open with letter), and the ceremony was specified
+  as a 26-frame sequence that is still a draft.
 - With a real payment provider: does the box hold the provider's embedded
   form, or close for the trip to the provider's page and reopen on the
   magic link? Depends on the provider's documentation.

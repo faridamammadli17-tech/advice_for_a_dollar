@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EnvelopeCeremony } from './EnvelopeCeremony';
+import { MagicEnvelopes } from './MagicEnvelopes';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
 import { copy } from '../content/placeholder';
@@ -406,7 +407,12 @@ function Confirmation({
   return (
     <div className="flow stack" style={{ gap: '22px' }}>
       <div className="confirm-head">
-        <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+        {/* The bunny where he was; the owner's envelopes float in the empty
+            space to his right (MagicEnvelopes). */}
+        <div className="standing">
+          <SpriteCanvas sprite={bunnySprite} scale={2} rimLight alt={null} />
+          <MagicEnvelopes />
+        </div>
         <h2 className="h1">Here&rsquo;s your magic link.</h2>
       </div>
 
