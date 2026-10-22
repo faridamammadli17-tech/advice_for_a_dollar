@@ -123,12 +123,7 @@ export function Recover() {
                   type="month"
                   value={month}
                   onChange={(event) => setMonth(event.target.value)}
-                  aria-describedby="recover-month-help"
                 />
-                <p className="field-help" id="recover-month-help">
-                  Near enough is fine — we look a month either side. Leaving it blank searches the
-                  last three months.
-                </p>
               </div>
 
               <div className="row">
@@ -152,7 +147,9 @@ export function Recover() {
                 ) : result.link !== null ? (
                   <>
                     <h2 className="h3">Found it.</h2>
-                    <p className="prose">Here is your link. Save it somewhere this time.</p>
+                    <p className="prose">
+                      Here is your link. Save it somewhere this time, and don’t lose it.
+                    </p>
                     <Link className="btn btn-primary" to={result.link}>
                       Open my submission
                     </Link>
@@ -161,9 +158,8 @@ export function Recover() {
                   <>
                     <h2 className="h3">Nothing matched those details.</h2>
                     <p className="prose">
-                      The bunny had a look and came back empty-pawed. It might be a different word,
-                      or a different month — it is worth trying again with another guess at the
-                      date.
+                      Chiron had a look and came back empty-pawed. It might be a different word, or
+                      a different month - it is worth trying again with another guess at the date.
                     </p>
                     <p className="field-help">
                       If a submission was deleted, it is gone for good and cannot be found this way.

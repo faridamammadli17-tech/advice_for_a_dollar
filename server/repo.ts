@@ -104,7 +104,7 @@ export async function createSubmission(db: Database, input: CreateInput) {
     digest.hash,
     digest.salt,
     input.amountMinorUnits,
-    'AZN',
+    'USD',
     input.transactionId,
     null,
     now.toISOString(),

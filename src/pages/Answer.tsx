@@ -72,7 +72,7 @@ export function Answer() {
     } else {
       const result = await visitorApi.sendFollowUp(token, followUpText);
       if (!result.ok || result.data.ok === false) {
-        setFollowUpError('That did not send. Your words are still here — try again.');
+        setFollowUpError('That did not send.');
         return;
       }
     }
@@ -194,7 +194,7 @@ export function Answer() {
                 <div className="stack" style={{ gap: '6px' }}>
                   <h2 className="h3">Not answered yet</h2>
                   <p className="prose">
-                    Farida has it. {copy.responseTime} Nothing more is needed from you — come back
+                    Chiron has it. {copy.responseTime} Nothing more is needed from you — come back
                     through this link.
                   </p>
                   {IS_PREVIEW && (
@@ -222,7 +222,7 @@ export function Answer() {
                   <div className="stack" style={{ gap: '10px' }}>
                     <h2 className="h3">A response</h2>
                     <p className="letter-body">{view.answer}</p>
-                    <p className="letter-from">From: Farida</p>
+                    <p className="letter-from">From: Chiron</p>
                   </div>
                 </div>
               </article>
@@ -235,13 +235,13 @@ export function Answer() {
                 {finalReplyIn ? (
                   <>
                     <hr className="letter-rule" />
-                    <h2 className="h3">Farida&rsquo;s reply</h2>
+                    <h2 className="h3">Chiron&rsquo;s reply</h2>
                     <p className="letter-body">{view.followUp.reply}</p>
-                    <p className="letter-from">From: Farida</p>
+                    <p className="letter-from">From: Chiron</p>
                   </>
                 ) : (
                   <p className="letter-quiet">
-                    Sent. Farida will reply once more, and that closes the conversation.
+                    Sent. Chiron will reply once more, and that closes the conversation.
                   </p>
                 )}
               </article>
@@ -251,8 +251,7 @@ export function Answer() {
               <div className="letter-block stack" style={{ gap: '12px' }}>
                 <h2 className="h3">One follow-up, if you need it</h2>
                 <p className="field-help">
-                  You can send one message back, and Farida replies once more. That is the whole
-                  exchange — it is not a chat.
+                  You can send one message back, and Chiron replies once more.
                 </p>
                 <textarea
                   className="textarea"

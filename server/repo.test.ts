@@ -51,7 +51,7 @@ function rawInsert(overrides: Record<string, unknown> = {}) {
     secret_word_hash: 'hash',
     secret_word_salt: 'salt',
     amount_minor_units: 100,
-    currency: 'AZN',
+    currency: 'USD',
     transaction_id: 'tx',
     category: 'life',
     created_at: '2026-01-01T00:00:00.000Z',

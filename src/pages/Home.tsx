@@ -5,7 +5,6 @@ import { SafetyInterstitial } from '../components/SafetyInterstitial';
 import { FlowDialog } from '../components/FlowDialog';
 import { SubmissionFlow } from '../components/SubmissionFlow';
 import { WritingPad } from '../components/WritingPad';
-import { ForestScene } from '../components/ForestScene';
 import { BunnyPortrait } from '../components/Bunny';
 import { TypingFrog } from '../components/TypingFrog';
 import { copy } from '../content/placeholder';
@@ -25,7 +24,8 @@ import './Home.css';
  * one line, the frog typing at his computer beside it on the top edge of the
  * writing area, the writing area itself, the button, and Chiron's name card
  * hanging off the bottom edge. Then: who is writing back, why it costs what
- * it costs, a real example, and a final invitation.
+ * it costs, and a real example. (The final invitation at the foot was
+ * deleted by the owner on 2026-10-22.)
  *
  * The writing box is the hero rather than a thing below it. Someone arriving
  * mid-crisis should not have to read a landing page before they find out
@@ -54,6 +54,7 @@ export function Home() {
     stageRef.current?.scrollIntoView({ block: 'center' });
     area?.focus({ preventScroll: true });
   }, []);
+  // Every page shows the forest now (PageShell); this one adds nothing to it.
 
   /* A link to "Get advice" from anywhere on the site lands on the writing
      area; the back button or a reload closes the box (its flag is in the
@@ -154,9 +155,7 @@ export function Home() {
   }
 
   return (
-    <PageShell backdrop="forest">
-      <ForestScene />
-
+    <PageShell>
       {/* ------------------------------------------------------------ hero */}
       <section className="hero">
         <div className="wrap hero-inner">
@@ -192,14 +191,14 @@ export function Home() {
               </div>
 
               <p className="hero-assurance">
-                A real person reads this and writes back. {copy.responseTime}
+                Chiron reads this and writes back. {copy.responseTime}
               </p>
 
               {/* Chiron's name card: the bunny's portrait (the same art as the
                   logo) and the name, nothing else. It hangs off the box's
                   bottom edge, below the line above, never over it. */}
               <figure className="chiron">
-                <BunnyPortrait label="Chiron, the bunny" />
+                <BunnyPortrait label="Chiron" />
                 <figcaption className="chiron-name">Chiron</figcaption>
               </figure>
             </div>
@@ -207,7 +206,8 @@ export function Home() {
 
           {FEATURES.archive ? (
             <p className="hero-alt">
-              Or <Link to="/archive">{copy.hero.secondaryCta.toLowerCase()}</Link> first.
+              {copy.hero.secondaryLead} <Link to="/archive">{copy.hero.secondaryCta}</Link>{' '}
+              {copy.hero.secondaryTail}
             </p>
           ) : (
             <p className="hero-alt hero-alt-muted">
@@ -237,7 +237,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* -------------------------------------------------------- why 1 AZN */}
+      {/* ----------------------------------------------------- why one dollar */}
       <section className="section on-forest on-forest-alt">
         <div className="wrap wrap-narrow stack" style={{ gap: '16px' }}>
           <h2 className="h2">{copy.whyADollar.heading}</h2>
@@ -261,7 +261,7 @@ export function Home() {
             <div className="panel example example-awaiting">
               <p className="example-awaiting-title">This is where a real exchange goes.</p>
               <p className="prose">
-                Nothing is generated for this space. It stays empty until Farida chooses a real
+                Nothing is generated for this space. It stays empty until Chiron chooses a real
                 problem and writes the reply herself.
               </p>
             </div>
@@ -273,20 +273,9 @@ export function Home() {
               <hr className="example-rule" />
               <h3 className="h3">The advice</h3>
               <p className="prose">{copy.example.advice}</p>
-              <p className="example-from">From: Farida</p>
+              <p className="example-from">From: Chiron</p>
             </article>
           )}
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------- final cta */}
-      <section className="section on-forest on-forest-alt final">
-        <div className="wrap wrap-narrow stack" style={{ gap: '16px', alignItems: 'flex-start' }}>
-          <h2 className="h2">{copy.finalCta.heading}</h2>
-          <p className="lede">{copy.finalCta.body}</p>
-          <button type="button" className="btn btn-primary" onClick={focusWriting}>
-            {copy.finalCta.button}
-          </button>
         </div>
       </section>
 

@@ -11,6 +11,9 @@ import { copy } from '../../content/placeholder';
  * visitor clicking through to a page that does not exist yet is worse than
  * not seeing the link. Phase 3 turns the rest on.
  *
+ * There is no "Get advice" entry: the writing box is the home page, so Home
+ * is that link (owner, 2026-10-22).
+ *
  * The logo is the bunny's portrait, at its native 128 pixels: it is the site's
  * profile picture everywhere (Farida, 2026-10-04). Whole-number scaling only,
  * so a smaller header would need a 64-pixel version from the artist.
@@ -27,7 +30,6 @@ export function SiteHeader() {
         <nav className="site-nav" aria-label="Main">
           <NavLink to="/">Home</NavLink>
           {FEATURES.staticPages && <NavLink to="/how-it-works">How it works</NavLink>}
-          <NavLink to="/ask">Get advice</NavLink>
           {FEATURES.archive && <NavLink to="/archive">Browse problems</NavLink>}
           {FEATURES.staticPages && <NavLink to="/about">About</NavLink>}
           {FEATURES.staticPages && <NavLink to="/faq">FAQ</NavLink>}

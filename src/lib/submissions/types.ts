@@ -55,9 +55,9 @@ export type Submission = {
   readonly secretWordHash: string;
   readonly secretWordSalt: string;
 
-  /** Minor units (qəpik). 1 AZN is 100. Never a float. */
+  /** Minor units (cents). 1 dollar is 100. Never a float. */
   readonly amountMinorUnits: number;
-  readonly currency: 'AZN';
+  readonly currency: 'USD';
 
   readonly createdAt: string;
   readonly answeredAt: string | null;
@@ -87,7 +87,7 @@ export type SubmissionView = {
   readonly answer: string | null;
   readonly followUp: FollowUp | null;
   readonly amountMinorUnits: number;
-  readonly currency: 'AZN';
+  readonly currency: 'USD';
 };
 
 export function toView(submission: Submission): SubmissionView {

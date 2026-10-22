@@ -16,7 +16,9 @@
  *
  * What IS settled here, and what the rest of the system relies on:
  *
- *   - both providers settle in AZN, in minor units (qəpik)
+ *   - both providers settle in AZN, in minor units (qəpik); the site now
+ *     charges in USD (src/lib/money.ts), so whether either can take dollars
+ *     is an open question for their documentation
  *   - a checkout produces a transaction id BEFORE the visitor is sent anywhere
  *   - a callback is verified server-side, signature first, amount second
  *   - a refund works from the transaction id alone
@@ -24,7 +26,7 @@
 
 export type CheckoutInput = {
   readonly amountMinorUnits: number;
-  readonly currency: 'AZN';
+  readonly currency: 'USD';
   readonly submissionId: string | null;
   readonly returnUrl: string;
 };

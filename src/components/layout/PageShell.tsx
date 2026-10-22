@@ -1,21 +1,25 @@
 import { type ReactNode } from 'react';
 import { SiteHeader } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
+import { ForestScene } from '../ForestScene';
 import { COPY_IS_PLACEHOLDER } from '../../content/placeholder';
 
 /**
  * The frame every page sits in.
  *
- * While the copy is still mine rather than Farida's, development builds carry
- * a banner saying so. It is loud on purpose: placeholder words have a way of
- * quietly becoming shipped words.
+ * The forest is behind every page (owner, 2026-10-22: one world, everywhere),
+ * except the safety screen, which does not use this shell and stays plain.
+ *
+ * While the copy is still mine rather than the owner's, development builds
+ * carry a banner saying so. It is loud on purpose: placeholder words have a
+ * way of quietly becoming shipped words.
  */
 export function PageShell({
   children,
-  backdrop = 'paper',
+  backdrop = 'forest',
 }: {
   children: ReactNode;
-  /** `forest` lets a fixed scene show through; the home page uses it. */
+  /** `forest` (every page) draws the fixed scene behind; `paper` is plain. */
   backdrop?: 'paper' | 'forest';
 }) {
   return (
@@ -31,6 +35,7 @@ export function PageShell({
       <a className="skip-link" href="#main">
         Skip to the main content
       </a>
+      {backdrop === 'forest' && <ForestScene />}
       <SiteHeader />
       <main className="shell-main" id="main" tabIndex={-1}>
         {children}

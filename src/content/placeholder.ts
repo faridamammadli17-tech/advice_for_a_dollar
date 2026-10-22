@@ -22,8 +22,10 @@
  * slot cannot be mistaken for Farida's voice.
  */
 
-/** Flips the dev-only "placeholder copy" banner. Set false when real copy lands. */
-export const COPY_IS_PLACEHOLDER = true;
+/** Flips the dev-only "placeholder copy" banner. False since the owner's
+ * wording arrived (2026-10-22); the lines still marked PLACEHOLDER below
+ * are the few she has not replaced yet. */
+export const COPY_IS_PLACEHOLDER = false;
 
 export type ExampleProblem = {
   readonly category: string;
@@ -41,13 +43,18 @@ export const copy = {
     // The home page's writing box carries one line above the writing area and
     // nothing else (Farida, 2026-10-06: the headline, the paragraph and the
     // "What is on your mind?" label were deleted by her, deliberately).
-    writeLine: 'Write down the thing you have been carrying',
+    // Owner's wording, 2026-10-22 (HOME-01, HOME-02 in docs/site-text).
+    writeLine: 'You want someone to talk? Let’s talk',
     writeHint: 'Try giving as much detail as possible',
     // The /ask page keeps its own label and placeholder.
     writePrompt: 'What is on your mind?',
     writePlaceholder: 'Start anywhere. It does not have to be tidy.',
-    primaryCta: 'Get advice',
-    secondaryCta: 'Read other people’s problems',
+    primaryCta: 'Send',
+    // The line under the box (HOME-09): the second sentence is the link to
+    // the archive. "wenting" is as she wrote it, raised with her, not changed.
+    secondaryLead: 'If you think you’re alone, you’re not.',
+    secondaryCta: 'Check other people’s wenting.',
+    secondaryTail: '(just to not feel alone)',
   },
 
   /* ------------------------------------------------------------- why 1 AZN */
@@ -83,11 +90,12 @@ export const copy = {
    * load-bearing.
    */
   whyADollar: {
-    heading: 'Why one manat?',
+    heading: 'Why one dollar?',
     body: [
-      'I’m AGE_PLACEHOLDER years old. I’ve been in high school, in university, unemployed, employed, earning good money, earning nothing at all — rich, poor, everything you can imagine.',
+      // "something" is deliberate (owner, 2026-10-22): the word itself appears.
+      'I’m something years old. I’ve been in high school, in university, unemployed, employed, earning good money, earning nothing at all — rich, poor, everything you can imagine.',
       'And one thing I would check when I downloaded an app, or anything at all, was the price. First. I still do this.',
-      'I don’t want that factor — price — to get between us. I think, and firmly believe, that people need to be seen and heard.',
+      'I don’t want that factor — price — to restrict people from getting heard. I think, and firmly believe, that people need to be seen and heard.',
       'So the price here is symbolic. It is for the domain, and for the future possibility of partnering with psychologists, to help people more than I can on my own.',
     ],
     notTherapy:
@@ -97,20 +105,24 @@ export const copy = {
   /* --------------------------------------------------------------- example */
   // The spec asks for one real problem and response on the homepage.
   // It must be a real exchange Farida has written or approved.
+  // The problem is the owner's own (2026-10-22, HOME-27 in docs/site-text).
+  // The reply is not written yet, so the section stays in its waiting state
+  // (awaitingOwnerContent) until it is: a problem with an empty answer under
+  // it is not an example. Nothing is ever generated for the reply.
   example: {
     category: 'Awaiting a real example',
     problem:
-      'PLACEHOLDER — a real problem, chosen by Farida, goes here. It will be one someone actually sent, published with their permission, or one she writes as a representative example.',
+      'I started a new job in october – this is kind of a job that I would only imagine to get into. It is a corporate one tho- I am not an artist. The thing is that, I feel extremely “not confident”. I always believed that in this life – whatever I achieved – I achieved because of luck : I scored a high score in university entrance exam, because that particular year the questions was extremely easy. I graduated from university with high grades – because professors just loved me. I got scholarship for masters – again, I was just luck that year. I entered my dream job – because they didn’t have anyone else to hire.\n\nNow, clearly I do understand that luck do really have a role here – but rationally, I believe it’s not 100%. The problem is I “feel” like it’s 100% and I cant get out of that feeling. So I feel not confident. And I have this coworker who turn this life into hell for me. She’s not my manager, not my boss, but she always always questions the things I do, she asks weird questions. And since I am new here, I don’t know if I am the only one thinking this about her or everyone else is aware.',
     advice:
-      'PLACEHOLDER — Farida’s real reply goes here. Nothing is generated for this slot. The section stays visibly empty until she writes it.',
+      'PLACEHOLDER — Chiron’s real reply goes here. Nothing is generated for this slot. The section stays visibly empty until she writes it.',
     awaitingOwnerContent: true,
   } satisfies ExampleProblem,
 
   /* ----------------------------------------------------------------- trust */
   trust: {
-    heading: 'Who is actually reading this',
-    // This sentence is specified verbatim in the brief. Do not reword it.
-    oneHuman: 'All advice is written by one real human wearing different hats.',
+    heading: 'Who is actually reading your texts',
+    // The owner's sentence (2026-10-22). Do not reword it.
+    oneHuman: 'All advice is written by Chiron – which is a real person.',
     points: [
       {
         title: 'You stay anonymous',
@@ -124,19 +136,13 @@ export const copy = {
       },
       {
         title: 'No judgement, and no bots',
-        // PLACEHOLDER
-        body: 'Nothing here is written by a machine. If that matters to you, it matters here too.',
+        body: 'If you want to talk with AI – that’s totally fine and understandable. This platform is not the one for that purpose tho.',
       },
     ],
   },
 
-  /* ------------------------------------------------------------ final call */
-  finalCta: {
-    // PLACEHOLDER
-    heading: 'Still carrying it around?',
-    body: 'It takes a few minutes to write down and one manat to send.',
-    button: 'Write your problem',
-  },
+  // The "last call" section at the foot of the home page was deleted by the
+  // owner on 2026-10-22 (HOME-31 to HOME-33).
 
   /* ------------------------------------------------------ the writing flow */
   ask: {
@@ -147,18 +153,25 @@ export const copy = {
       'If you ever lose your private link, this is how you prove the submission is yours. Pick something you will remember and nobody could guess.',
     visibilityHeading: 'Private, or shared with others?',
     visibilityWhy:
-      'Both cost the same. Public problems are read and approved by Farida before they appear anywhere, and always without your name.',
+      'Both cost the same. Public problems are read and approved by Chiron before they appear anywhere, and always without your name.',
     paymentHeading: 'Pay what you want',
-    paymentWhy: 'One manat minimum. More if you want to and can.',
+    paymentWhy: 'One dollar minimum. More if you want to and can.',
   },
 
   /* ------------------------------------------------------------ what next */
   responseTime: 'Normally within 24 hours, and up to about two days when it is busy.',
 
   footer: {
-    // PLACEHOLDER
-    tagline: 'One person, writing back.',
-    // Honest: the site sets no tracking cookies, so the cookie policy says so.
-    cookieNote: 'This site sets no tracking cookies.',
+    tagline: 'Real person is talking, listen up.',
+    // Honest: the site sets no tracking cookies, so the cookie line says so.
+    cookieNote: 'I don’t get the cookie stuff that websites talk about, so none here.',
+    lostLinkHeading:
+      'Losts can happen and sometimes there is no solution. Not for your magic link tho – if you’ve lost it, click here.',
+    // Trouble with the website itself goes to this address: no help page, no
+    // form, no route (owner, 2026-10-22).
+    helpEmail: 'help@adviceforadollar.org',
+    // PLACEHOLDER — builder's wording, for the owner to replace with hers.
+    helpNote:
+      'For trouble with the website only. Anything written to this address is not read or answered as advice.',
   },
 } as const;

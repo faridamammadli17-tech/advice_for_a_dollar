@@ -1,39 +1,41 @@
 /**
  * Money.
  *
- * Decision (NOTES.md): the price is 1 AZN, displayed and charged in AZN.
- * Not dollars, not converted — despite the product being called Advice for a
- * Dollar. No copy anywhere may say "$1" while the charge is 1 AZN.
+ * Decision (owner, 2026-10-22): the price is one dollar, displayed and
+ * charged in US dollars (USD). Earlier it was 1 AZN; the owner changed it,
+ * and the copy now says dollar everywhere.
  *
- * Amounts are stored and passed around as **minor units** (qəpik), never as
- * floats. 1 AZN is 100. Money in floating point is how rounding errors become
- * refund tickets.
+ * Amounts are stored and passed around as **minor units** (cents), never as
+ * floats. 1 dollar is 100. Money in floating point is how rounding errors
+ * become refund tickets.
  */
 
-export const CURRENCY = 'AZN' as const;
+export const CURRENCY = 'USD' as const;
 
 /** The minimum. Pay what you want, from here upwards. */
 export const MINIMUM_MINOR_UNITS = 100;
 
-/** Suggested amounts on the payment step: 1, 3 and 5 AZN. */
+/** Suggested amounts on the payment step: 1, 3 and 5 dollars. */
 export const SUGGESTED_MINOR_UNITS: readonly number[] = [100, 300, 500];
 
 /** The largest amount the form accepts, as a guard against a typo. */
 export const MAXIMUM_MINOR_UNITS = 50_000;
 
 /**
- * Format for display: "1 AZN", "3 AZN", "1.50 AZN".
- * Whole amounts drop the decimals, because "1.00 AZN" reads like a price tag
- * and the whole point of this one is that it is symbolic.
+ * Format for display: "1 dollar", "3 dollars", "1.50 dollars".
+ * The word rather than the sign or the code, because the owner's copy says
+ * "one dollar" in words, and whole amounts drop the decimals, because
+ * "1.00 dollars" reads like a price tag and the whole point of this one is
+ * that it is symbolic.
  */
 export function formatMinorUnits(minorUnits: number): string {
   const whole = Math.floor(minorUnits / 100);
   const fraction = minorUnits % 100;
 
   if (fraction === 0) {
-    return `${whole} ${CURRENCY}`;
+    return `${whole} ${whole === 1 ? 'dollar' : 'dollars'}`;
   }
-  return `${whole}.${String(fraction).padStart(2, '0')} ${CURRENCY}`;
+  return `${whole}.${String(fraction).padStart(2, '0')} dollars`;
 }
 
 /**

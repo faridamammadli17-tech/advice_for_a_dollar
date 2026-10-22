@@ -2050,3 +2050,79 @@ which now holds all 24 commits. From here on work goes straight onto
 `main`: pull first, commit and push when a piece of work is finished, and
 say what was pushed. No more `claude/...` branches, so the repository never
 again looks empty to someone opening it.
+
+---
+
+## The owner's words, applied (2026-10-22)
+
+Farida sent back the Word document with her wording and a list of decisions.
+All of it is applied; nothing was improved on the way in. The parts that
+were code rather than words:
+
+- **The safety screen carries no phone numbers.** `src/content/crisis.ts`
+  now exports one `EMERGENCY_LINK` (https://emergencynumbers.org, a page of
+  emergency numbers per country) and the screen renders it as one large
+  bordered link that opens in a new tab, with the address itself as the
+  visible text so it can be read out. The two placeholder numbers and the
+  warning about them are gone together: deleting only the warning would
+  have handed someone two numbers that ring nowhere. The preflight gate
+  that used to check the placeholder flag now refuses a release build
+  unless that file exports an https:// address and the screen's source
+  renders it (`href={EMERGENCY_LINK.url}`); `SafetyInterstitial.test.ts`
+  renders the screen and checks the link, the new tab, and that nothing on
+  it looks like a phone number. The screen is still plain: no forest, no
+  art, system font (checked in the browser at 1440 and 390).
+- **Dollars.** `CURRENCY` is `USD`; the types, the server's inserts, the
+  table defaults and the tests say USD; amounts display in words ("1
+  dollar", "3 dollars", "2.50 dollars") because her copy says "one dollar"
+  in words and the dollar sign is not in her wording. Open question for
+  her: Epoint and Payriff, the two adapters written so far, are
+  Azerbaijani providers that settle in manat; whether either can charge
+  dollars needs their documentation or another provider. The mock
+  provider runs today, so nothing is blocked.
+- **Chiron, never Farida**, in every visitor-facing sentence (22 in the
+  text files plus the components). Her name stays in code comments, in
+  `docs/` and on the dashboard. The pronoun is **she** throughout: her
+  BOX-22 says "If she publishes it", and the original copy used she
+  everywhere, so BOX-51's "They reads it first" became "She reads it
+  first".
+- **Deleted**: the "last call" section at the foot of the home page
+  (HOME-31 to 33); the "Next: ..." hints on the secret-word and
+  private-or-public steps (BOX-16, BOX-25; the pay step keeps its "Next:
+  your private link."); the help text under the recover page's date field
+  (REC-05); the Terms page with its route and footer link.
+- **"Get advice" left the menu** (and the footer's page list, where the same
+  link sat): the writing box is the home page. Every other "write" link on
+  the site goes to /ask, which still lands on the writing area with the
+  cursor in it; typing /ask by hand does the same. /terms is a 404 now.
+- **help@adviceforadollar.org in the footer**, as a mailto link, with one
+  line under it that is the builder's wording, marked PLACEHOLDER in
+  `placeholder.ts` for her to replace: "For trouble with the website only.
+  Anything written to this address is not read or answered as advice." No
+  page, no form, no route. Tested in `SiteFooter.test.ts`.
+- **The forest behind every page.** `PageShell` draws `ForestScene` on
+  every page now (the home page no longer draws its own), and every inner
+  page keeps its opaque cream panel, so no text sits on the forest: a
+  browser walk counted every visible text node on every page at 1440 and
+  390 and found none without an opaque background, so contrast is what it
+  was. The safety screen does not use the shell and stays plain.
+- **The example section** holds her own problem (HOME-27) in
+  `placeholder.ts`, but stays in its waiting state: there is no reply yet,
+  and a problem with an empty answer under it is not an example. It
+  switches on when the reply is written (`awaitingOwnerContent: false`).
+- **COPY_IS_PLACEHOLDER** is false: the copy is hers. The dev banner is gone.
+- Raised with her, not changed: "wenting" (HOME-09, applied as written);
+  BOX-37 and BOX-38 end "Nothing was charged" with no full stop in her
+  document, applied with the full stop and said so. Several of her rows
+  replaced an em dash with a plain hyphen (BOX-12, BOX-22, BOX-33, REC-14,
+  HOW-13, ABT-04, ABT-08, PRV-06); applied as written, which also happens
+  to suit the pixel font, which lacks the em dash.
+- A finding from the walk, not changed: the screening rules did not flag
+  "I have the pills in front of me and I am going to take all of them
+  tonight. I do not want to be here tomorrow." The rules are hers to
+  decide on; the sentence used for the screenshots ("...I want to end my
+  life...") is flagged.
+- Checks: 171 tests (160 plus the eleven new ones for the footer, the
+  safety screen and money), typecheck, lint and preflight all pass.
+  README screenshots retaken. The inventory in `docs/site-text/content.cjs`
+  is the 15 October text; her edited document is the record of this round.

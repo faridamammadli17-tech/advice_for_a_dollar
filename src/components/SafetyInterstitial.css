@@ -47,54 +47,51 @@
   color: var(--text);
 }
 
-.safety-numbers {
-  border: 2px solid var(--border-strong);
-  padding: 20px 22px;
+/* The emergency link: the most important control on the page, so it is a
+   large bordered block with the whole area tappable, the address in big type
+   that wraps rather than overflowing a phone, and nothing decorative. */
+.safety-link {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  border: 3px solid var(--border-strong);
+  padding: 22px 24px;
   background: var(--surface);
-}
-
-.safety-numbers-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.safety-numbers ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.safety-numbers li {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.safety-number {
-  font-size: 1.9rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
   color: var(--text);
   text-decoration: none;
-  font-variant-numeric: tabular-nums;
+  min-height: 72px;
+  overflow-wrap: anywhere;
 }
 
-.safety-number:hover {
+.safety-link:hover,
+.safety-link:focus-visible {
+  background: var(--surface-alt);
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+
+.safety-link-label {
+  font-size: 1.06rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.safety-link-url {
+  font-size: clamp(1.35rem, 4.6vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.3;
   text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
-.safety-number-label {
-  font-size: 0.95rem;
-  color: var(--muted);
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
-
 
 .safety-reassure {
   color: var(--muted);
@@ -114,25 +111,4 @@
 
 .safety-back:hover {
   background: var(--surface-alt);
-}
-
-/* Placeholder crisis numbers. Loud, and present in every build — a visitor who
-   somehow reaches this screen must not be handed a number that does not answer
-   without being told. */
-.safety-placeholder-warning {
-  margin: 0;
-  background: var(--accent-strong);
-  color: #ffffff;
-  padding: 12px 14px;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  font-weight: 600;
-}
-
-.safety-number-fake {
-  color: var(--faint);
-  text-decoration: line-through;
-  font-size: 1.9rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }

@@ -23,11 +23,12 @@ is the most recent round), `README.md` (plain-language tour).
   pretend submission in the browser (`src/lib/preview/fakeSubmissions.ts`),
   so the whole flow can be walked there, including the reply page with a
   labelled stand-in reply. Both are preview build only.
-- Latest work at the time of writing: the text inventory (2026-10-15),
-  `docs/site-text/`: a Word document listing every sentence a visitor can
-  see, each with a code such as HOME-06, which the owner is editing and
-  sending back for the copy-correction round; see the last entry of
-  `docs/NOTES.md`.
+- Latest work at the time of writing: the copy round of 2026-10-22, applied
+  from the owner's edited Word document (`docs/site-text/`): her wording on
+  every page, Chiron instead of Farida, dollars instead of manat, the
+  safety screen's link instead of numbers, the Terms page and the "Get
+  advice" menu entry gone, a help address in the footer, the forest behind
+  every page. See the last entry of `docs/NOTES.md`.
 
 ## Who you are working with
 
@@ -44,22 +45,25 @@ code. The project owner is Farida, also not an engineer. What they want:
 ## Rules that are not negotiable
 
 1. **No AI-written advice anywhere**: not in replies, examples or the archive.
-   The home page example slot stays empty until Farida writes a real one.
-2. **Never change the copy.** Design rounds are design only. On the home page
-   the one line "Write down the thing you have been carrying", the
-   placeholder "Try giving as much detail as possible", the button "Get
-   advice", "1 AZN minimum · pay what you want", the reply line ("A real
-   person reads this and writes back. Normally within 24 hours...") and
-   "Chiron" are final. The old headline, paragraph and "What is on your
-   mind?" label were deleted by the owner on 2026-10-06 and do not come
-   back. The em dashes elsewhere are part of how the owner writes; do not
-   rewrite text to avoid a missing glyph.
+   The home page example slot stays empty until the owner writes the reply
+   to her own example problem (the problem is in place since 2026-10-22).
+2. **Never change the copy.** Every visitor-facing sentence is the owner's
+   since 2026-10-22, applied from her edited Word document
+   (`docs/site-text/`, codes such as HOME-06): the line "You want someone
+   to talk? Let’s talk", the button "Send", "1 dollar minimum · pay what
+   you want", "Chiron reads this and writes back...", and so on. Typos she
+   has not ruled on ("wenting" in the line under the box) stay as written
+   until she does. The name on the site is **Chiron, never Farida**; the
+   pronoun is she. The price is **one dollar**, not manat. Do not rewrite
+   text to avoid a missing glyph.
 3. **Leave the safety / crisis screen alone**: no forest, no bunny, no
    animation, system fonts, the neutral paper colours pinned on `.safety`
    in theme.css (Farida's dashboard, `.admin-shell`, shares that block).
-   Its phone numbers are placeholders on purpose and the release build
-   refuses until Farida supplies real ones (`ALLOW_PLACEHOLDER_CONTENT=1
-   npm run build` for local testing only; that bundle must never go online).
+   It carries **no phone numbers**: one large link to
+   https://emergencynumbers.org (`src/content/crisis.ts`, owner's decision
+   2026-10-22). `scripts/preflight.ts` refuses a release build unless that
+   file exports an https:// address and the screen renders it; the tests in
+   `SafetyInterstitial.test.ts` check the same. Never put numbers back.
    **The safety screen runs before anyone reaches the secret word**,
    through the one function `checkWriting` in
    `src/lib/submissions/writeStep.ts`; the box with the rest of the flow
@@ -70,14 +74,15 @@ code. The project owner is Farida, also not an engineer. What they want:
    shadow under buttons and Chiron's card and as the fireflies' glow, and
    pale pink `#F8CAE4` only as text on the dark-green header and footer and
    on buttons. **Pale pink is never a fill** (owner, 2026-10-06). Inner pages
-   are a light-green page with a cream `.page-panel`; the home page is the
-   forest with the same furniture. Pick the background first, then the text
+   are the forest with a cream `.page-panel` on it (every page shows the
+   forest since 2026-10-22, `PageShell`; the safety screen is the one
+   exception); the home page is the forest with the same furniture. Pick the background first, then the text
    colour that reads best. Body text at 4.5:1 or better; pink never carries
    text (3.3:1 at best). Measured pairs are in `docs/NOTES.md`: wine on
    cream 9.8:1, dark green on cream 8.0:1, wine on light green 6.9:1.
 5. **Font**: VCR OSD Mono via `@font-face` (`src/fonts/`), fallback
    `'Courier New', monospace` for the glyphs it lacks (em dash, en dash,
-   middle dot, manat sign; also ə ş ğ ı İ).
+   middle dot; also ə ş ğ ı İ).
 6. **Pixel art**: whole-number scale only, `image-rendering: pixelated`, no
    stretching. Animation moves by whole art pixels with `steps()`; no
    fractional translate, rotation or non-integer scale. Everything stops under
@@ -171,14 +176,19 @@ pixel), so the stump with its creatures at the right is off screen there.
   that the standing bunny is gone (open meadow and the dark bush today).
 - Ask the artist for a 1x export of the forest (480x279 PNG): it would be
   pixel-exact too and allow a 3x step on laptops.
-- Draw the four missing glyphs (em dash, en dash, middle dot, manat) as a
-  tiny companion font, or live with the Courier New fallback.
+- Draw the three missing glyphs (em dash, en dash, middle dot) as a tiny
+  companion font, or live with the Courier New fallback.
 - Widen the cloud environment's network policy if a real tunnel link is
   wanted (api.trycloudflare.com and localtunnel.me are refused there); the
   artifact preview is the workaround.
-- Content only Farida can supply: real emergency numbers, her age for the
-  "Why one manat?" paragraph (or a rewrite), a real example exchange, Epoint
-  or Payriff API documentation for real payments, switching email on.
+- From the copy round of 2026-10-22, still hers to answer: "wenting" in
+  the line under the writing box (typo or not); the reply to her example
+  problem (the section waits for it); a payment provider that can charge
+  dollars (Epoint and Payriff settle in manat); her own wording for the
+  footer line next to help@adviceforadollar.org (the current line is the
+  builder's); the pronoun "she" for Chiron, if she wants another.
+- Content only Farida can supply: the provider's API documentation for
+  real payments, switching email on.
 
 ## Traps learned the hard way
 

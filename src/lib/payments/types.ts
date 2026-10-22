@@ -1,9 +1,10 @@
 /**
  * Payment provider abstraction.
  *
- * Two providers are in scope for Phase 5, Epoint and Payriff, and both settle
- * in AZN. Everything in Phases 2–4 runs on the mock, and the whole flow must
- * work end to end on it.
+ * Two providers were in scope for Phase 5, Epoint and Payriff, and both
+ * settle in AZN; the site now charges in USD (see money.ts), which is an
+ * open question for those two providers. Everything in Phases 2–4 runs on
+ * the mock, and the whole flow must work end to end on it.
  *
  * TODO(provider-docs): request shapes, credential names, signature algorithms
  * and callback payloads must all come from Epoint's and Payriff's own
@@ -13,7 +14,7 @@
 
 export type CheckoutInput = {
   readonly amountMinorUnits: number;
-  readonly currency: 'AZN';
+  readonly currency: 'USD';
   readonly submissionId: string;
 };
 

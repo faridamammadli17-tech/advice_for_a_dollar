@@ -23,7 +23,7 @@ export function StaticPageView({ page }: { page: StaticPageContent }) {
               {page.awaitingOwnerContent === true && (
                 <p className="awaiting">
                   This page is unfinished. The words here are placeholders and are not
-                  Farida&rsquo;s.
+                  Chiron&rsquo;s.
                 </p>
               )}
             </header>

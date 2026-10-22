@@ -107,7 +107,7 @@ export function Archive() {
                   <h2 className="h3">Nothing here yet</h2>
                   <p className="prose">
                     {category === ALL_CATEGORY_ID
-                      ? 'No problems have been approved for sharing yet. Nothing is invented to fill this space — it stays empty until someone shares theirs and Farida publishes it.'
+                      ? 'No problems have been approved for sharing yet. Nothing is invented to fill this space — it stays empty until someone shares theirs and Chiron publishes it.'
                       : `Nothing in ${categoryLabel(category)} yet.`}
                   </p>
                   <p>

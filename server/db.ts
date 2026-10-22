@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   secret_word_salt   TEXT NOT NULL,
 
   amount_minor_units INTEGER NOT NULL,
-  currency           TEXT NOT NULL DEFAULT 'AZN',
+  currency           TEXT NOT NULL DEFAULT 'USD',
   transaction_id     TEXT,
 
   category           TEXT,
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS payments (
   submission_id      TEXT,
   provider           TEXT NOT NULL,
   amount_minor_units INTEGER NOT NULL,
-  currency           TEXT NOT NULL DEFAULT 'AZN',
+  currency           TEXT NOT NULL DEFAULT 'USD',
   state              TEXT NOT NULL CHECK (state IN ('attempted','captured','failed','refunded')),
   failure_reason     TEXT,
   created_at         TEXT NOT NULL,

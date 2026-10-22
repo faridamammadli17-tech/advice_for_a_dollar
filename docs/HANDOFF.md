@@ -17,8 +17,8 @@ Everything a new session needs to pick this up. Written to be read first.
 
 ## What it is
 
-A one-person advice service. Someone writes a problem anonymously, pays 1 AZN,
-and Farida writes back personally. Approved problems can appear in a public
+A one-person advice service. Someone writes a problem anonymously, pays one
+dollar, and Farida writes back personally, as Chiron. Approved problems can appear in a public
 archive so other people feel less alone.
 
 It should feel playful, pixel-art, warm, human. It must never feel clinical,
@@ -125,7 +125,9 @@ two factors verify (secret word + date window, or secret word + email).
 
 | Question | Decision |
 | --- | --- |
-| Currency | **1 AZN**, not a dollar. Stored as minor units (qəpik). Copy must never say "$1". |
+| Currency | **One dollar (USD)** since 2026-10-22 (it was 1 AZN before). Stored as minor units (cents). Shown in words: "1 dollar", "3 dollars". Whether Epoint or Payriff can charge dollars is an open question. |
+| The name | Visitors read **Chiron**, never Farida (owner, 2026-10-22). Her name stays in code comments, `docs/` and the dashboard. Pronoun on the site: she. |
+| Safety screen | **No phone numbers.** One large link to https://emergencynumbers.org (`src/content/crisis.ts`); the release build refuses without an https:// address rendered by the screen. |
 | Follow-up | Visitor sends **one**, Farida replies **once**, conversation closed. Not a chat. |
 | Email | Optional. Used only for "your answer is ready". **Purged after 6 months.** |
 | Editing problems | **Never.** See rule 4. |
@@ -134,7 +136,7 @@ two factors verify (secret word + date window, or secret word + email).
 | Characters | **Two** — frog (the one writing) and bunny (the one writing back). **There is no owl**, despite `PROMPT.md` §10. |
 | Night mode | **Off for launch.** Disabled behind `FEATURES.nightMode`, not deleted. Comes back after launch. |
 | Palette | Five brand colours. On the **home page, only those five and nothing white** (Farida, 2026-10-04): pale pink card, light green writing box, wine and dark green text (6.9:1 and 5.7:1 on both). Cream `#F2E6C9` stays on the inner pages. A wood/brown neutral was proposed and **rejected**. |
-| Font | **VCR OSD Mono** everywhere except the safety screen and the dashboard, which keep system fonts on purpose. It lacks the em dash, en dash, middle dot and manat sign; those fall back to Courier New. The copy is never rewritten to avoid them. |
+| Font | **VCR OSD Mono** everywhere except the safety screen and the dashboard, which keep system fonts on purpose. It lacks the em dash, en dash and middle dot; those fall back to Courier New. The copy is never rewritten to avoid them. |
 | Logo | The bunny's **portrait**, at its native 128px, in the header of every page and as the favicon. It is also the Instagram picture. |
 | Archive at launch | On, but shows an empty state until something is approved. |
 | Deletion | Destroys body, answer and email; keeps a payment tombstone for refunds. |
@@ -273,9 +275,9 @@ is how the frog was saved.
 ```
 src/
   content/      every word on the site
-                  placeholder.ts  — marketing copy, has AGE_PLACEHOLDER
-                  pages.ts        — About, FAQ, Privacy, guidelines, terms
-                  crisis.ts       — the emergency numbers (placeholders)
+                  placeholder.ts  — the owner's copy (home page, the box, footer)
+                  pages.ts        — How it works, About, FAQ, guidelines, Privacy
+                  crisis.ts       — the emergency link on the safety screen
   lib/
     safety/     screening rules + 55 tests
     api/        typed client for the server
@@ -312,12 +314,13 @@ docs/           this file, NOTES.md, PROMPT.md, ART_GUIDELINES.md, screenshots/
 
 ### Waiting on Farida
 
-1. **Real crisis numbers** for `src/content/crisis.ts`, with labels. Currently
-   obvious fakes (`000 000 00 00`) that are struck through, not clickable, and
-   carry a warning in every build. **This blocks the production build.**
-2. **Her age**, for "I'm AGE_PLACEHOLDER years old" in the Why-one-manat copy.
-   Also blocks the build. If she prefers not to say, the line works without it.
-3. **A real problem-and-reply** for the homepage example.
+1. ~~Real crisis numbers~~ **Resolved 2026-10-22**: no numbers at all, one
+   link to emergencynumbers.org instead.
+2. ~~Her age~~ **Resolved 2026-10-22**: the line says "I'm something years
+   old" on purpose.
+3. **The reply to the homepage example.** The problem is hers and is in
+   `placeholder.ts`; the section stays in its waiting state until the reply
+   exists.
 
 ### Waiting on others
 

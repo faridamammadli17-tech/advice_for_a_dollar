@@ -13,7 +13,7 @@ import {
  * the visitor will actually meet and the spec is firm that it must never
  * destroy their written text.
  *
- * Trigger a failure by paying an amount ending in 13 qəpik (e.g. 1.13 AZN).
+ * Trigger a failure by paying an amount ending in 13 qəpik (e.g. 1.13 dollars).
  * Crude, deliberate, and documented on the payment step in dev builds.
  */
 

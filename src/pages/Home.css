@@ -3,9 +3,11 @@
 /* ------------------------------------------------- the page on the forest */
 
 /* The colours, the header, the footer, the buttons and the fields are the
-   site's own (theme.css, site.css); the home page only makes the page
-   transparent so the fixed forest shows through everything, and is the
-   stacking context the scene sits at the bottom of. */
+   site's own (theme.css, site.css). Every page is transparent so the fixed
+   forest shows through (PageShell renders the scene on all of them since
+   2026-10-22, the safety screen excepted), and is the stacking context the
+   scene sits at the bottom of. These rules live here because the scene was
+   the home page's alone first; this file is always loaded. */
 .shell-forest {
   background: transparent;
   position: relative;
@@ -423,12 +425,6 @@
 
 .trust-card .prose {
   font-size: 15px;
-}
-
-/* ----------------------------------------------------------- final call */
-
-.final {
-  padding-bottom: 88px;
 }
 
 /* ------------------------------------------------------- the writing pad */

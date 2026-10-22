@@ -10,7 +10,7 @@ import { Problem } from './pages/Problem';
 import { Recover } from './pages/Recover';
 import { StaticPageView } from './pages/StaticPage';
 import { FEATURES } from './config/features';
-import { about, communityGuidelines, faq, howItWorks, privacy, terms } from './content/pages';
+import { about, communityGuidelines, faq, howItWorks, privacy } from './content/pages';
 
 /**
  * Routing.
@@ -48,7 +48,8 @@ export function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         {/* The flow lives in a box over the home page now; every link to
-            /ask (menu, footer, the other pages) lands on the writing area. */}
+            /ask (the other pages' buttons) and anyone typing /ask by hand
+            lands on the writing area. */}
         <Route path="/ask" element={<Navigate to="/" replace state={{ focusWriting: true }} />} />
         <Route path="/a/:token" element={<Answer />} />
         {FEATURES.recovery && <Route path="/recover" element={<Recover />} />}
@@ -78,7 +79,6 @@ export function App() {
         {FEATURES.staticPages && (
           <Route path="/privacy" element={<StaticPageView page={privacy} />} />
         )}
-        {FEATURES.staticPages && <Route path="/terms" element={<StaticPageView page={terms} />} />}
 
         {/* Phase 1's status page, kept reachable in development only. */}
         {import.meta.env.DEV && <Route path="/foundation" element={<FoundationHome />} />}

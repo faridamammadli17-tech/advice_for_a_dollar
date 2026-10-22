@@ -97,7 +97,7 @@ export function SubmissionFlow({
       return;
     }
     if (problem === 'too-short') {
-      setError('A little longer — at least four characters.');
+      setError('A little longer - at least four characters.');
       return;
     }
     if (problem === 'too-long') {
@@ -131,7 +131,7 @@ export function SubmissionFlow({
       return;
     }
     if (problem === 'above-maximum') {
-      setError('That is a very large amount — please check it.');
+      setError('That is a very large amount - please check it.');
       return;
     }
     if (amount === null) return;
@@ -143,7 +143,7 @@ export function SubmissionFlow({
     try {
       const checkout = await mockPaymentProvider.createCheckout({
         amountMinorUnits: amount,
-        currency: 'AZN',
+        currency: 'USD',
         submissionId: 'pending',
       });
 
@@ -168,9 +168,7 @@ export function SubmissionFlow({
       });
 
       if (!result.ok) {
-        setError(
-          'The server could not take it just now. Nothing was charged, and your words are safe.',
-        );
+        setError('The server could not take it just now. Nothing was charged.');
         setStep('pay');
         return;
       }
@@ -187,7 +185,7 @@ export function SubmissionFlow({
     } catch {
       // The text is untouched, and the draft is still in storage. Nothing the
       // visitor wrote is lost because a card failed.
-      setError('The payment did not go through. Nothing was charged, and your words are safe.');
+      setError('The payment did not go through. Nothing was charged.');
       setStep('pay');
     }
   };
@@ -224,7 +222,7 @@ export function SubmissionFlow({
               spellCheck={false}
             />
             <p className="field-help">
-              It is stored scrambled, never in plain text, and never shown to anyone else.
+              It will not be shown to anyone else. You yourself just need to remember it.
             </p>
           </div>
 
@@ -239,7 +237,6 @@ export function SubmissionFlow({
             <button type="button" className="btn btn-quiet" onClick={onChangeWriting}>
               Change what I wrote
             </button>
-            <span className="flow-next">Next: private or public.</span>
           </div>
         </div>
       )}
@@ -254,13 +251,13 @@ export function SubmissionFlow({
               selected={visibility === 'private'}
               onSelect={() => setVisibility('private')}
               title="Keep it private"
-              body="Only you and Farida ever see it. It never appears anywhere else."
+              body="Only you and Chiron ever see it. It never appears anywhere else."
             />
             <ChoiceCard
               selected={visibility === 'public'}
               onSelect={() => setVisibility('public')}
               title="Let it be published"
-              body="Farida reads it first and decides. If she publishes it, it appears without your name — and you can still delete it."
+              body="Chiron reads it first and decides. If she publishes it, it appears without your name - and you can still delete it anytime you want."
             />
           </div>
 
@@ -271,7 +268,6 @@ export function SubmissionFlow({
             <button type="button" className="btn btn-quiet" onClick={() => setStep('secret')}>
               Back
             </button>
-            <span className="flow-next">Next: pay what you want.</span>
           </div>
         </div>
       )}
@@ -446,9 +442,9 @@ function Confirmation({
       </div>
 
       <div className="stack" style={{ gap: '8px' }}>
-        <h3 className="h3">What happens now</h3>
+        <h3 className="h3">What’s next?</h3>
         <ul className="next-list">
-          <li>Farida reads it and writes back. {copy.responseTime}</li>
+          <li>Chiron reads it and writes back. {copy.responseTime}</li>
           {view.visibility === 'public' && (
             <li>
               You asked for this to be published. She reads it first and decides — it is not public

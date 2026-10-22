@@ -5,6 +5,10 @@ on the site, page by page, each with a code (HOME-06, BOX-18, PRV-22 ...).
 The owner edits the right-hand column and sends the file back; the codes
 are how each edit is matched to its place in the code.
 
+The owner’s edited copy, as returned on 22 October 2026, is
+`returned-2026-10-22.docx`; it is the record of the copy round applied that
+day (see `docs/NOTES.md`).
+
 `content.cjs` is the list the document is built from. `build.cjs` turns it
 into the Word file; it needs the `docx` npm package, which is not a project
 dependency:

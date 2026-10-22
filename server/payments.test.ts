@@ -146,7 +146,7 @@ describe('the real providers refuse to run rather than guessing', () => {
     await expect(
       provider.createCheckout({
         amountMinorUnits: 100,
-        currency: 'AZN',
+        currency: 'USD',
         submissionId: null,
         returnUrl: '/',
       }),

@@ -33,7 +33,7 @@ export async function checkWriting(text: string): Promise<WriteOutcome> {
   if (text.trim().length < MIN_BODY_CHARS) {
     return {
       kind: 'problem',
-      message: 'A little more to go on would help. Even a few sentences.',
+      message: 'I do believe I need to hear a bit more to give you the proper answer.',
     };
   }
   if (text.length > MAX_BODY_CHARS) {

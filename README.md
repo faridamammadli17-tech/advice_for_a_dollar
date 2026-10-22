@@ -3,9 +3,9 @@
 [![Checks](https://github.com/faridamammadli17-tech/advice_for_a_dollar/actions/workflows/checks.yml/badge.svg)](https://github.com/faridamammadli17-tech/advice_for_a_dollar/actions/workflows/checks.yml)
 
 A one-person advice service. Someone writes down a problem, anonymously, pays
-one manat (1 AZN), and Farida writes back personally. Problems that the writer
-chose to share, and that Farida approved, appear in a public archive so other
-people feel less alone.
+one dollar, and Farida writes back personally, under the name Chiron. Problems
+that the writer chose to share, and that she approved, appear in a public
+archive so other people feel less alone.
 
 It is built to feel playful, warm and human: a pixel-art forest, a bunny who
 listens, and a little ceremony when a letter is sent. It must never feel
@@ -37,19 +37,19 @@ It is at the bottom of this page.
     <td width="50%"><img src="docs/screenshots/home-mobile-chiron.png" alt="On a phone, Chiron's name card hangs off the bottom edge of the box"></td>
   </tr>
   <tr>
-    <td>While someone writes, the box lifts. Pressing Get advice checks the length and runs the safety screen before anything else, then opens the flow on the secret word.</td>
+    <td>While someone writes, the box lifts. Pressing Send checks the length and runs the safety screen before anything else, then opens the flow on the secret word.</td>
     <td>On a phone, Chiron's card hangs off the bottom edge of the box, the same as on a wide screen.</td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/ask-write.png" alt="After Get advice, the rest of the flow opens in a box over the home page, starting with the secret word"></td>
-    <td width="50%"><img src="docs/screenshots/ask-pay.png" alt="Step 4 of 4 in the box: pay what you want, one manat minimum"></td>
+    <td width="50%"><img src="docs/screenshots/ask-write.png" alt="After Send, the rest of the flow opens in a box over the home page, starting with the secret word"></td>
+    <td width="50%"><img src="docs/screenshots/ask-pay.png" alt="Step 4 of 4 in the box: pay what you want, one dollar minimum"></td>
   </tr>
   <tr>
     <td>Four steps: write on the home page, then a box opens over it for the secret word, private or public, and pay.</td>
-    <td>Pay what you want, from one manat.</td>
+    <td>Pay what you want, from one dollar.</td>
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/ask-confirmation.png" alt="The magic link, shown once after sending"></td>
@@ -64,7 +64,7 @@ It is at the bottom of this page.
     <td width="50%"><img src="docs/screenshots/archive.png" alt="The public archive, empty until Farida approves something"></td>
   </tr>
   <tr>
-    <td>If a message describes a crisis, the flow stops here, before payment. Deliberately plain. The numbers are placeholders until Farida supplies the real ones.</td>
+    <td>If a message describes a crisis, the flow stops here, before payment. Deliberately plain: no forest, no characters. One large link to emergencynumbers.org, which lists the emergency numbers of every country; no phone numbers on the site itself.</td>
     <td>The public archive. It stays empty until a real problem is shared and approved. Nothing is invented to fill it.</td>
   </tr>
 </table>
@@ -87,7 +87,7 @@ It is at the bottom of this page.
 - write a problem, with their words saved as a draft while they type
 - be stopped, gently and before paying, if what they wrote describes a crisis
 - choose a secret word, and choose whether the problem may be published
-- pay what they want, from one manat
+- pay what they want, from one dollar
 - receive a private "magic link" to their own page
 - read the reply, send one follow-up, and delete everything at any time
 - recover a lost link with the secret word plus roughly when they wrote
@@ -194,10 +194,9 @@ Whoever sets up the server should know three things. All of them are in
 
 | What | Who | Why it matters |
 | --- | --- | --- |
-| The real emergency numbers, with labels | Farida | Shown on the safety screen. Until they are in, the release build refuses to run, on purpose. |
-| Her age, for the "Why one manat?" paragraph | Farida | Or the line can be rewritten without it. Also blocks the release build. |
-| A real problem and reply for the home page example | Farida | The slot is empty on purpose. A made-up example would be worse than a gap. |
-| Epoint or Payriff API documentation | The payment provider | Real payments cannot be wired safely without it. The code refuses to guess. |
+| The reply to the home page example | Farida | The problem is hers and is in place; the section stays empty until the reply is written. A made-up reply would be worse than a gap. |
+| A payment provider that charges dollars | Farida | Epoint and Payriff, the two adapters written so far, settle in manat. See the note in `docs/NOTES.md` (2026-10-22). |
+| The provider's API documentation | The payment provider | Real payments cannot be wired safely without it. The code refuses to guess. |
 | Connecting email | A developer | The mailer is written but not switched on: "your answer is ready" and sending a recovered link to an inbox. |
 | More artwork | Her artist | The envelope for the sending ceremony. The bunny's blink and the frog's typing are drawn from the delivered art. |
 
@@ -209,7 +208,7 @@ Whoever sets up the server should know three things. All of them are in
 | --- | --- |
 | `npm run dev` | the website, on port 5173 |
 | `npm run server` | the API and database, on port 8787 |
-| `npm test` | all 160 tests |
+| `npm test` | all 171 tests |
 | `npm run typecheck` | checks the code for type mistakes |
 | `npm run lint` | checks code style |
 | `npm run build` | builds for release. **Refuses while anything unsafe is unfinished.** |
@@ -223,8 +222,9 @@ Whoever sets up the server should know three things. All of them are in
 | `npm run art:typist` | cut the frog at his computer into the layers the home page animates |
 | `npm run art:creatures` | cut the little black creatures out of the delivered forest file so they can move |
 
-The release build refuses on purpose while the crisis numbers are placeholders
-or the copy still contains an unfilled blank. To build anyway for local
+The release build refuses on purpose if the safety screen's emergency link is
+missing or not an https:// address, or the copy still contains an unfilled
+blank. To build anyway for local
 testing only: `ALLOW_PLACEHOLDER_CONTENT=1 npm run build`. That bundle must
 not be put online.
 
@@ -234,7 +234,7 @@ not be put online.
 
 ```
 src/            the website (React + TypeScript + Vite)
-  content/      every word on the site, including the crisis numbers
+  content/      every word on the site, including the emergency link
   lib/safety/   the crisis screening rules and their tests
   pixel/        the pixel-art engine, and assets/ where artwork goes
   pages/        one file per page

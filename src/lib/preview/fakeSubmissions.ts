@@ -24,7 +24,7 @@ const KEY = (token: string) => `afad:preview:${token}`;
 type Stored = VisitorSubmission & { deleted?: boolean };
 
 const STAND_IN_REPLY =
-  'PREVIEW ONLY. This is where Farida’s reply appears. Nothing is written here by anyone in the preview; these lines only show what the page looks like once an answer is ready.';
+  'PREVIEW ONLY. This is where Chiron’s reply appears. Nothing is written here by anyone in the preview; these lines only show what the page looks like once an answer is ready.';
 
 function read(token: string): Stored | null {
   try {
@@ -59,7 +59,7 @@ export function previewCreate(input: {
     answer: null,
     followUp: null,
     amountMinorUnits: input.amountMinorUnits,
-    currency: 'AZN',
+    currency: 'USD',
   });
   return token;
 }

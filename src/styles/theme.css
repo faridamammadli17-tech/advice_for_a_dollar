@@ -50,8 +50,8 @@
   /* ---- type ----
      VCR OSD Mono is Farida's choice (2026-10-04): a complete pixel font with
      real lowercase and curly quotes, used for headings AND body text. It lacks
-     four characters her copy needs — the em dash, en dash, middle dot and the
-     manat sign — so the stack falls through to Courier New for those glyphs
+     three characters her copy needs — the em dash, en dash and middle dot —
+     so the stack falls through to Courier New for those glyphs
      rather than showing empty boxes. The copy is never rewritten to dodge
      this. The safety screen and the admin dashboard keep the plain system
      fonts on purpose (see their own stylesheets). */

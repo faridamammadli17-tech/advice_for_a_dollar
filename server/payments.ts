@@ -39,7 +39,7 @@ export function recordAttempt(
 ): void {
   db.prepare(
     `INSERT INTO payments (transaction_id, provider, amount_minor_units, currency, state, created_at)
-     VALUES (?,?,?,'AZN','attempted',?)
+     VALUES (?,?,?,'USD','attempted',?)
      ON CONFLICT(transaction_id) DO NOTHING`,
   ).run(input.transactionId, input.provider, input.amountMinorUnits, new Date().toISOString());
 }

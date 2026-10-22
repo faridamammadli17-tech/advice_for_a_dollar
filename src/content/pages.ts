@@ -6,7 +6,7 @@
  * Privacy in particular is written from the code, not from a template, and
  * must be corrected whenever the code changes.
  *
- * Anything still marked PLACEHOLDER is Farida's to write.
+ * Visitor-facing text says Chiron, the name the owner answers under.
  */
 
 export type Section = {
@@ -29,7 +29,7 @@ export type StaticPage = {
 export const howItWorks: StaticPage = {
   slug: 'how-it-works',
   title: 'How it works',
-  intro: 'Nine steps, and you are only responsible for the first five.',
+  intro: 'Here’s the steps',
   sections: [
     {
       heading: 'What you do',
@@ -37,23 +37,23 @@ export const howItWorks: StaticPage = {
         'Write what is going on. It does not have to be tidy or well argued.',
         'Create your secret word, in case you lose your link.',
         'Choose whether it stays private or can be shared.',
-        'Pay one manat, or more if you want to.',
+        'Pay one dollar, or more if you want to.',
         'Save the magic link you are given.',
       ],
     },
     {
       heading: 'What happens then',
       bullets: [
-        'Farida reads it and writes back, normally within 24 hours and up to about two days when it is busy.',
+        'Chiron reads it and writes back, normally within 24 hours and up to about two days when it is busy.',
         'You return through your link.',
         'You read your advice.',
-        'If you need to, you send one follow-up — and Farida replies once more. That closes it.',
+        'If you need to, you send one follow-up - and Chiron replies once more. That closes it.',
       ],
     },
     {
       heading: 'What this is not',
       paragraphs: [
-        'It is not therapy, and it is not professional psychological care. It is one person reading what you wrote and answering honestly.',
+        'It is not therapy, and it is not professional psychological care. It is one person reading what you wrote and hearing you.',
         'If something is urgent or dangerous, this is the wrong kind of help. Please contact emergency services instead.',
       ],
     },
@@ -84,7 +84,7 @@ export const about: StaticPage = {
       heading: 'What is “Advice for a Dollar”?',
       paragraphs: [
         'Advice for a Dollar is an initiative and website where you can write about whatever is on your mind and receive a response from a real human being.',
-        'The idea came to me at 2 AM one night. It was rooted in those moments when, during difficult times, we’ve all wished we could pour our hearts out to a complete stranger — someone who doesn’t know us, has no preconceived opinions about our lives, and might still have something meaningful to say.',
+        'The idea came to me at 2 AM one night. It was rooted in those moments when, during difficult times, we’ve all wished we could pour our hearts out to a complete stranger - someone who doesn’t know us, has no preconceived opinions about our lives, and might still have something meaningful to say.',
         'This is not therapy, and I am not a doctor or a mental health professional. I’m simply, in my humble opinion, a capable person and an empath who is willing to listen, share my perspective, and hopefully make you feel a little more seen.',
         'Sometimes, you don’t need a professional. You just need someone to listen.',
       ],
@@ -92,8 +92,8 @@ export const about: StaticPage = {
     {
       heading: 'How does it work?',
       paragraphs: [
-        'You have a problem, a thought, a dilemma, or simply something you want to get off your chest — and you want to hear what a complete stranger thinks about it.',
-        'You visit the website, write whatever you want to share, and pay 1 AZN for me to read it. Then, depending on the volume of submissions, you’ll receive a response within a day or two.',
+        'You have a problem, a thought, a dilemma, or simply something you want to get off your chest - and you want to hear what a complete stranger thinks about it.',
+        'You visit the website, write whatever you want to share, and pay 1 Dollar for me to read it. Then, depending on the volume of submissions, you’ll receive a response within a day or two.',
       ],
     },
   ],
@@ -108,13 +108,13 @@ export const faq: StaticPage = {
     {
       heading: 'Who answers?',
       paragraphs: [
-        'Farida. One person, every time. Nothing here is written by a machine — not drafted by one, not suggested by one, not filled in by one.',
+        'Chiron. One person, every time. Nothing here is written by a machine — not drafted by one, not suggested by one, not filled in by one.',
       ],
     },
     {
       heading: 'Why does it cost anything at all?',
       paragraphs: [
-        'One manat is small enough not to be the reason someone stays quiet, and real enough that this is not a favour being asked of a stranger. You can pay more if you want to.',
+        'One dollar is small enough not to be the reason someone stays quiet, and real enough that this is not a favour being asked of a stranger. You can pay more if you want to.',
       ],
     },
     {
@@ -126,7 +126,7 @@ export const faq: StaticPage = {
     {
       heading: 'Will anyone see what I wrote?',
       paragraphs: [
-        'Only if you asked for it to be shared, and only after Farida has read it and decided to publish it. Asking is not the same as it being published. Private submissions are seen by Farida and by you, and nobody else.',
+        'Only if you asked for it to be shared, and only after Chiron has read it and decided to publish it. Asking is not the same as it being published. Private submissions are seen by Chiron and by you, and nobody else.',
       ],
     },
     {
@@ -144,7 +144,7 @@ export const faq: StaticPage = {
     {
       heading: 'Can I keep talking after the reply?',
       paragraphs: [
-        'You can send one follow-up, and Farida replies once more. That is the whole exchange. It is not a chat, and that is deliberate — it keeps this something one person can actually sustain.',
+        'You can send one follow-up, and Chiron replies once more. That is the whole exchange. It is not a chat, and that is deliberate — it keeps this something one person can actually sustain.',
       ],
     },
   ],
@@ -196,7 +196,7 @@ export const privacy: StaticPage = {
       bullets: [
         'What you wrote, and the reply.',
         'Your private link token, which is what lets you back in.',
-        'Verification data for your secret word — scrambled, never the word itself.',
+        'Verification data for your secret word - scrambled, never the word itself.',
         'The payment transaction record, including the amount.',
         'Timestamps, and whether a submission has been reviewed or published.',
         'Your email address, only if you chose to give one, and only for six months.',
@@ -214,8 +214,8 @@ export const privacy: StaticPage = {
     {
       heading: 'Who can see your submission',
       paragraphs: [
-        'A private submission is seen by Farida and by you, through your link. Nobody else.',
-        'A public submission is seen by Farida first. It appears publicly only if she approves it, and always without your name.',
+        'A private submission is seen by Chiron and by you, through your link. Nobody else.',
+        'A public submission is seen by Chiron first. It appears publicly only if she approves it, and always without your name.',
       ],
     },
     {
@@ -240,41 +240,7 @@ export const privacy: StaticPage = {
   ],
 };
 
-/* ------------------------------------------------------------------- terms */
-
-export const terms: StaticPage = {
-  slug: 'terms',
-  title: 'Terms',
-  awaitingOwnerContent: true,
-  intro:
-    'PLACEHOLDER — this page needs a lawyer, not an engineer. What follows describes how the service actually behaves, so that whoever writes the real terms has something accurate to start from.',
-  sections: [
-    {
-      heading: 'What the service is',
-      paragraphs: [
-        'One person reads what you send and writes a personal reply. It is not therapy, not medical advice, not legal or financial advice, and not professional psychological care.',
-      ],
-    },
-    {
-      heading: 'What you get',
-      paragraphs: [
-        'One written reply, normally within 24 hours and up to about two days. One follow-up from you, and one final reply.',
-      ],
-    },
-    {
-      heading: 'Refunds',
-      paragraphs: [
-        'A payment can be refunded from its transaction record. You do not need to give any contact details to receive one.',
-      ],
-    },
-    {
-      heading: 'Submissions that cannot be answered',
-      paragraphs: [
-        'A submission that raises an urgent safety concern is stopped before payment and is never published. Nothing is charged in that case.',
-      ],
-    },
-  ],
-};
+/* The Terms page was deleted by the owner on 2026-10-22, with its footer link. */
 
 export const STATIC_PAGES: readonly StaticPage[] = [
   howItWorks,
@@ -282,5 +248,4 @@ export const STATIC_PAGES: readonly StaticPage[] = [
   faq,
   communityGuidelines,
   privacy,
-  terms,
 ];

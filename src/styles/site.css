@@ -401,6 +401,21 @@
   max-width: 40ch;
 }
 
+/* The help address: a mailto link, so a tap opens the mail app. */
+.foot-mail {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.foot-col a.foot-mail {
+  font-size: 15px;
+  color: #ffffff;
+}
+
 .foot-bottom {
   border-top: 1px solid rgba(207, 221, 157, 0.5);
   padding: 16px 0 28px;

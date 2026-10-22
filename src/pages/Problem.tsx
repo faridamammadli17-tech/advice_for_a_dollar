@@ -17,7 +17,7 @@ import './Problem.css';
  *   ────────
  *   Advice
  *   ────────
- *   From: Farida
+ *   From: Chiron
  *
  * Looked up by public id, never by token, and served from the
  * `public_submissions` view. A private or flagged submission returns 404 from
@@ -101,7 +101,7 @@ export function Problem() {
               <h2 className="h3">Advice</h2>
               <hr className="problem-rule" />
               <p className="problem-text">{problem.answer}</p>
-              <p className="problem-from">From: Farida</p>
+              <p className="problem-from">From: Chiron</p>
             </section>
 
             <footer className="problem-foot stack" style={{ gap: '14px' }}>

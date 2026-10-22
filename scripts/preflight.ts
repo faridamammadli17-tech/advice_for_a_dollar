@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { EMERGENCY_LINK } from '../src/content/crisis';
 
 /**
  * Pre-build shippability check.
@@ -7,7 +8,8 @@ import { readFileSync } from 'node:fs';
  * happen. This is not lint — lint is about code quality. This is about the
  * handful of things that would cause real harm if they reached a visitor.
  *
- * Currently one hard blocker, and one warning.
+ * Hard blockers: the emergency link, unfilled placeholder tokens, and the
+ * homepage example switched on while still a placeholder. One warning.
  *
  * To build anyway (for testing a bundle locally), set:
  *
@@ -22,15 +24,28 @@ const override = process.env.ALLOW_PLACEHOLDER_CONTENT === '1';
 const blockers: string[] = [];
 const warnings: string[] = [];
 
-/* ---- HARD BLOCKER: fake emergency numbers ---- */
+/* ---- HARD BLOCKER: the safety screen must carry a working emergency link ---- */
 
-const crisis = readFileSync('src/content/crisis.ts', 'utf8');
-if (/CRISIS_NUMBERS_ARE_PLACEHOLDERS\s*=\s*true/.test(crisis)) {
+// The safety screen's one emergency resource is a link (src/content/crisis.ts).
+// This gate exists so the site can never ship a safety screen that sends
+// someone in crisis nowhere: the address must be a real https:// one, and the
+// screen must actually render it as its link.
+const url = typeof EMERGENCY_LINK?.url === 'string' ? EMERGENCY_LINK.url.trim() : '';
+if (!/^https:\/\/[^\s/]+\.[^\s/]+/.test(url)) {
   blockers.push(
-    'The crisis numbers on the safety screen are still placeholders.\n' +
-      '    Someone in crisis could be shown a number that does not answer.\n' +
-      '    Fix: put the real numbers in src/content/crisis.ts and set\n' +
-      '    CRISIS_NUMBERS_ARE_PLACEHOLDERS = false.',
+    'The safety screen has no working emergency link.\n' +
+      `    src/content/crisis.ts exports EMERGENCY_LINK.url = ${JSON.stringify(url)},\n` +
+      '    which is not an https:// address. Someone in crisis would be sent nowhere.\n' +
+      '    Fix: set EMERGENCY_LINK.url to the real https:// address.',
+  );
+}
+
+const safetyScreen = readFileSync('src/components/SafetyInterstitial.tsx', 'utf8');
+if (!/href=\{EMERGENCY_LINK\.url\}/.test(safetyScreen)) {
+  blockers.push(
+    'The safety screen does not render the emergency link.\n' +
+      '    src/components/SafetyInterstitial.tsx must carry href={EMERGENCY_LINK.url}\n' +
+      '    on its link, so the address in crisis.ts is what visitors are given.',
   );
 }
 
@@ -68,13 +83,13 @@ if (tokens.length > 0) {
 
 // The example slot is guarded by its own switch, `awaitingOwnerContent`. If
 // that is flipped to false before the text is replaced, the home page would
-// show "PLACEHOLDER — ..." under "From: Farida", and the token check above
+// show "PLACEHOLDER — ..." under "From: Chiron", and the token check above
 // would not notice because those strings carry no `_PLACEHOLDER` token.
 const exampleBlock = copy.match(/example:\s*\{[\s\S]*?satisfies ExampleProblem/)?.[0] ?? '';
 if (/awaitingOwnerContent:\s*false/.test(exampleBlock) && /PLACEHOLDER/.test(exampleBlock)) {
   blockers.push(
     'The homepage example is switched on but its text is still a placeholder.\n' +
-      '    Visitors would see "PLACEHOLDER" signed "From: Farida".\n' +
+      '    Visitors would see "PLACEHOLDER" signed "From: Chiron".\n' +
       '    Fix: replace example.problem and example.advice in src/content/placeholder.ts\n' +
       '    with the real exchange, or set awaitingOwnerContent back to true.',
   );
