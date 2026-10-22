@@ -2015,3 +2015,38 @@ English only, VCR OSD Mono, strings where they were. If Azerbaijani is
 wanted again, that history holds a complete translation and the font
 findings (only VT323 and Handjet, among fourteen free pixel fonts, carry
 the Azerbaijani letters).
+
+---
+
+## Every sentence on the site, in one Word file (2026-10-15)
+
+Farida asked for all the text on the mock site in a document she can edit
+and send back, so the copy can be corrected in one round rather than
+sentence by sentence in chat. `docs/site-text/Advice-for-a-Dollar-site-text.docx`
+lists every visitor-facing line (301 of them) page by page, in the order a
+visitor meets them: header and footer, home page, the pop-up box step by
+step, the safety screen, the submission page, the archive and its category
+names, one published problem, lost-link recovery, the six content pages,
+page not found, and a last section of lines that are still in the files
+but shown nowhere. Each line carries a code (HOME-06, BOX-18, PRV-22, ...)
+so her edits can be matched back to the exact place in the code; yellow
+rows are the builder's placeholders, not her words. The admin dashboard
+and the emergency numbers are deliberately left out. `content.cjs` beside
+it is the list the document is built from (code, where it appears, text),
+and `build.cjs` rebuilds the document with the `docx` npm package.
+
+When the edited file comes back: read it with `pandoc -t markdown`, compare
+each row with `content.cjs`, and apply the changes to
+`src/content/placeholder.ts`, `src/content/pages.ts` and the components
+that hold the interface strings (the header, footer, Home, SubmissionFlow,
+Answer, Archive, Problem, Recover, StaticPage, NotFound,
+SafetyInterstitial, EnvelopeCeremony and `writeStep.ts`). Her words,
+verbatim; nothing reworded on the way in.
+
+## Everything on main (2026-10-22)
+
+The owner merged pull request #1 and pushed the later rounds to `main`,
+which now holds all 24 commits. From here on work goes straight onto
+`main`: pull first, commit and push when a piece of work is finished, and
+say what was pushed. No more `claude/...` branches, so the repository never
+again looks empty to someone opening it.

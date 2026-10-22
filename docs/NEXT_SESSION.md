@@ -9,16 +9,13 @@ is the most recent round), `README.md` (plain-language tour).
 ## Where everything is
 
 - Repository: `faridamammadli17-tech/advice_for_a_dollar`
-- Working branches: the first three design rounds are on
-  `claude/new-session-40ml7r`; rounds four to six (2026-10-06) are on
-  `claude/sharp-cray-8x10z0`, which contains everything on the first branch
-  plus those rounds. Develop and push on the branch the session names; never
-  on another branch without being asked.
-- Pull request: https://github.com/faridamammadli17-tech/advice_for_a_dollar/pull/1
-  (open, created by the owner from the Claude Code UI, base `main`, from the
-  first branch). GitHub runs tests, types, lint and build on every push.
-  Rounds four to six are not in that pull request: the owner decides whether
-  they go onto the first branch or get their own pull request.
+- Branch: everything is on `main`, and new work goes straight onto `main`
+  (the owner's instruction, 2026-10-22: pull `main` first, commit and push
+  there when a piece of work is done, and say what was pushed; no
+  `claude/...` branches). Pull request #1 (the first three design rounds)
+  was merged by the owner on 2026-10-22, and the later rounds were pushed
+  to `main` on top of it, so the repository shows the whole project.
+  GitHub runs tests, types, lint and build on every push.
 - Preview page (front end only, no server, private, shows the latest
   version): https://claude.ai/artifact/8bXKMWZKcVxfBJrUYx4a6D. In that
   build the safety screening runs in the browser with the same rules
@@ -26,9 +23,11 @@ is the most recent round), `README.md` (plain-language tour).
   pretend submission in the browser (`src/lib/preview/fakeSubmissions.ts`),
   so the whole flow can be walked there, including the reply page with a
   labelled stand-in reply. Both are preview build only.
-- Latest work at the time of writing: the seventh round (2026-10-13, every
-  page restyled and the flow change), on `claude/sharp-cray-8x10z0`; see
-  the last entry of `docs/NOTES.md`.
+- Latest work at the time of writing: the text inventory (2026-10-15),
+  `docs/site-text/`: a Word document listing every sentence a visitor can
+  see, each with a code such as HOME-06, which the owner is editing and
+  sending back for the copy-correction round; see the last entry of
+  `docs/NOTES.md`.
 
 ## Who you are working with
 
@@ -156,8 +155,6 @@ pixel), so the stump with its creatures at the right is off screen there.
 
 ## Decisions still waiting on the owner
 
-- Whether rounds four to seven go onto the pull request's branch or into a
-  second pull request; then merge when happy.
 - Azerbaijani: built and removed on 2026-10-14 at the owner's request
   (English only for now). The complete translation, the language switch
   and the font findings are in git history, commits 9545b85 to 47b5eac,
