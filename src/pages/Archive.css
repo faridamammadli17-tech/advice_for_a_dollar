@@ -21,9 +21,10 @@
 
 .chip {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0.04em;
-  padding: 7px 12px;
+  min-height: var(--tap);
+  padding: 0 14px;
   background: var(--surface);
   color: var(--muted);
   border: 2px solid rgba(47, 88, 44, 0.45);
@@ -77,7 +78,7 @@
 
 .problem-meta {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-small);
   letter-spacing: 0.06em;
   color: var(--faint);
 }
@@ -95,7 +96,7 @@
 .problem-more {
   margin-top: auto;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   color: var(--accent-strong);
   font-weight: 700;
 }
@@ -115,4 +116,9 @@
   gap: 12px;
   align-items: flex-start;
   border-style: dashed;
+}
+
+.chip:active,
+.problem-card:active {
+  transform: translate(2px, 2px);
 }

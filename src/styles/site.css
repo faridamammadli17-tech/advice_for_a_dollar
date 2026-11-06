@@ -25,7 +25,9 @@
   width: 100%;
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0 24px;
+  /* The gutter, never less than the phone's own safe area in landscape. */
+  padding-left: max(var(--space-5), env(safe-area-inset-left));
+  padding-right: max(var(--space-5), env(safe-area-inset-right));
 }
 
 .wrap-narrow {
@@ -60,7 +62,7 @@
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   font-weight: 700;
@@ -90,7 +92,17 @@
   background: var(--surface);
   border: var(--border-width) solid var(--border-strong);
   box-shadow: 6px 6px 0 var(--shadow);
-  padding: 32px 34px 36px;
+  padding: var(--space-6) var(--space-6) var(--space-6);
+}
+
+/* A link standing alone in a paragraph ("Write yours", "Back to the start")
+   is a tap target, so it gets the height of one. */
+.page-panel p > a:only-child,
+.hero-alt a {
+  display: inline-block;
+  min-height: var(--tap);
+  padding: 10px 0;
+  margin: -10px 0;
 }
 
 .page-panel .panel {
@@ -111,18 +123,21 @@
   justify-content: center;
   gap: 10px;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 700;
-  padding: 14px 22px;
+  padding: 12px 22px;
+  min-height: var(--tap);
   border: var(--border-width) solid var(--border-strong);
   background: var(--surface);
   color: var(--text);
   text-decoration: none;
   cursor: pointer;
   box-shadow: 4px 4px 0 var(--shadow);
-  transition: transform 90ms linear, box-shadow 90ms linear;
+  transition:
+    transform var(--dur-quick) var(--ease-out),
+    box-shadow var(--dur-quick) var(--ease-out);
 }
 
 .btn:hover {
@@ -130,9 +145,12 @@
   box-shadow: 5px 5px 0 var(--shadow);
 }
 
+/* Pressed: the button drops into its own shadow. On a phone this is the
+   whole acknowledgement that a tap landed, so it is on every button. */
 .btn:active {
-  transform: translate(2px, 2px);
+  transform: translate(3px, 3px);
   box-shadow: 1px 1px 0 var(--shadow);
+  transition-duration: 40ms;
 }
 
 .btn-primary {
@@ -172,6 +190,12 @@
   border-color: var(--border-strong);
 }
 
+.btn-quiet:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+  background: rgba(47, 88, 44, 0.12);
+}
+
 /* Motion is a courtesy, not a requirement. */
 @media (prefers-reduced-motion: reduce) {
   .btn,
@@ -206,7 +230,7 @@
 
 .field-label {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 700;
@@ -214,7 +238,7 @@
 }
 
 .field-help {
-  font-size: 14px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin: 0;
   max-width: 60ch;
@@ -222,7 +246,7 @@
 
 .field-error {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-small);
   color: var(--accent-strong);
   font-weight: 700;
   margin: 0;
@@ -258,14 +282,16 @@
 .site-head {
   border-bottom: var(--border-width) solid #cfdd9d;
   background: #2f582c;
+  /* The notch: the band extends under it and the content starts below. */
+  padding-top: env(safe-area-inset-top);
 }
 
 .site-head-inner {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  gap: var(--space-5);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -275,6 +301,17 @@
   gap: 12px;
   text-decoration: none;
   color: #f8cae4;
+}
+
+/* The portrait is drawn at 1x inside a frame. On wide screens the frame is
+   the whole 128px drawing; on a phone it is a 64px window on the same
+   drawing, framed on his face (never scaled, see SiteHeader.tsx). */
+.brand-logo-frame {
+  display: block;
+  flex: none;
+  width: 128px;
+  height: 128px;
+  overflow: hidden;
 }
 
 .brand-logo {
@@ -302,12 +339,15 @@
 }
 
 .site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   letter-spacing: 0.04em;
   text-decoration: none;
   color: #f8cae4;
-  padding: 7px 10px;
+  padding: 0 10px;
   border: 2px solid transparent;
 }
 
@@ -317,8 +357,166 @@
   border-color: #cfdd9d;
 }
 
+.site-nav a:active {
+  background: rgba(207, 221, 157, 0.2);
+}
+
 .site-nav a:focus-visible {
   outline-color: #ffffff;
+}
+
+/* ---------------------------------------------------------- phone menu */
+
+/* The button is only shown on a phone (below), where the row of links is
+   hidden. Three pixel bars and the word, 44px tall. */
+.menu-button {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  margin-left: auto;
+  padding: 0 10px;
+  background: transparent;
+  border: 2px solid transparent;
+  color: #f8cae4;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.menu-button:active,
+.menu-button[aria-expanded='true'] {
+  border-color: #cfdd9d;
+  color: #ffffff;
+  background: rgba(207, 221, 157, 0.2);
+}
+
+.menu-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 18px;
+}
+
+.menu-bars span {
+  display: block;
+  height: 3px;
+  background: currentColor;
+}
+
+/* The sheet: a native dialog pinned to the top of the screen, the same
+   dark-green band as the header, with the links as full-width rows a
+   finger cannot miss. The backdrop stays transparent (nothing sits between
+   the forest and the screen) but it still takes the tap that closes it. */
+.menu-dialog {
+  position: fixed;
+  inset: 0 0 auto 0;
+  width: 100%;
+  max-width: none;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f8cae4;
+  overflow: visible;
+}
+
+.menu-dialog::backdrop {
+  background: transparent;
+}
+
+.menu-sheet {
+  background: #2f582c;
+  border-bottom: var(--border-width) solid #cfdd9d;
+  box-shadow: 0 6px 0 rgba(117, 36, 69, 0.45);
+  padding: calc(var(--space-2) + env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+    var(--space-4) max(var(--gutter), env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap);
+}
+
+.menu-title {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8cae4;
+}
+
+.menu-close {
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 0 12px;
+  background: transparent;
+  border: 2px solid #cfdd9d;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.menu-close:active {
+  background: rgba(207, 221, 157, 0.2);
+}
+
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-decoration: none;
+  color: #f8cae4;
+  border: 2px solid transparent;
+}
+
+.menu-nav a[aria-current='page'] {
+  color: #ffffff;
+  border-color: #cfdd9d;
+}
+
+.menu-nav a:active {
+  background: rgba(207, 221, 157, 0.2);
+  color: #ffffff;
+}
+
+.menu-nav a:focus-visible {
+  outline-color: #ffffff;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .menu-dialog[open] .menu-sheet {
+    animation: sheet-in var(--dur-move) var(--ease-out);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* -------------------------------------------------------------- theme keys */
@@ -330,7 +528,7 @@
 
 .theme-toggle button {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-small);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 6px 9px;
@@ -357,26 +555,28 @@
   border-top: var(--border-width) solid #cfdd9d;
   background: #2f582c;
   color: #f8cae4;
-  margin-top: 72px;
+  margin-top: var(--space-8);
+  /* The home indicator: the band runs under it, the links stop above it. */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .site-foot-inner {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 28px;
-  padding-top: 36px;
-  padding-bottom: 36px;
+  gap: var(--space-5);
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
 }
 
 .foot-col {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-1);
 }
 
 .foot-title {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-small);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 700;
@@ -384,7 +584,12 @@
 }
 
 .foot-col a {
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  font-size: 16px;
   color: #f8cae4;
   text-decoration: none;
 }
@@ -394,10 +599,15 @@
   text-decoration: underline;
 }
 
+.foot-col a:active {
+  color: #ffffff;
+  background: rgba(207, 221, 157, 0.2);
+}
+
 .foot-note {
-  font-size: 13px;
+  font-size: var(--text-small);
   color: #f8cae4;
-  margin: 0;
+  margin: 0 0 var(--space-1);
   max-width: 40ch;
 }
 
@@ -418,8 +628,8 @@
 
 .foot-bottom {
   border-top: 1px solid rgba(207, 221, 157, 0.5);
-  padding: 16px 0 28px;
-  font-size: 13px;
+  padding: var(--space-4) 0 var(--space-5);
+  font-size: var(--text-small);
   color: #f8cae4;
   display: flex;
   gap: 16px;
@@ -432,7 +642,7 @@
   background: var(--accent-strong);
   color: #ffffff;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0.06em;
   text-align: center;
   padding: 7px 16px;
@@ -453,53 +663,93 @@
 }
 
 .section {
-  padding: 72px 0;
+  padding: var(--space-8) 0;
 }
 
 .section-tight {
-  padding: 48px 0;
+  padding: var(--space-7) 0;
 }
 
-@media (max-width: 640px) {
+/* ------------------------------------------------------------------ phone */
+
+/* A phone held either way: narrow, or short (landscape), gets the phone
+   header and menu, the phone gutter and the tighter rhythm. */
+@media (max-width: 640px), (max-height: 500px) {
   .wrap {
-    padding: 0 18px;
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
   }
 
-  /* The logo is 128px and cannot shrink (whole-number scaling), so on a phone
-     the menu sits beside it instead of under it, and the written name steps
-     aside: the link still announces the site name, and the page says it in
-     its first line. */
+  /* The header: the portrait cropped to his face at 1x in a 64px frame,
+     the name beside it, and the menu button at the right. 82px tall. */
   .site-head-inner {
     flex-wrap: nowrap;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-3);
+  }
+
+  .brand {
+    gap: 10px;
+    min-height: var(--tap);
+  }
+
+  .brand-logo-frame {
+    width: 64px;
+    height: 64px;
+  }
+
+  .brand-logo {
+    /* The window sits on his face: 30 pixels in from the left, 26 down. */
+    transform: translate(-30px, -26px);
   }
 
   .brand-name {
+    font-size: 16px;
+    white-space: normal;
+    line-height: 1.15;
+  }
+
+  .site-nav {
     display: none;
   }
 
-  .site-nav {
-    justify-content: flex-end;
-    gap: 2px;
-  }
-
-  .site-nav a {
-    font-size: 13px;
-    padding: 5px 7px;
+  .menu-button {
+    display: inline-flex;
   }
 
   .section {
-    padding: 48px 0;
+    padding: var(--space-7) 0;
   }
 
-  .site-nav {
-    width: 100%;
-    margin-left: 0;
+  .site-foot {
+    margin-top: var(--space-7);
+  }
+
+  /* The footer in two columns: the name and its notes across the top,
+     Pages beside The small print, and the lost-link column (its heading is
+     a whole sentence) across the bottom. Keeps the footer to one screen. */
+  .site-foot-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4) var(--space-5);
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-4);
+  }
+
+  .site-foot-inner .foot-col:first-child,
+  .site-foot-inner .foot-col:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .site-foot-inner .foot-col:nth-child(3) {
+    order: 1;
+  }
+
+  .foot-note {
+    max-width: none;
   }
 
   .page-panel {
-    padding: 22px 18px 24px;
+    padding: var(--space-5) var(--space-4) var(--space-5);
   }
 }
 
@@ -510,7 +760,7 @@
   top: 0;
   z-index: 100;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   font-weight: 700;
   padding: 12px 18px;
   /* Fixed colours, not tokens, on purpose.

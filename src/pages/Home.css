@@ -175,7 +175,7 @@
 
 .hero-price {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   color: #752445;
   letter-spacing: 0.02em;
 }
@@ -190,11 +190,15 @@
 
 .hero-alt {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--text-small);
   padding: 8px 14px;
   background: #cfdd9d;
   color: #2f582c;
   border: var(--border-width) solid #2f582c;
+}
+
+.hero-alt a:active {
+  background: rgba(47, 88, 44, 0.12);
 }
 
 .hero-alt-muted {
@@ -345,7 +349,7 @@
 .not-therapy {
   margin: 8px 0 0;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   line-height: 1.6;
   color: #752445;
   border-left: 4px solid #752445;
@@ -363,7 +367,7 @@
 
 .example-category {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #752445;
@@ -379,7 +383,7 @@
 
 .example-from {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   color: #2f582c;
   margin: 4px 0 0;
 }
@@ -552,17 +556,50 @@
 /* --------------------------------------------------------------- mobile */
 
 @media (max-width: 640px) {
+  /* The forest shows above the box for a beat, and the box ends high enough
+     for the creature at the bottom-left of the scene to peek out under
+     Chiron's card on the first screen. */
   .hero {
-    padding: 16px 0 40px;
+    padding: var(--space-5) 0 var(--space-7);
     min-height: 0;
   }
 
+  .hero-inner {
+    gap: var(--space-5);
+  }
+
   .hero-card {
-    padding: 22px 18px 20px;
+    padding: var(--space-4) var(--space-4) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .hero-card .pad-textarea {
+    min-height: 150px;
+  }
+
+  .hero-assurance {
+    padding-top: var(--space-3);
   }
 
   /* The card's bottom padding is shallower here. */
   .chiron {
-    margin-bottom: calc(-20px - var(--chiron-hang));
+    margin-bottom: calc(-16px - var(--chiron-hang));
+  }
+
+  .meet-inner,
+  .trust-grid {
+    gap: var(--space-4);
+  }
+
+  .meet .trust-card {
+    padding: var(--space-4);
+  }
+
+  .example {
+    gap: var(--space-2);
+  }
+
+  .hero-alt {
+    padding: 6px 14px;
   }
 }

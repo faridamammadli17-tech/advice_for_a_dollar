@@ -2246,3 +2246,68 @@ anywhere except the site's name. README screenshots retaken.
 fourth step, the price line, the section and the copy all return, and the
 server refuses unpaid submissions again. A real provider is still a
 separate job (the mock runs until then).
+
+---
+
+## Made for a phone (2026-11-06, later)
+
+Farida tested at 375x812 and listed what was wrong: a 130px header with a
+clipped logo and a menu wrapping onto three ragged lines, 14 tap targets
+under 44px, 30 pieces of text under 16px, the page scrolling behind the
+open box, the step trail on two lines, no safe-area handling, the forest
+mostly off screen, and a home page four screens tall. All measured and
+fixed with a browser audit (`scratchpad/pw/audit.js`, the same checks at
+375x812, 390x844 and 430x932, portrait and landscape).
+
+- **Header: 82px** (was 130). The portrait is not scaled (whole-number
+  rule) but CROPPED: a 64px window on the same 1x drawing, framed on his
+  face (`.brand-logo-frame`, translate -30/-26). The name is back beside
+  him. The links are replaced by a Menu button (three pixel bars, 44px)
+  that opens a sheet under the header: a native <dialog>, so Escape closes
+  it and focus stays inside; a tap on the backdrop closes it; the page
+  behind is pinned; it closes itself on navigation; links are 48px rows
+  at 17px. Landscape phones (any screen under 500px tall) get the same
+  header and menu.
+- **Tap targets: zero under 44x44** on every page and every step, at all
+  six sizes. Buttons have a 44px minimum height; footer links, nav links,
+  chips and the lone links in paragraphs ("Write yours", the archive link
+  under the box) carry padding to 44px without their text growing.
+- **Text: nothing under 15px** anywhere (`--text-small`); body stays 17px
+  and every form field 17px, so iOS does not zoom. Every 11-14px size in
+  the stylesheets became the 15px floor.
+- **The box**: `useScrollLock` pins the body (position fixed at the scroll
+  offset, restored on close), so nothing moves behind it; checked by
+  wheel and tap at every size. The trail is one line on a phone: every
+  step shows its number, only the current one its name (the others keep
+  theirs for screen readers). On a phone the box sits at the top of the
+  screen rather than centred, so the secret-word field is at y=229 on a
+  375x812 screen; with the viewport cut to 512px (a keyboard's worth) the
+  field is still fully visible at every size, and the dialog also scrolls
+  the focused field into view on focus and on visual-viewport resize.
+  Escape now closes the finished box too (it was locked on the magic-link
+  screen by mistake).
+- **Safe areas**: `viewport-fit=cover`; the header pads by the top inset,
+  the footer and the box's bottom by the bottom inset, the gutters by the
+  side insets in landscape.
+- **The forest on a phone** is anchored left like a wide screen, so the
+  window shows the painted bunny and frog and the big creature at the
+  scene's bottom-left corner sits in the bottom-left of the first screen,
+  under Chiron's card. Same whole-number scale, cropped, never squashed.
+  The scene is a CSS background (164KB JPEG) behind a solid meadow green,
+  so it never blocks first paint; the unused 113KB PNG is not requested.
+- **Rhythm**: one spacing scale (4 8 12 16 24 32 48 64, `--space-*`) for
+  every margin, padding and gap; a 16px gutter (`--gutter`); sections at
+  48px on a phone; the footer in two columns with the lost-link column
+  across the bottom. Home page height at 375: 2966 -> 2869. The
+  44px tap rows and the 15px floor push the other way, so the gain is
+  modest and honest.
+- **Motion**: the box arrives from 12px below in 200ms and leaves in 160ms;
+  each step slides in from the right; the menu sheet drops in; every
+  button drops into its own shadow when pressed (`:active`, 40ms); links
+  and chips tint when pressed; `touch-action: manipulation` and no grey
+  tap flash. `overscroll-behavior` keeps scrolling inside the box and
+  stops sideways rubber-banding; `overflow-x: clip` on html and body. All
+  of it off under prefers-reduced-motion (the global rule, plus the
+  dialog skipping its leave delay).
+- Nothing about the art changed: whole-number scales, pixelated rendering,
+  no stretching.

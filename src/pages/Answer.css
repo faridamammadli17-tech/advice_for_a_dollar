@@ -6,7 +6,7 @@
 
 .letter-date {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   color: var(--faint);
   margin: 0;
 }
@@ -46,13 +46,13 @@
 
 .letter-from {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin: 2px 0 0;
 }
 
 .letter-quiet {
-  font-size: 14px;
+  font-size: var(--text-small);
   color: var(--faint);
   margin: 0;
 }

@@ -10,22 +10,69 @@
   max-height: calc(100vh - 32px);
   max-height: calc(100dvh - 32px);
   margin: auto;
-  padding: 28px 30px 30px;
+  padding: var(--space-5) var(--space-6) var(--space-6);
   background: #cfdd9d;
   color: var(--text);
   border: var(--border-width) solid #752445;
   box-shadow: 9px 9px 0 #752445;
   overflow: auto;
+  /* Scrolling inside the box stays inside the box: no rubber-banding into
+     the page behind it. */
+  overscroll-behavior: contain;
 }
 
 .flow-dialog::backdrop {
   background: transparent;
 }
 
+/* Arrives from a little below, leaves the same way: short and confident. */
+@media (prefers-reduced-motion: no-preference) {
+  .flow-dialog[open] {
+    animation: flow-in var(--dur-move) var(--ease-out);
+  }
+
+  .flow-dialog[data-closing] {
+    animation: flow-out 160ms var(--ease-out) forwards;
+  }
+
+  .flow-step {
+    animation: step-in var(--dur-move) var(--ease-out);
+  }
+}
+
+@keyframes flow-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes flow-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .flow {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: var(--space-5);
 }
 
 /* Inside the light-green box, panels are cream, and the fields in them too. */
@@ -45,7 +92,7 @@
 
 .flow-next {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-small);
   color: var(--faint);
   letter-spacing: 0.02em;
 }
@@ -53,7 +100,7 @@
 .flow-devnote {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.6;
   color: var(--faint);
   border-top: 1px solid var(--border);
@@ -68,7 +115,7 @@
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .trail-step {
@@ -76,8 +123,8 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-small);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 6px 10px;
   /* Still to come: dark green, lightly drawn. */
@@ -123,9 +170,18 @@
   border: var(--border-width) solid var(--border);
   cursor: pointer;
   box-shadow: 4px 4px 0 transparent;
+  transition:
+    transform var(--dur-quick) var(--ease-out),
+    box-shadow var(--dur-quick) var(--ease-out),
+    border-color var(--dur-quick) var(--ease-out);
 }
 
 .choice:hover {
+  border-color: var(--border-strong);
+}
+
+.choice:active {
+  transform: translate(2px, 2px);
   border-color: var(--border-strong);
 }
 
@@ -136,12 +192,12 @@
 
 .choice-title {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   font-weight: 700;
 }
 
 .choice-body {
-  font-size: 14px;
+  font-size: var(--text-small);
   line-height: 1.55;
   color: var(--muted);
 }
@@ -182,7 +238,7 @@
 
 .ceremony-caption {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-small);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
@@ -202,7 +258,7 @@
 .secret-shown {
   display: block;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-small);
   line-height: 1.5;
   padding: 12px 14px;
   background: var(--surface);
@@ -235,11 +291,53 @@
   color: var(--accent);
 }
 
-@media (max-width: 640px) {
+/* ------------------------------------------------------------------ phone */
+
+@media (max-width: 640px), (max-height: 500px) {
+  /* Sits at the top of the screen rather than centred, so the field someone
+     is about to type into is high up, above where the keyboard will come
+     from; its bottom edge and padding keep clear of the home indicator. */
   .flow-dialog {
-    width: calc(100% - 16px);
-    max-height: calc(100vh - 16px);
-    max-height: calc(100dvh - 16px);
-    padding: 20px 16px 22px;
+    width: calc(100% - 2 * var(--gutter));
+    margin: var(--space-2) auto auto;
+    max-height: calc(100vh - var(--space-4) - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - var(--space-4) - env(safe-area-inset-bottom));
+    padding: var(--space-4) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    box-shadow: 6px 6px 0 #752445;
+  }
+
+  .flow {
+    gap: var(--space-4);
+  }
+
+  /* The trail on one line: every step shows its number; only the step you
+     are on shows its name (the others keep theirs for screen readers). */
+  .trail {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .trail-step {
+    padding: 0 10px;
+    min-height: 36px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  .trail-step:not([data-state='now']) .trail-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .choices {
+    grid-template-columns: 1fr;
+  }
+
+  .ceremony {
+    padding: var(--space-7) 0;
   }
 }

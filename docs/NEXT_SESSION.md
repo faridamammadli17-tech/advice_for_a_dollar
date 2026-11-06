@@ -23,7 +23,13 @@ is the most recent round), `README.md` (plain-language tour).
   pretend submission in the browser (`src/lib/preview/fakeSubmissions.ts`),
   so the whole flow can be walked there, including the reply page with a
   labelled stand-in reply. Both are preview build only.
-- Latest work at the time of writing: the site launches FREE
+- Latest work at the time of writing: the phone pass (2026-11-06, later):
+  82px header with a cropped (never scaled) portrait and a menu sheet,
+  every tap target 44px, no text under 15px, the page pinned behind the
+  box, a one-line trail, safe areas, the forest anchored left on phones,
+  one spacing scale, pressed states and short motion. The audit that
+  proves it is described in the last entry of `docs/NOTES.md`. Before
+  that: the site launches FREE
   (2026-11-06): `FEATURES.payments` is false and drives both the website
   (three steps, no price anywhere) and the server (accepts unpaid
   submissions, tighter rate limit). Nothing about payments was deleted;
@@ -51,6 +57,10 @@ code. The project owner is Farida, also not an engineer. What they want:
 
 ## Rules that are not negotiable
 
+00. **Phone rules** (2026-11-06): nothing tappable under 44x44, no text
+   under 15px (`--text-small`), form fields at 17px, spacing only from the
+   `--space-*` scale, a 16px gutter, the forest cropped not scaled, and
+   any new modal pins the page with `useScrollLock`.
 0. **Payments are switched off, not removed** (`FEATURES.payments`,
    2026-11-06). Do not delete the pay step, the providers, the payment
    tables or their tests; do not add a second switch. The server reads the

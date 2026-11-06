@@ -68,6 +68,32 @@
      around it should not contradict that. */
   --radius: 0;
   --border-width: 2px;
+
+  /* One spacing scale, used for every margin, padding and gap so distances
+     feel related: 4 8 12 16 24 32 48 64. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  /* The gutter down both sides of the screen on a phone; wider screens use
+     --space-5. Safe-area insets are added on top where the phone needs them. */
+  --gutter: var(--space-4);
+  /* The smallest thing a finger can hit reliably. */
+  --tap: 44px;
+  /* Type: body text, and the floor for any other text on the site. A phone
+     held at arm's length cannot read 11px; iOS zooms into any form field
+     under 16px, so fields stay at 17px. */
+  --text-body: 17px;
+  --text-small: 15px;
+  --text-label: 15px;
+  /* Motion: short and confident, never bouncy. */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-quick: 120ms;
+  --dur-move: 200ms;
 }
 
 /* ---------------------------------------------------------------------------

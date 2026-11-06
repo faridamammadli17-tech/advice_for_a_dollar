@@ -88,9 +88,21 @@ export function SubmissionFlow({
     firstField.current?.focus();
   }, []);
 
+  // The box cannot be closed while the request is in flight or the envelope
+  // is still travelling; once the magic link is on screen, Escape works again.
+  const showingConfirmation = step === 'sending' && ceremonyDone && requestDone && created !== null;
   useEffect(() => {
-    onLocked(step === 'sending');
-  }, [step, onLocked]);
+    onLocked(step === 'sending' && !showingConfirmation);
+  }, [step, showingConfirmation, onLocked]);
+
+  // A new step starts at the top of the box, smoothly unless motion is off.
+  const flowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const box = flowRef.current?.closest('dialog');
+    if (!box) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    box.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }, [step]);
 
   /* ------------------------------------------------------------ secret step */
 
@@ -228,11 +240,11 @@ export function SubmissionFlow({
   /* ----------------------------------------------------------------- render */
 
   return (
-    <div className="flow">
+    <div className="flow" ref={flowRef}>
       {step !== 'sending' && <StepTrail current={step} />}
 
       {step === 'secret' && (
-        <div className="stack" style={{ gap: '18px' }}>
+        <div className="stack flow-step" style={{ gap: '18px' }}>
           <h2 className="h1">{copy.ask.secretWordHeading}</h2>
           <p className="prose">{copy.ask.secretWordWhy}</p>
 
@@ -271,7 +283,7 @@ export function SubmissionFlow({
       )}
 
       {step === 'visibility' && (
-        <div className="stack" style={{ gap: '18px' }}>
+        <div className="stack flow-step" style={{ gap: '18px' }}>
           <h2 className="h1">{copy.ask.visibilityHeading}</h2>
           <p className="prose">{copy.ask.visibilityWhy}</p>
 
@@ -310,7 +322,7 @@ export function SubmissionFlow({
       )}
 
       {step === 'pay' && (
-        <div className="stack" style={{ gap: '18px' }}>
+        <div className="stack flow-step" style={{ gap: '18px' }}>
           <h2 className="h1">{copy.ask.paymentHeading}</h2>
           <p className="prose">{copy.ask.paymentWhy}</p>
 
@@ -388,7 +400,7 @@ function StepTrail({ current }: { current: Step }) {
           data-state={index < currentIndex ? 'done' : index === currentIndex ? 'now' : 'todo'}
         >
           <span className="trail-num">{index + 1}</span>
-          {entry.label}
+          <span className="trail-label">{entry.label}</span>
         </li>
       ))}
     </ol>
@@ -441,7 +453,7 @@ function Confirmation({
   };
 
   return (
-    <div className="flow stack" style={{ gap: '22px' }}>
+    <div className="flow stack flow-step" style={{ gap: '22px' }}>
       <div className="confirm-head">
         {/* The bunny where he was; the owner's envelopes float in the empty
             space to his right (MagicEnvelopes). */}

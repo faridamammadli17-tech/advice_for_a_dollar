@@ -31,6 +31,14 @@ const ART_PIXEL = creatureData.scene.artPixel;
 
 /** Wide screens anchor the scene left so its painted characters stay in view. */
 const ANCHOR_LEFT_FROM = 1160;
+/**
+ * So do phones: a 375px window on a 1920px scene shows a fifth of it, and
+ * centred that fifth is open meadow. Anchored left it is the painted bunny
+ * and frog on their mushroom, with the big creature at the bottom-left
+ * corner of the scene in the bottom-left of the screen. Cropped, never
+ * squashed: the scale is the same whole number either way.
+ */
+const ANCHOR_LEFT_BELOW = 700;
 
 const creatureFrames = import.meta.glob('../pixel/assets/creatures/creature_*.png', {
   eager: true,
@@ -57,7 +65,12 @@ const RHYTHMS: readonly { seconds: number; delay: number; blink: number }[] = [
 
 type Layout = { readonly scale: number; readonly left: number; readonly top: number };
 
-function layoutFor(viewportWidth: number, viewportHeight: number, width: number, height: number): Layout {
+function layoutFor(
+  viewportWidth: number,
+  viewportHeight: number,
+  width: number,
+  height: number,
+): Layout {
   const scale = Math.max(
     1,
     Math.ceil(viewportWidth / SCENE_WIDTH),
@@ -67,7 +80,10 @@ function layoutFor(viewportWidth: number, viewportHeight: number, width: number,
   const sceneHeight = SCENE_HEIGHT * scale;
   return {
     scale,
-    left: viewportWidth >= ANCHOR_LEFT_FROM ? 0 : Math.floor((width - sceneWidth) / 2),
+    left:
+      viewportWidth >= ANCHOR_LEFT_FROM || viewportWidth < ANCHOR_LEFT_BELOW
+        ? 0
+        : Math.floor((width - sceneWidth) / 2),
     top: Math.floor(height - sceneHeight),
   };
 }
@@ -171,7 +187,10 @@ export function ForestScene() {
                   src={frame(creature.id, '_blink')}
                   alt=""
                   {...size}
-                  style={{ animationDuration: `${rhythm?.blink ?? 5}s`, animationDelay: `${rhythm?.delay ?? 0}s` }}
+                  style={{
+                    animationDuration: `${rhythm?.blink ?? 5}s`,
+                    animationDelay: `${rhythm?.delay ?? 0}s`,
+                  }}
                 />
               </span>
             </span>

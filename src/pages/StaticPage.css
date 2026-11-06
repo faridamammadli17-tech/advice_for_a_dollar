@@ -19,7 +19,7 @@
 .awaiting {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-small);
   line-height: 1.6;
   color: var(--accent-strong);
   border: 2px dashed var(--accent-strong);

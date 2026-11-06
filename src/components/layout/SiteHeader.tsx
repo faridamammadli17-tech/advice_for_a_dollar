@@ -1,8 +1,10 @@
-import { NavLink, Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import portrait from '../../pixel/assets/bunny_portrait_01.png';
 import { ThemeToggle } from '../ThemeToggle';
 import { FEATURES } from '../../config/features';
 import { copy } from '../../content/placeholder';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * The header.
@@ -16,26 +18,106 @@ import { copy } from '../../content/placeholder';
  *
  * The logo is the bunny's portrait, at its native 128 pixels: it is the site's
  * profile picture everywhere (Farida, 2026-10-04). Whole-number scaling only,
- * so a smaller header would need a 64-pixel version from the artist.
+ * so on a phone the portrait is not shrunk but CROPPED: a 64px window on the
+ * same 1x drawing, framed on his face (site.css, .brand-logo-frame). Every
+ * art pixel stays exactly one pixel.
+ *
+ * On a phone the menu is a button that opens a sheet under the header: a
+ * native <dialog>, so Escape closes it and focus stays inside it; a tap on
+ * the backdrop closes it; the page behind is pinned (useScrollLock); it
+ * closes itself on navigation. Wider screens show the links in a row and no
+ * button; the sheet's links are only rendered while it is open, so there is
+ * never a second "Main" navigation in the page.
  */
 export function SiteHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDialogElement>(null);
+  const location = useLocation();
+  useScrollLock(menuOpen);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const menu = menuRef.current;
+    if (menu === null) return;
+    if (menuOpen && !menu.open) menu.showModal();
+    if (!menuOpen && menu.open) menu.close();
+  }, [menuOpen]);
+
+  const links = (
+    <>
+      <NavLink to="/" end>
+        Home
+      </NavLink>
+      {FEATURES.staticPages && <NavLink to="/how-it-works">How it works</NavLink>}
+      {FEATURES.archive && <NavLink to="/archive">Browse problems</NavLink>}
+      {FEATURES.staticPages && <NavLink to="/about">About</NavLink>}
+      {FEATURES.staticPages && <NavLink to="/faq">FAQ</NavLink>}
+      {FEATURES.nightMode && <ThemeToggle />}
+    </>
+  );
+
   return (
     <header className="site-head">
       <div className="wrap site-head-inner">
         <Link to="/" className="brand" aria-label={`${copy.siteName} — home`}>
-          <img className="brand-logo" src={portrait} alt="" width={128} height={128} />
+          <span className="brand-logo-frame">
+            <img className="brand-logo" src={portrait} alt="" width={128} height={128} />
+          </span>
           <span className="brand-name">{copy.siteName}</span>
         </Link>
 
         <nav className="site-nav" aria-label="Main">
-          <NavLink to="/">Home</NavLink>
-          {FEATURES.staticPages && <NavLink to="/how-it-works">How it works</NavLink>}
-          {FEATURES.archive && <NavLink to="/archive">Browse problems</NavLink>}
-          {FEATURES.staticPages && <NavLink to="/about">About</NavLink>}
-          {FEATURES.staticPages && <NavLink to="/faq">FAQ</NavLink>}
-          {FEATURES.nightMode && <ThemeToggle />}
+          {links}
         </nav>
+
+        <button
+          type="button"
+          className="menu-button"
+          aria-expanded={menuOpen}
+          aria-controls="site-menu"
+          onClick={() => setMenuOpen(true)}
+        >
+          <span className="menu-bars" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+          <span className="menu-word">Menu</span>
+        </button>
       </div>
+
+      <dialog
+        id="site-menu"
+        ref={menuRef}
+        className="menu-dialog"
+        aria-label="Menu"
+        onCancel={(event) => {
+          event.preventDefault();
+          setMenuOpen(false);
+        }}
+        onClose={() => setMenuOpen(false)}
+        onClick={(event) => {
+          // A tap on the backdrop reaches the dialog element itself.
+          if (event.target === event.currentTarget) setMenuOpen(false);
+        }}
+      >
+        {menuOpen && (
+          <div className="menu-sheet">
+            <div className="menu-head">
+              <span className="menu-title">{copy.siteName}</span>
+              <button type="button" className="menu-close" onClick={() => setMenuOpen(false)}>
+                Close
+              </button>
+            </div>
+            <nav className="menu-nav" aria-label="Main">
+              {links}
+            </nav>
+          </div>
+        )}
+      </dialog>
     </header>
   );
 }

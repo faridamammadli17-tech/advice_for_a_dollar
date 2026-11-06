@@ -13,13 +13,37 @@ body {
   padding: 0;
 }
 
+html {
+  /* Nothing may ever drift sideways on a phone, and the page does not
+     rubber-band left or right. Up and down scroll as normal. */
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+  /* iOS otherwise inflates text in landscape on its own. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* While a dialog (the flow box, the phone menu) is open, the page behind it
+   is pinned so it cannot scroll under a finger: position fixed at the scroll
+   position it had, restored on close (useScrollLock). overflow: hidden alone
+   does not hold iOS Safari. */
+body.scroll-locked {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 17px;
+  font-size: var(--text-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
 /* Focus must always be visible. Never remove the ring without a replacement. */
@@ -35,6 +59,18 @@ a {
 button {
   font: inherit;
   color: inherit;
+}
+
+/* Tapping responds at once: no 300ms wait, no grey flash from the browser;
+   every tappable thing draws its own pressed state instead. */
+a,
+button,
+input,
+textarea,
+select,
+label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Every canvas in this project renders pixel art. Fractional device scaling
