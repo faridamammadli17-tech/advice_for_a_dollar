@@ -307,17 +307,22 @@
    the whole 128px drawing; on a phone it is a 64px window on the same
    drawing, framed on his face (never scaled, see SiteHeader.tsx). */
 .brand-logo-frame {
+  position: relative;
   display: block;
-  flex: none;
+  flex: 0 0 auto;
   width: 128px;
   height: 128px;
   overflow: hidden;
 }
 
 .brand-logo {
+  position: absolute;
+  left: 0;
+  top: 0;
   display: block;
   width: 128px;
   height: 128px;
+  max-width: none;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
@@ -694,13 +699,18 @@
   }
 
   .brand-logo-frame {
+    flex-basis: 64px;
     width: 64px;
+    min-width: 64px;
     height: 64px;
   }
 
   .brand-logo {
-    /* The window sits on his face: 30 pixels in from the left, 26 down. */
-    transform: translate(-30px, -26px);
+    /* The window sits on his face: 30 pixels in from the left, 26 down.
+       Offset by position, not transform: iOS Safari drew the transformed
+       picture in the wrong place (owner's screenshot, 2026-11-06). */
+    left: -30px;
+    top: -26px;
   }
 
   .brand-name {
