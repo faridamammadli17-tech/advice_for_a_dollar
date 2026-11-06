@@ -2259,16 +2259,14 @@ mostly off screen, and a home page four screens tall. All measured and
 fixed with a browser audit (`scratchpad/pw/audit.js`, the same checks at
 375x812, 390x844 and 430x932, portrait and landscape).
 
-- **Header: a 62px band** (was 130). The portrait is neither scaled
-  (whole-number rule) nor cropped: the first try was a 64px crop on his
-  face, and on the owner's phone it looked cut off (and iOS Safari placed
-  the transform-offset crop wrongly; fixed by position, then dropped). So
-  the whole 128px drawing sits on a small cream card with the wine border
-  and pink shadow, hanging from the band over the forest, the same
-  treatment as Chiron's name card at the foot of the writing box
-  (`.brand-logo-frame`, absolute, `.site-head` z-index 2). The first
-  section of every page starts 98px down, under the card. The name is
-  back beside him. The links are replaced by a Menu button (three pixel bars, 44px)
+- **Header: 146px, the computer version's.** The owner tried a 64px crop
+  of the portrait's face (looked cut off) and the whole portrait on a card
+  hanging from a 62px band (turned down), and chose the desktop header:
+  the whole 128px drawing in the band with 8px of band above and below,
+  the name beside him. The portrait is never scaled (whole-number rule)
+  and never cropped; the first version's fault was a 130px band that
+  squeezed and clipped it, not its size. A smaller portrait is the
+  artist's to draw. The links are replaced by a Menu button (three pixel bars, 44px)
   that opens a sheet under the header: a native <dialog>, so Escape closes
   it and focus stays inside; a tap on the backdrop closes it; the page
   behind is pinned; it closes itself on navigation; links are 48px rows

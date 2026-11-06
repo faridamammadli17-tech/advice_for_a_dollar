@@ -24,8 +24,8 @@ is the most recent round), `README.md` (plain-language tour).
   so the whole flow can be walked there, including the reply page with a
   labelled stand-in reply. Both are preview build only.
 - Latest work at the time of writing: the phone pass (2026-11-06, later):
-  a 62px header band with the full portrait on a hanging card (never
-  scaled, never cropped) and a menu sheet,
+  the desktop header on phones too (the full portrait in the band, never
+  scaled or cropped, by the owner's choice) and a menu sheet,
   every tap target 44px, no text under 15px, the page pinned behind the
   box, a one-line trail, safe areas, the forest anchored left on phones,
   one spacing scale, pressed states and short motion. The audit that

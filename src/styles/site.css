@@ -280,8 +280,6 @@
 /* The band across the top is dark green on every page; on it, the name and
    the menu are pale pink (5.4:1), and the page you are on is white (8.3:1). */
 .site-head {
-  position: relative;
-  z-index: 2;
   border-bottom: var(--border-width) solid #cfdd9d;
   background: #2f582c;
   /* The notch: the band extends under it and the content starts below. */
@@ -305,11 +303,8 @@
   color: #f8cae4;
 }
 
-/* The portrait is drawn at 1x inside a frame. On wide screens the frame is
-   the whole 128px drawing in the band; on a phone the band is slim and the
-   frame becomes a small cream card hanging from it, the whole drawing at
-   its true size, never scaled or cropped (see SiteHeader.tsx and the
-   phone rules below). */
+/* The portrait is drawn at 1x inside a frame, the whole 128px drawing in
+   the band on every screen: never scaled, never cropped (SiteHeader.tsx). */
 .brand-logo-frame {
   position: relative;
   display: block;
@@ -691,12 +686,12 @@
     padding-right: max(var(--gutter), env(safe-area-inset-right));
   }
 
-  /* The header: a slim band (82px) with the name and the menu button, and
-     the portrait on a cream card that hangs from the band over the forest,
-     the same treatment as Chiron's name card at the foot of the writing
-     box. The drawing is its true 128px; a crop looked cut off and a
-     smaller version would have to be redrawn by the artist. The first
-     section of every page starts below the card (further down). */
+  /* The header on a phone is the computer version's: the whole 128px
+     portrait in the band with 8px of band above and below it (the owner's
+     choice, 2026-11-06, after a crop and a hanging card were both turned
+     down), the name beside him, the Menu button at the right. 146px tall,
+     the same as on a wide screen; a smaller portrait would have to be
+     redrawn by the artist. */
   .site-head-inner {
     flex-wrap: nowrap;
     align-items: center;
@@ -704,40 +699,14 @@
   }
 
   .brand {
-    gap: 0;
+    gap: 10px;
     min-height: var(--tap);
-    /* Room for the card, which is positioned out of the flow. */
-    padding-left: calc(136px + var(--space-3));
-  }
-
-  .brand-logo-frame {
-    position: absolute;
-    left: max(var(--gutter), env(safe-area-inset-left));
-    top: calc(var(--space-1) + env(safe-area-inset-top));
-    width: 136px;
-    height: 136px;
-    min-width: 0;
-    padding: 2px;
-    background: #fcffe1;
-    border: var(--border-width) solid #752445;
-    box-shadow: 4px 4px 0 #ea6993;
-    overflow: visible;
-  }
-
-  .brand-logo {
-    position: static;
   }
 
   .brand-name {
     font-size: 16px;
     white-space: normal;
     line-height: 1.15;
-  }
-
-  /* The card hangs 78px below the band (shadow included); the first section
-     of every page starts 16px under it. */
-  .shell-main > section:first-child {
-    padding-top: 98px;
   }
 
   .site-nav {

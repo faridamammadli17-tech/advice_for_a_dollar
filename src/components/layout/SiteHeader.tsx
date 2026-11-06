@@ -18,9 +18,9 @@ import { useScrollLock } from '../../hooks/useScrollLock';
  *
  * The logo is the bunny's portrait, at its native 128 pixels: it is the site's
  * profile picture everywhere (Farida, 2026-10-04). Whole-number scaling only,
- * so on a phone the portrait is not shrunk but CROPPED: a 64px window on the
- * same 1x drawing, framed on his face (site.css, .brand-logo-frame). Every
- * art pixel stays exactly one pixel.
+ * so it is the same 128px drawing in the band on a phone too, with room
+ * around it (a crop and a hanging card were both tried and turned down,
+ * 2026-11-06); a smaller version is the artist's to draw.
  *
  * On a phone the menu is a button that opens a sheet under the header: a
  * native <dialog>, so Escape closes it and focus stays inside it; a tap on
