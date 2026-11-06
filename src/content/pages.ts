@@ -9,6 +9,16 @@
  * Visitor-facing text says Chiron, the name the owner answers under.
  */
 
+import { FEATURES } from '../config/features';
+
+/**
+ * While payments are off (FEATURES.payments) the lines about paying are
+ * left out, not deleted: the "Pay" step, the FAQ entry about the price, the
+ * payment record on the Privacy page, and the paying clause in two of the
+ * owner's sentences (marked below). They all return with the flag.
+ */
+const PAID = FEATURES.payments;
+
 export type Section = {
   readonly heading: string;
   readonly paragraphs?: readonly string[];
@@ -37,7 +47,7 @@ export const howItWorks: StaticPage = {
         'Write what is going on. It does not have to be tidy or well argued.',
         'Create your secret word, in case you lose your link.',
         'Choose whether it stays private or can be shared.',
-        'Pay one dollar, or more if you want to.',
+        ...(PAID ? ['Pay one dollar, or more if you want to.'] : []),
         'Save the magic link you are given.',
       ],
     },
@@ -93,7 +103,11 @@ export const about: StaticPage = {
       heading: 'How does it work?',
       paragraphs: [
         'You have a problem, a thought, a dilemma, or simply something you want to get off your chest - and you want to hear what a complete stranger thinks about it.',
-        'You visit the website, write whatever you want to share, and pay 1 Dollar for me to read it. Then, depending on the volume of submissions, you’ll receive a response within a day or two.',
+        // Free: her sentence without the paying clause (the cut is the
+        // builder's, 2026-11-06, for her to confirm or reword).
+        PAID
+          ? 'You visit the website, write whatever you want to share, and pay 1 Dollar for me to read it. Then, depending on the volume of submissions, you’ll receive a response within a day or two.'
+          : 'You visit the website and write whatever you want to share. Then, depending on the volume of submissions, you’ll receive a response within a day or two.',
       ],
     },
   ],
@@ -111,12 +125,16 @@ export const faq: StaticPage = {
         'Chiron. One person, every time. Nothing here is written by a machine — not drafted by one, not suggested by one, not filled in by one.',
       ],
     },
-    {
-      heading: 'Why does it cost anything at all?',
-      paragraphs: [
-        'One dollar is small enough not to be the reason someone stays quiet, and real enough that this is not a favour being asked of a stranger. You can pay more if you want to.',
-      ],
-    },
+    ...(PAID
+      ? [
+          {
+            heading: 'Why does it cost anything at all?',
+            paragraphs: [
+              'One dollar is small enough not to be the reason someone stays quiet, and real enough that this is not a favour being asked of a stranger. You can pay more if you want to.',
+            ],
+          },
+        ]
+      : []),
     {
       heading: 'Do I need an account?',
       paragraphs: [
@@ -197,7 +215,7 @@ export const privacy: StaticPage = {
         'What you wrote, and the reply.',
         'Your private link token, which is what lets you back in.',
         'Verification data for your secret word - scrambled, never the word itself.',
-        'The payment transaction record, including the amount.',
+        ...(PAID ? ['The payment transaction record, including the amount.'] : []),
         'Timestamps, and whether a submission has been reviewed or published.',
         'Your email address, only if you chose to give one, and only for six months.',
         'The network address of anyone who tries lost-link recovery or the owner sign-in, for fifteen minutes, to stop guessing. Then it is deleted.',
@@ -228,7 +246,10 @@ export const privacy: StaticPage = {
     {
       heading: 'Deleting',
       paragraphs: [
-        'You can delete your submission at any time through your link. The text and the reply are destroyed. A record of the payment is kept, because refunds and accounting need it — it holds a transaction number, an amount and dates, not what you wrote.',
+        // Free: nothing is charged, so no payment record exists to mention.
+        PAID
+          ? 'You can delete your submission at any time through your link. The text and the reply are destroyed. A record of the payment is kept, because refunds and accounting need it — it holds a transaction number, an amount and dates, not what you wrote.'
+          : 'You can delete your submission at any time through your link. The text and the reply are destroyed.',
       ],
     },
     {

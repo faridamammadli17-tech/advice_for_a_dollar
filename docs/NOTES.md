@@ -2169,3 +2169,80 @@ he stands alone like that.
   unchanged; 171 tests, typecheck, lint pass. The sending ceremony still
   uses its draft envelope frames: this art is two stills, not the 26-frame
   sequence that ceremony was specified with.
+
+---
+
+## Stage one: the site launches free (2026-11-06)
+
+Farida's decision: no charge at launch; the dollar comes back if more
+problems arrive than she can answer. So payments are switched OFF, not
+removed, the way night mode is: `FEATURES.payments` in
+`src/config/features.ts`, false, with the comment that says how to turn
+it on. Nothing was deleted: the pay step's code, the mock provider, the
+Epoint and Payriff adapters, the payments table and all their tests are
+still here, idle.
+
+**Both sides read the one flag.** The trap was the server: `POST
+/api/submissions` refused any submission without an amount and a
+transaction ("No payment, no submission"), so hiding the pay step alone
+would have broken every submission with a 400. `buildApp` now takes
+`{ payments }`, defaulting to `FEATURES.payments`, the same file the
+website imports; with it off the route accepts a submission with no
+amount and no transaction, stores amount 0 and no transaction, records
+nothing in the payments table, and ignores (does not store) any amount or
+transaction a request claims, so "Received" on the dashboard can never
+count money that was only claimed while the site was free. With it on,
+the old path runs unchanged. Tests build the app with `{ payments: true }`
+for the payment tests and a new block at the foot of `app.test.ts`
+checks the switch itself: accepted when off, refused when on, nothing
+recorded when off, and the default follows the flag.
+
+**What guards the free endpoint.** The payment was also the anti-abuse
+gate for someone posting straight at the API. In its place: a tighter
+rate limit per address for free submissions (`submit-free`, 4 an hour,
+against 10 for paid), plus the checks that were always there: 20 to
+10,000 characters, a secret word, the safety screening on the server.
+Behind a proxy `TRUST_PROXY` must be set or every visitor shares that
+limit (README).
+
+**What changed for the visitor.** Three steps, not four: Write, Secret
+word, Private or public; the trail shows three. "Send it" and its hint
+"Next: your private link." sit on the third step; the envelope ceremony
+and the magic-link screen are untouched. Hidden behind the flag (not
+deleted): HOME-05, the price line beside Send; the whole "Why one
+dollar?" section (her writing, kept for her to rewrite or restore);
+HOW-07 "Pay one dollar, or more if you want to."; FAQ-04/05 "Why does it
+cost anything at all?"; PRV-07 "The payment transaction record, including
+the amount." Two of her sentences lost their paying clause while free,
+the builder's cut, for her to confirm: ABT-09 now reads "You visit the
+website and write whatever you want to share. Then, depending on the
+volume of submissions, you’ll receive a response within a day or two.",
+and PRV-22 now ends after "The text and the reply are destroyed." (the
+sentence about keeping a payment record is out, because none exists).
+Two error lines in the box drop "Nothing was charged" while free. Not
+changed, raised with her: BOX-18 "Both cost the same." on the
+private-or-public step still mentions cost.
+
+**The home page without "Why one dollar?"**: writing box, then "Who is
+actually reading your texts", then "A real example", then the footer. No
+hole, but the two remaining sections are both cream, so the alternation
+of cream and light green that the hidden section provided is gone and
+the example sits on the same colour as the cards above it. One class on
+the example section would make it light green again, if she wants the
+rhythm back. Her call.
+
+**Currency.** The dollar work stands: `CURRENCY` is USD, the amounts say
+"dollar", so when the flag flips it charges a dollar, not a manat. The
+site keeps its name while free.
+
+**Checked**: 177 tests (171 plus six for the switch), typecheck, lint;
+walked in a real browser at 1440 and 390: write, secret word, private or
+public, Send it, the envelope, the magic link, no error, the API
+answering 200 with no amount sent, and no price, pay or dollar wording
+anywhere except the site's name. README screenshots retaken.
+
+**To turn payment back on**: set `payments: true` in
+`src/config/features.ts`, restart the server, rebuild the site. The
+fourth step, the price line, the section and the copy all return, and the
+server refuses unpaid submissions again. A real provider is still a
+separate job (the mock runs until then).

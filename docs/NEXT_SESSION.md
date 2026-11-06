@@ -23,9 +23,14 @@ is the most recent round), `README.md` (plain-language tour).
   pretend submission in the browser (`src/lib/preview/fakeSubmissions.ts`),
   so the whole flow can be walked there, including the reply page with a
   labelled stand-in reply. Both are preview build only.
-- Latest work at the time of writing: the owner's two envelopes floating
-  beside the standing bunny (`MagicEnvelopes`, 2026-10-22, later), and
-  before that the copy round of 2026-10-22, applied
+- Latest work at the time of writing: the site launches FREE
+  (2026-11-06): `FEATURES.payments` is false and drives both the website
+  (three steps, no price anywhere) and the server (accepts unpaid
+  submissions, tighter rate limit). Nothing about payments was deleted;
+  see the last entry of `docs/NOTES.md` for how to switch it back on.
+  Before that: the owner's two envelopes floating beside the standing
+  bunny (`MagicEnvelopes`, 2026-10-22, later), and the copy round of
+  2026-10-22, applied
   from the owner's edited Word document (`docs/site-text/`): her wording on
   every page, Chiron instead of Farida, dollars instead of manat, the
   safety screen's link instead of numbers, the Terms page and the "Get
@@ -45,6 +50,11 @@ code. The project owner is Farida, also not an engineer. What they want:
 - honesty about anything that failed or was not done
 
 ## Rules that are not negotiable
+
+0. **Payments are switched off, not removed** (`FEATURES.payments`,
+   2026-11-06). Do not delete the pay step, the providers, the payment
+   tables or their tests; do not add a second switch. The server reads the
+   same flag (`buildApp` in `server/app.ts`): if one side changes, both do.
 
 1. **No AI-written advice anywhere**: not in replies, examples or the archive.
    The home page example slot stays empty until the owner writes the reply

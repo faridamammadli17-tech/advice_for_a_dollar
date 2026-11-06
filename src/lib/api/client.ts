@@ -164,7 +164,8 @@ export type SubmitInput = {
   body: string;
   secretWord: string;
   visibility: 'public' | 'private';
-  amountMinorUnits: number;
+  /** Null while payments are off (FEATURES.payments): nothing is asked for. */
+  amountMinorUnits: number | null;
   email: string | null;
   transactionId: string | null;
 };

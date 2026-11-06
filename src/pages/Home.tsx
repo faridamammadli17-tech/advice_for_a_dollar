@@ -185,9 +185,11 @@ export function Home() {
                 >
                   {busy ? 'Just a moment…' : copy.hero.primaryCta}
                 </button>
-                <span className="hero-price">
-                  {formatMinorUnits(MINIMUM_MINOR_UNITS)} minimum · pay what you want
-                </span>
+                {FEATURES.payments && (
+                  <span className="hero-price">
+                    {formatMinorUnits(MINIMUM_MINOR_UNITS)} minimum · pay what you want
+                  </span>
+                )}
               </div>
 
               <p className="hero-assurance">
@@ -238,17 +240,21 @@ export function Home() {
       </section>
 
       {/* ----------------------------------------------------- why one dollar */}
-      <section className="section on-forest on-forest-alt">
-        <div className="wrap wrap-narrow stack" style={{ gap: '16px' }}>
-          <h2 className="h2">{copy.whyADollar.heading}</h2>
-          {copy.whyADollar.body.map((paragraph) => (
-            <p className="prose" key={paragraph.slice(0, 24)}>
-              {paragraph}
-            </p>
-          ))}
-          <p className="not-therapy">{copy.whyADollar.notTherapy}</p>
-        </div>
-      </section>
+      {/* Hidden, not deleted, while the site is free (FEATURES.payments): it
+          is the owner's writing and comes back with the price. */}
+      {FEATURES.payments && (
+        <section className="section on-forest on-forest-alt">
+          <div className="wrap wrap-narrow stack" style={{ gap: '16px' }}>
+            <h2 className="h2">{copy.whyADollar.heading}</h2>
+            {copy.whyADollar.body.map((paragraph) => (
+              <p className="prose" key={paragraph.slice(0, 24)}>
+                {paragraph}
+              </p>
+            ))}
+            <p className="not-therapy">{copy.whyADollar.notTherapy}</p>
+          </div>
+        </section>
+      )}
 
       {/* ---------------------------------------------------------- example */}
       <section className="section on-forest">

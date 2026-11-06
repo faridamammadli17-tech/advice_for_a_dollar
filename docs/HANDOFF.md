@@ -125,6 +125,7 @@ two factors verify (secret word + date window, or secret word + email).
 
 | Question | Decision |
 | --- | --- |
+| Payments | **OFF at launch** (`FEATURES.payments`, 2026-11-06): three steps, no price shown, the server accepts unpaid submissions with a tighter rate limit. Switched off, not deleted; one flag drives both sides. |
 | Currency | **One dollar (USD)** since 2026-10-22 (it was 1 AZN before). Stored as minor units (cents). Shown in words: "1 dollar", "3 dollars". Whether Epoint or Payriff can charge dollars is an open question. |
 | The name | Visitors read **Chiron**, never Farida (owner, 2026-10-22). Her name stays in code comments, `docs/` and the dashboard. Pronoun on the site: she. |
 | Safety screen | **No phone numbers.** One large link to https://emergencynumbers.org (`src/content/crisis.ts`); the release build refuses without an https:// address rendered by the screen. |

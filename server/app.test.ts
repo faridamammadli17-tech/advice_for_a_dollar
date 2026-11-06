@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from './app';
+import { FEATURES } from '../src/config/features';
 import { openTestDatabase, type Database } from './db';
 import { generatePasswordEnv, purgeStaleRateLimits } from './auth';
 import type { FastifyInstance } from 'fastify';
@@ -30,7 +31,10 @@ beforeEach(async () => {
   process.env.ADMIN_PASSWORD_SALT = env.ADMIN_PASSWORD_SALT;
 
   db = openTestDatabase();
-  app = buildApp(db);
+  // The payment path is what most of this file tests, so it is switched on
+  // explicitly, whatever the launch flag says. The switch itself is tested
+  // at the bottom of the file.
+  app = buildApp(db, { payments: true });
   await app.ready();
 });
 
@@ -609,7 +613,7 @@ describe('rate limits behind a proxy', () => {
     await app.close();
     process.env.TRUST_PROXY = 'loopback';
     try {
-      app = buildApp(db);
+      app = buildApp(db, { payments: true });
       await app.ready();
       await wrongLogins(8);
       expect((await ownerLogin()).statusCode).toBe(200);
@@ -742,5 +746,88 @@ describe('recovery is bounded', () => {
     expect(busy).toBeGreaterThanOrEqual(1190);
     expect(empty).toBeGreaterThanOrEqual(1190);
     expect(Math.abs(busy - empty)).toBeLessThan(300);
+  });
+});
+
+/* ------------------------------------------------- the payments switch */
+
+/**
+ * FEATURES.payments drives both the website and the server. These are the
+ * tests most likely to catch a silent break later: the server must accept a
+ * bare submission while the flag is off, refuse one while it is on, and
+ * follow the flag by default.
+ */
+describe('the payments switch (FEATURES.payments)', () => {
+  const bare = (instance: FastifyInstance, extra: Record<string, unknown> = {}) =>
+    instance.inject({
+      method: 'POST',
+      url: '/api/submissions',
+      payload: { body: ORDINARY, secretWord: 'lighthouse', visibility: 'private', ...extra },
+    });
+  const paymentRows = () =>
+    (db.prepare('SELECT COUNT(*) AS n FROM payments').get() as { n: number }).n;
+  const rebuild = async (options: { payments?: boolean }) => {
+    await app.close();
+    app = buildApp(db, options);
+    await app.ready();
+  };
+
+  it('off: accepts a submission with no amount and no payment, and records no payment', async () => {
+    await rebuild({ payments: false });
+    const response = await bare(app);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({ ok: true });
+    expect(countRows()).toBe(1);
+    expect(paymentRows()).toBe(0);
+    const row = db.prepare('SELECT amount_minor_units, transaction_id FROM submissions').get() as {
+      amount_minor_units: number;
+      transaction_id: string | null;
+    };
+    expect(row).toEqual({ amount_minor_units: 0, transaction_id: null });
+  });
+
+  it('off: ignores a claimed amount and transaction rather than storing them', async () => {
+    await rebuild({ payments: false });
+    const response = await bare(app, { amountMinorUnits: 300, transactionId: 'tx_claimed' });
+    expect(response.statusCode).toBe(200);
+    expect(paymentRows()).toBe(0);
+    const row = db.prepare('SELECT amount_minor_units FROM submissions').get() as {
+      amount_minor_units: number;
+    };
+    expect(row.amount_minor_units).toBe(0);
+  });
+
+  it('off: still screens, still checks the text and the secret word', async () => {
+    await rebuild({ payments: false });
+    expect((await bare(app, { body: 'too short' })).statusCode).toBe(400);
+    expect((await bare(app, { secretWord: 'ab' })).statusCode).toBe(400);
+    const crisis = await bare(app, { body: 'I have no reason to live and I want to end my life.' });
+    expect(crisis.json()).toMatchObject({ ok: false, blocked: true });
+    expect(countRows()).toBe(0);
+  });
+
+  it('off: has a tighter limit per address, so a script cannot fill the dashboard', async () => {
+    await rebuild({ payments: false });
+    const codes: number[] = [];
+    for (let i = 0; i < 5; i += 1) codes.push((await bare(app)).statusCode);
+    expect(codes).toEqual([200, 200, 200, 200, 429]);
+    expect(countRows()).toBe(4);
+  });
+
+  it('on: refuses the same submission, because it carries no amount and no payment', async () => {
+    await rebuild({ payments: true });
+    const noAmount = await bare(app);
+    expect(noAmount.statusCode).toBe(400);
+    expect(noAmount.json()).toMatchObject({ ok: false, reason: 'amount' });
+    const noPayment = await bare(app, { amountMinorUnits: 100 });
+    expect(noPayment.statusCode).toBe(400);
+    expect(noPayment.json()).toMatchObject({ ok: false, reason: 'payment' });
+    expect(countRows()).toBe(0);
+  });
+
+  it('follows FEATURES.payments by default, so the server and the website agree', async () => {
+    await rebuild({});
+    const response = await bare(app);
+    expect(response.statusCode).toBe(FEATURES.payments ? 400 : 200);
   });
 });

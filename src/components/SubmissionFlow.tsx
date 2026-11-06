@@ -5,6 +5,7 @@ import { MagicEnvelopes } from './MagicEnvelopes';
 import { SpriteCanvas } from '../pixel/SpriteCanvas';
 import { bunnySprite } from '../pixel/sprites';
 import { copy } from '../content/placeholder';
+import { FEATURES } from '../config/features';
 import { clearDraft } from '../lib/submissions/draft';
 import { visitorApi } from '../lib/api/client';
 import { checkSecretWord } from '../lib/submissions/secretWord';
@@ -23,11 +24,13 @@ import './SubmissionFlow.css';
 
 type Step = 'secret' | 'visibility' | 'pay' | 'sending' | 'done';
 
+// Three steps while payments are off (FEATURES.payments), four with the
+// pay step when they are on. The pay step's code stays either way.
 const STEP_LABELS: readonly { step: 'write' | Step; label: string }[] = [
   { step: 'write', label: 'Write' },
   { step: 'secret', label: 'Secret word' },
   { step: 'visibility', label: 'Private or public' },
-  { step: 'pay', label: 'Pay' },
+  ...(FEATURES.payments ? [{ step: 'pay' as const, label: 'Pay' }] : []),
 ];
 
 export type SubmissionFlowProps = {
@@ -118,40 +121,57 @@ export function SubmissionFlow({
     return amountMinorUnits;
   };
 
-  const pay = async () => {
+  /**
+   * Send it. With payments on this is the pay step's button: the amount is
+   * checked, the (mock) checkout made, and the transaction sent with the
+   * text. With payments off it is the private-or-public step's button: no
+   * amount, no checkout, no transaction, and the server (which reads the
+   * same flag) expects none.
+   */
+  const send = async () => {
     setError(null);
-    const amount = resolveAmount();
-    const problem = checkAmount(amount);
+    let amount: number | null = null;
+    if (FEATURES.payments) {
+      amount = resolveAmount();
+      const problem = checkAmount(amount);
 
-    if (problem === 'not-a-number') {
-      setError('That does not look like an amount.');
-      return;
+      if (problem === 'not-a-number') {
+        setError('That does not look like an amount.');
+        return;
+      }
+      if (problem === 'below-minimum') {
+        setError(`The minimum is ${formatMinorUnits(MINIMUM_MINOR_UNITS)}.`);
+        return;
+      }
+      if (problem === 'above-maximum') {
+        setError('That is a very large amount - please check it.');
+        return;
+      }
+      if (amount === null) return;
     }
-    if (problem === 'below-minimum') {
-      setError(`The minimum is ${formatMinorUnits(MINIMUM_MINOR_UNITS)}.`);
-      return;
-    }
-    if (problem === 'above-maximum') {
-      setError('That is a very large amount - please check it.');
-      return;
-    }
-    if (amount === null) return;
+    // The step to return to if sending fails.
+    const stepBefore: Step = FEATURES.payments ? 'pay' : 'visibility';
 
     setStep('sending');
     setCeremonyDone(false);
     setRequestDone(false);
 
     try {
-      const checkout = await mockPaymentProvider.createCheckout({
-        amountMinorUnits: amount,
-        currency: 'USD',
-        submissionId: 'pending',
-      });
+      const transactionId =
+        amount === null
+          ? null
+          : (
+              await mockPaymentProvider.createCheckout({
+                amountMinorUnits: amount,
+                currency: 'USD',
+                submissionId: 'pending',
+              })
+            ).transactionId;
 
       if (IS_PREVIEW) {
         // The static design preview has no server: keep a pretend submission
         // in the browser so the magic-link page can be seen. Never a real build.
-        const token = previewCreate({ body: text, visibility, amountMinorUnits: amount });
+        const token = previewCreate({ body: text, visibility, amountMinorUnits: amount ?? 0 });
         setCreated({ token, body: text, visibility });
         clearDraft();
         onCreated();
@@ -165,12 +185,16 @@ export function SubmissionFlow({
         visibility,
         amountMinorUnits: amount,
         email: null,
-        transactionId: checkout.transactionId,
+        transactionId,
       });
 
       if (!result.ok) {
-        setError('The server could not take it just now. Nothing was charged.');
-        setStep('pay');
+        setError(
+          FEATURES.payments
+            ? 'The server could not take it just now. Nothing was charged.'
+            : 'The server could not take it just now.',
+        );
+        setStep(stepBefore);
         return;
       }
       if (result.data.ok === false) {
@@ -185,9 +209,13 @@ export function SubmissionFlow({
       setRequestDone(true);
     } catch {
       // The text is untouched, and the draft is still in storage. Nothing the
-      // visitor wrote is lost because a card failed.
-      setError('The payment did not go through. Nothing was charged.');
-      setStep('pay');
+      // visitor wrote is lost because a card (or the network) failed.
+      setError(
+        FEATURES.payments
+          ? 'The payment did not go through. Nothing was charged.'
+          : 'That did not send.',
+      );
+      setStep(stepBefore);
     }
   };
 
@@ -263,12 +291,20 @@ export function SubmissionFlow({
           </div>
 
           <div className="row">
-            <button type="button" className="btn btn-primary" onClick={() => setStep('pay')}>
-              Continue
-            </button>
+            {FEATURES.payments ? (
+              <button type="button" className="btn btn-primary" onClick={() => setStep('pay')}>
+                Continue
+              </button>
+            ) : (
+              /* Payments off: this is the last step, so Send it lives here. */
+              <button type="button" className="btn btn-primary" onClick={() => void send()}>
+                Send it
+              </button>
+            )}
             <button type="button" className="btn btn-quiet" onClick={() => setStep('secret')}>
               Back
             </button>
+            {!FEATURES.payments && <span className="flow-next">Next: your private link.</span>}
           </div>
         </div>
       )}
@@ -322,7 +358,7 @@ export function SubmissionFlow({
           {error !== null && <p className="field-error">{error}</p>}
 
           <div className="row">
-            <button type="button" className="btn btn-primary" onClick={() => void pay()}>
+            <button type="button" className="btn btn-primary" onClick={() => void send()}>
               Send it
             </button>
             <button type="button" className="btn btn-quiet" onClick={() => setStep('visibility')}>

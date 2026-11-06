@@ -6,6 +6,7 @@ import { looksLikeToken } from './crypto';
 import { isKnownCategory } from '../src/lib/archive/categories';
 import { MAXIMUM_MINOR_UNITS, MINIMUM_MINOR_UNITS } from '../src/lib/money';
 import { MAX_BODY_CHARS, MAX_FOLLOW_UP_CHARS } from '../src/lib/submissions/types';
+import { FEATURES } from '../src/config/features';
 import {
   isValidSession,
   login,
@@ -91,7 +92,15 @@ function trustProxySetting(value: string | undefined): boolean | string {
 const visibleText = (value: unknown): string =>
   (typeof value === 'string' ? value : '').replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim();
 
-export function buildApp(db: Database = openDatabase()) {
+/**
+ * `payments` is the one switch for whether a submission must be paid for.
+ * It defaults to FEATURES.payments (src/config/features.ts), the same flag
+ * the website reads, so the two sides cannot disagree: the box asks for
+ * money exactly when the server demands it. Tests pass it explicitly to
+ * exercise both positions.
+ */
+export function buildApp(db: Database = openDatabase(), options: { payments?: boolean } = {}) {
+  const paymentsOn = options.payments ?? FEATURES.payments;
   const app = Fastify({
     logger: false,
     trustProxy: trustProxySetting(process.env.TRUST_PROXY),
@@ -210,7 +219,9 @@ export function buildApp(db: Database = openDatabase()) {
   /* -------------------------------------------------------- submission */
 
   app.post('/api/submissions', async (request, reply) => {
-    if (!rateLimit(db, 'submit', clientKey(request))) {
+    // A free submission has only this limit between a script and a reply,
+    // so it gets the tighter bucket (server/auth.ts).
+    if (!rateLimit(db, paymentsOn ? 'submit' : 'submit-free', clientKey(request))) {
       return reply.code(429).send({ ok: false, reason: 'rate-limited' });
     }
     const input = (request.body ?? {}) as {
@@ -248,6 +259,29 @@ export function buildApp(db: Database = openDatabase()) {
     const safety = screen(body);
     if (safety.flagged) {
       return reply.code(200).send({ ok: false, blocked: true, category: safety.category });
+    }
+
+    if (!paymentsOn) {
+      // Payments are switched off (FEATURES.payments): nothing is asked for,
+      // so nothing is checked and nothing is recorded. An amount or a
+      // transaction id in the request is ignored, not stored, so the
+      // dashboard's "Received" can never count money that was only claimed
+      // while the site was free. The length checks, the secret word, the
+      // screening above and the rate limit are what guard this path.
+      const created = await createSubmission(db, {
+        body,
+        secretWord,
+        visibility: input.visibility === 'public' ? 'public' : 'private',
+        amountMinorUnits: 0,
+        email,
+        transactionId: null,
+        safety: {
+          flagged: false,
+          category: safety.category,
+          matchedRuleIds: safety.matchedRuleIds,
+        },
+      });
+      return { ok: true, token: created.token };
     }
 
     // Amount verified here, never taken from the browser on trust. Phase 5

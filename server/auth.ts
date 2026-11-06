@@ -28,6 +28,10 @@ const RATE_LIMITS = {
   login: { max: 8, windowMs: 15 * 60 * 1000 },
   recover: { max: 6, windowMs: 15 * 60 * 1000 },
   submit: { max: 10, windowMs: 60 * 60 * 1000 },
+  // While payments are off (FEATURES.payments) nothing but this stands
+  // between a script and a free reply, so it is tighter than the paid one.
+  // Still more than a person writes in an hour.
+  'submit-free': { max: 4, windowMs: 60 * 60 * 1000 },
   screen: { max: 60, windowMs: 15 * 60 * 1000 },
 } as const;
 

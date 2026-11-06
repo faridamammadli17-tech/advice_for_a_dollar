@@ -35,6 +35,30 @@ export const FEATURES = {
   archive: true,
   /** How It Works, About, FAQ, Community Guidelines, Privacy, Terms. */
   staticPages: true,
+  /**
+   * Payments. OFF for launch, by Farida's decision (2026-11-06): the site
+   * starts free, and the dollar comes back if more problems arrive than
+   * she can answer.
+   *
+   * Disabled rather than deleted, because it is coming back. This one
+   * switch drives BOTH sides, so they can never disagree:
+   *   - the website: the box has three steps (write, secret word, private
+   *     or public) and "Send it" sits on the third; the price line beside
+   *     the Send button, the "Why one dollar?" section, the "Pay" step in
+   *     How it works, the FAQ entry about the price and the Privacy page's
+   *     mentions of a payment record are all hidden;
+   *   - the server (server/app.ts reads this file): a submission is
+   *     accepted with no amount and no transaction, nothing is recorded in
+   *     the payments table, and the free endpoint has its own, tighter
+   *     rate limit per address in place of the payment gate.
+   *
+   * To bring it back: set this to true. Nothing else needs changing: the
+   * fourth step, the mock provider, the Epoint and Payriff adapters, the
+   * payment tables and their tests are all still here, and the server
+   * refuses an unpaid submission again. Then restart the server; the
+   * website picks it up on its next build.
+   */
+  payments: false,
   /** Real payment providers. Phase 5 — until then everything runs on the mock. */
   realPayments: false,
   /**
